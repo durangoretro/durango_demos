@@ -1,0 +1,12 @@
+LDX #$3f
+STX $df80
+
+LDX #$00
+LDY #$10
+LDA #$01
+loop:
+STA $6000,X
+INX
+TXA
+DEY
+BNE loop
