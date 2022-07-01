@@ -1,7 +1,8 @@
 begin:
 
     ; Generate tiles
-    JSR generate_tiles    
+    JSR generate_tiles
+    JSR generate_tilemap    
 
     ; Set video mode
     LDA #$3F
@@ -246,4 +247,28 @@ STA $E100,X
 INX
 DEY
 BNE loop4
+RTS
+
+generate_tilemap:
+LDX #$00; Memory iterator
+LDY #$10; count items
+loop5:
+LDA #$01
+STA $E200,X
+INX
+LDA #$02
+STA $E200,X
+INX
+BNE loop5
+; Second tilemap
+LDX #$00; Memory iterator
+LDY #$10; count items
+loop6:
+LDA #$02
+STA $E300,X
+INX
+LDA #$01
+STA $E300,X
+INX
+BNE loop6
 RTS
