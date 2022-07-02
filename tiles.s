@@ -40,18 +40,21 @@ loop_tilemap:
     ; Convert tile index to tile memory offset by adding 0x20 for each tile
     TAX
     LDA #$00
-    CLC
 loop_tilemap_2:    
+    CPX #$00
+    BEQ loop_tilemap_3    
+    CLC
     ADC #$20
     DEX
     BNE loop_tilemap_2
+loop_tilemap_3:    
     ; Store tile to draw into $12 to call draw_tile method
     STA $12
     ; Draw tile
-    JSR draw_back_tile
-    
+    JSR draw_back_tile    
     ; Go to next tile in tilemap
     INC $14
+BNE loop_tilemap    
     
 
 RTS
