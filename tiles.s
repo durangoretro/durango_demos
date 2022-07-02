@@ -23,12 +23,27 @@ begin:
     STA $10 ; Current video memory position
 
 JSR draw_tilemap
+; Change screen row
+    LDA #$00 ; Set to 0 less significative addr
+    STA $10
+    LDA $11 ; Add 2 to more significative addr
+    CLC
+    ADC #$02
+    STA $11
+;JSR draw_tilemap    
+    
 end: JMP end
 
 ; $14, $15 -> current tile (private), tilemap to use
 ; $12, $13 -> tile number (private), tile bank to use
 ; $10,$11 -> screen position
+; $08 more significative screen end address
 draw_tilemap:
+    ; Save end screen position more significative in $08
+    LDA $11
+    CLC
+    ADC $20
+    STA $08
     ; Init $14 to zero
     LDA #$00
     STA $14
@@ -54,16 +69,27 @@ loop_tilemap_3:
     JSR draw_back_tile    
     ; Go to next tile in tilemap
     INC $14
-BNE loop_tilemap    
-    
+    LDY $14
+    CPY #$10
+    BNE loop_tilemap
+    ; Change screen row
+    LDA #$00 ; Set to 0 less significative addr
+    STA $10
+    LDA $11 ; Add 2 to more significative addr
+    CLC
+    ADC #$02
+    STA $11
+    CMP $08
+    BNE loop_tilemap
 
 RTS
 
 
 ;$12, $13 -> tile number, tile bank
 ;$10,$11 -> screen position
+;$09 backup of $10 original value
 draw_back_tile:
-; Save screen position
+; Save screen position as backup in $09
 LDA $10
 STA $09
 ; First row
