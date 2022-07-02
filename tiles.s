@@ -23,15 +23,6 @@ begin:
     STA $10 ; Current video memory position
 
 JSR draw_tilemap
-; Change screen row
-    LDA #$00 ; Set to 0 less significative addr
-    STA $10
-    LDA $11 ; Add 2 to more significative addr
-    CLC
-    ADC #$02
-    STA $11
-;JSR draw_tilemap    
-    
 end: JMP end
 
 ; $14, $15 -> current tile (private), tilemap to use
@@ -80,7 +71,7 @@ loop_tilemap_3:
     ADC #$02
     STA $11
     CMP $08
-    BNE loop_tilemap
+    BNE draw_tilemap
 
 RTS
 
