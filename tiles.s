@@ -11,9 +11,10 @@ begin:
 
 ; Set map to draw
     LDA #$E2
-    STA $15
-    LDA #$00
-    STA $14    
+    STA $15    
+; Set tile bank
+    LDA #$E0
+    STA $13
 
 ; Set where to draw
     LDA #$60
@@ -24,37 +25,64 @@ begin:
 JSR draw_tilemap
 end: JMP end
 
-
+; $14, $15 -> current tile (private), tilemap to use
+; $12, $13 -> tile number (private), tile bank to use
+; $10,$11 -> screen position
+; $08 more significative screen end address
 draw_tilemap:
-    ; tiles counter
-    LDX #$01
-    ; Set tile to draw
-    LDA #$E0
-    STA $13    
-    LDA $14
-    STA $12
-    JSR draw_back_tile
-
-    ; Set Second tile to draw
-    INC $13
+    ; Save end screen position more significative in $08
+    LDA $11
+    CLC
+    ADC $20
+    STA $08
+    ; Init $14 to zero
     LDA #$00
+    STA $14
+loop_tilemap:     
+    ; Load zero to Y
+    LDY #$00  
+    ; Load tile index to draw from tilemap
+    LDA ($14), Y
+    ; Convert tile index to tile memory offset by adding 0x20 for each tile
+    TAX
+    LDA #$00
+loop_tilemap_2:    
+    CPX #$00
+    BEQ loop_tilemap_3    
+    CLC
+    ADC #$20
+    DEX
+    BNE loop_tilemap_2
+loop_tilemap_3:    
+    ; Store tile to draw into $12 to call draw_tile method
     STA $12
-    ; Set second tile position
-    ; Store at $10 video memory pointer
-    ;LDA #$60
-    ;STA $11
-    LDA #$04
-    STA $10 ; Current video memory position
-    JSR draw_back_tile
+    ; Draw tile
+    JSR draw_back_tile    
+    ; Go to next tile in tilemap
+    INC $14
+    LDY $14
+    CPY #$10
+    BNE loop_tilemap
+    ; Change screen row
+    LDA #$00 ; Set to 0 less significative addr
+    STA $10
+    LDA $11 ; Add 2 to more significative addr
+    CLC
+    ADC #$02
+    STA $11
+    CMP $08
+    BNE draw_tilemap
 
 RTS
 
 
-
-
 ;$12, $13 -> tile number, tile bank
 ;$10,$11 -> screen position
+;$09 backup of $10 original value
 draw_back_tile:
+; Save screen position as backup in $09
+LDA $10
+STA $09
 ; First row
 LDY #$00
 LDA ($12), Y
@@ -75,7 +103,7 @@ ADC #$40; Each row is 0x40 (64) bytes
 STA $10
 LDA $12; Increment first tile byte position ($12), so it points to next byte
 CLC
-ADC #$04
+ADC #$04; Increment by 4 (already drawn 8 pixels)
 STA $12
 LDY #$00; Initialize pixel counter to 0
 ; Second row
@@ -223,10 +251,17 @@ STA ($10), Y
 INY
 LDA ($12), Y
 STA ($10), Y
-DEC $11; Restore $11 to original value, so next tile is at same row
-LDA $10; Move $10 to next screen position 
+
+
+; Finalize tile drawing
+LDA $12; Go to next tile by incrementing $12 by 0x04 (already drawn 8 pixels)
 CLC
-ADC #$40
+ADC #$04
+DEC $11; Restore $11 to original value, so next tile is at same row
+LDA $09; Restore $10 using backup and add 0x04 to set at next screen position 
+CLC
+ADC #$04
+STA $10
 RTS
 
 
@@ -251,7 +286,6 @@ DEY
 BNE loop2
 
 ; Second tile
-LDX #$00; Memory iterator
 LDY #$10; count items
 
 LDA #$33
@@ -274,10 +308,10 @@ generate_tilemap:
 LDX #$00; Memory iterator
 LDY #$10; count items
 loop5:
-LDA #$01
+LDA #$00
 STA $E200,X
 INX
-LDA #$02
+LDA #$01
 STA $E200,X
 INX
 BNE loop5
@@ -285,10 +319,10 @@ BNE loop5
 LDX #$00; Memory iterator
 LDY #$10; count items
 loop6:
-LDA #$02
+LDA #$01
 STA $E300,X
 INX
-LDA #$01
+LDA #$00
 STA $E300,X
 INX
 BNE loop6
