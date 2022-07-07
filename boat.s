@@ -34,7 +34,7 @@ STA $14
 ;$08 backup of current tile index ($14)
 draw_back_tile:
 LDA $14
-STA $09
+STA $08
 ; First tiles row
 ; tile 0
 JSR convert_tile_index_to_mem
