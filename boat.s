@@ -29,14 +29,52 @@ STA $15
 LDA #$00
 STA $14
 
+; Draw map 1
 JSR draw_map
+
+main_loop:
+
+; Second map
+LDA #$40
+STA $11
+LDA #$00
+STA $10
+LDA #$a1
+STA $15
+LDA #$00
+STA $14
+JSR draw_map
+; Change screen
+LDA #$2F
+STA $df80
+
+; Third map
+LDA #$60
+STA $11
+LDA #$00
+STA $10
+LDA #$a2
+STA $15
+LDA #$00
+STA $14
+JSR draw_map
+; Change screen
+LDA #$3F
+STA $df80
+
+JMP main_loop
+
+
 end: JMP end
+
+
+
 
 
 draw_map:
 ; $07 tiles rows counter
-LDA #$a0
-;LDA #$02
+;LDA #$a0
+LDA #$10
 STA $07
 draw_map_loop1:
 ; First tiles row
