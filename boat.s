@@ -29,8 +29,16 @@ STA $15
 LDA #$00
 STA $14
 
+JSR draw_map
+end: JMP end
 
 
+draw_map:
+; $07 tiles rows counter
+;LDA #$a0
+LDA #$02
+STA $07
+draw_map_loop1:
 ; First tiles row
 ; tile 0
 JSR convert_tile_index_to_mem
@@ -95,12 +103,24 @@ JSR draw_back_tile
 INC $14
 JSR convert_tile_index_to_mem
 JSR draw_back_tile
+INC $14
 
-end: JMP end
+; Change row
+LDA #$00
+STA $10
+INC $11
+INC $11
+DEC $07
+BEQ draw_map_end
+JMP draw_map_loop1
+draw_map_end:
+RTS
+;------------------------------------------------------
 
 
 ; Input $14 $15 Tilemap position
-; output $12, $13 tile to draw (initial position in mem)
+; output $12, $13 tile to draw (initial position in mem
+; $08 internal, backup of current tile index
 convert_tile_index_to_mem:
 ; Load tile index in X
 LDY #$00
