@@ -35,8 +35,8 @@ end: JMP end
 
 draw_map:
 ; $07 tiles rows counter
-;LDA #$a0
-LDA #$02
+LDA #$a0
+;LDA #$02
 STA $07
 draw_map_loop1:
 ; First tiles row
