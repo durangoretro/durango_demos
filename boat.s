@@ -29,6 +29,28 @@ STA $15
 LDA #$00
 STA $14
 
+
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+
+end: JMP end
+
+
+; Input $14 $15 Tilemap position
+; output $12, $13 tile to draw (initial position in mem)
+convert_tile_index_to_mem:
 ; Load tile index in X
 LDY #$00
 LDA ($14), Y
@@ -44,15 +66,10 @@ DEX
 BNE end_loop_tilemap2
 end_loop_tilemap1:
 ; Store tile memory position in $12
-LDA ($14), Y
 STA $12
-JSR draw_back_tile
+RTS
+; --------------------------------------------------------
 
-
-
-
-
-end: JMP end
 
 
 
