@@ -45,6 +45,9 @@ LDA #$00
 STA $14
 JSR draw_map
 ; Change screen
+wait_vsync1:
+BIT $DF88
+BVC wait_vsync1
 LDA #$2F
 STA $df80
 
@@ -59,6 +62,9 @@ LDA #$00
 STA $14
 JSR draw_map
 ; Change screen
+wait_vsync2:
+BIT $DF88
+BVC wait_vsync2
 LDA #$3F
 STA $df80
 
