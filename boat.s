@@ -31,10 +31,6 @@ STA $14
 
 
 
-;$08 backup of current tile index ($14)
-draw_back_tile:
-LDA $14
-STA $08
 ; First tiles row
 ; tile 0
 JSR convert_tile_index_to_mem
@@ -109,6 +105,8 @@ convert_tile_index_to_mem:
 ; Load tile index in X
 LDY #$00
 LDA ($14), Y
+;$08 backup of current tile index ($14)
+STA $08
 TAX
 ; Calculate tile memory position using accumulator and x
 LDA #$00
@@ -122,6 +120,21 @@ BNE end_loop_tilemap2
 end_loop_tilemap1:
 ; Store tile memory position in $12
 STA $12
+
+; Calculate more significative tile memory position ($13)
+;$07 backup of current tile index ($13)
+;LDA $13
+;STA $07
+LDA $08
+CLC
+LSR
+CLC
+LSR
+CLC
+LSR
+CLC
+ADC #$80
+STA $13
 RTS
 ; --------------------------------------------------------
 
