@@ -30,17 +30,72 @@ LDA #$00
 STA $14
 
 
+
+;$08 backup of current tile index ($14)
+draw_back_tile:
+LDA $14
+STA $09
+; First tiles row
+; tile 0
 JSR convert_tile_index_to_mem
 JSR draw_back_tile
-
+; tile 1
 INC $14
 JSR convert_tile_index_to_mem
 JSR draw_back_tile
-
+; tile 2
 INC $14
 JSR convert_tile_index_to_mem
 JSR draw_back_tile
-
+; tile 3
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 4
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 5
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 6
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 7
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 8
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 9
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 10
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 11
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 12
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 13
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 14
+INC $14
+JSR convert_tile_index_to_mem
+JSR draw_back_tile
+; tile 15
 INC $14
 JSR convert_tile_index_to_mem
 JSR draw_back_tile
