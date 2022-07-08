@@ -171,17 +171,12 @@ LDY #$00
 LDA ($14), Y
 ;$08 backup of current tile index ($14)
 STA $08
-TAX
-; Calculate tile memory position using accumulator and x
-LDA #$00
-CPX #$00
-BEQ end_loop_tilemap1
-end_loop_tilemap2:
-CLC
-ADC #$20
-DEX
-BNE end_loop_tilemap2
-end_loop_tilemap1:
+; Calculate tile memory position by multiplying (shifting) tile number * 0x20
+ASL
+ASL
+ASL
+ASL
+ASL
 ; Store tile memory position in $12
 STA $12
 
