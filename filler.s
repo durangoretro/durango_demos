@@ -49,6 +49,17 @@ loop:
 store:
     STA $12
 
+
+    LDX #$20
+wait_vsync_end:
+    BIT $DF88
+    BVS wait_vsync_end
+wait_vsync_begin:
+    BIT $DF88
+    BVC wait_vsync_begin   
+    DEX
+    BNE wait_vsync_end
+
     JMP loop3
 
     .dsb    $fffa-*, $ff    ; filling
