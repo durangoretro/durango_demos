@@ -76,7 +76,7 @@ end: JMP end
 
 
 
-
+; $14, $15 tilemap to draw
 draw_map:
 ; $07 tiles rows counter
 ;LDA #$a0
