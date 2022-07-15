@@ -176,7 +176,7 @@ STA $06
 ; 16, 17 x,y pixel coords
 LDA #$00
 STA $16
-LDA #$10
+LDA #$40
 STA $17
 
 ;JSR draw_square
