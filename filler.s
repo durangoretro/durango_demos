@@ -1,7 +1,8 @@
-*=$C000
+*=$c000
 
 begin:
     ; Set video mode
+    ; [HiRes Invert S1 S0    RGB LED NC NC]
     LDA #$3F
     STA $df80
 
