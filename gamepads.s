@@ -1,8 +1,11 @@
+; OPCODES: http://www.6502.org/tutorials/6502opcodes.html
 ;----------------------------
 ROM_START = $c000
 TILESET_START = ROM_START
 TILEMAP_START = TILESET_START + $2000
 ;----------------------------
+RED = $22
+DARK_GREEN = $44
 
 ; Tiles position (0xc000 - 0xdfff)
 *=ROM_START
@@ -160,7 +163,79 @@ STA $14
 JSR draw_map
 
 
+; $10 $11 Set video pointer
+LDA #$60
+STA $11
+LDA #$00
+STA $10
 
+; $6 current color
+LDA #RED
+STA $06
+
+; 16, 17 x,y pixel coords
+LDA #$0f
+STA $16
+LDA #$03
+STA $17
+
+JSR draw_square
+
+end: JMP end
+
+
+;18 19 -> video memory backup
+draw_square:
+; Backup video memory position
+LDA $10
+STA $18
+LDA $11
+STA $19
+JSR draw_pixel
+INC $17
+; Restore video memory position
+LDA $18
+STA $10
+LDA $19
+STA $11
+JSR draw_pixel
+RTS
+
+draw_pixel:
+JSR convert_coords_to_mem
+; Load current color
+LDA $06
+; Store at video position
+LDY #$00
+STA ($10), Y
+RTS
+
+
+
+; 16, 17 x,y pixel coords
+; $10 $11 current video memory pointer
+convert_coords_to_mem:
+; Multiply y coord by 64 (64 bytes each row)
+LDA $17
+ASL
+ASL
+ASL
+ASL
+ASL
+ASL
+CLC
+; Add to initial memory address, and save it
+ADC $10
+STA $10
+; Divide x coord by 2 (2 pixel each byte)
+LDA $16
+LSR
+; Add to memory address
+CLC
+ADC $10
+; Store in video memory position
+STA $10
+RTS
 
 
 
