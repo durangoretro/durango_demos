@@ -1,7 +1,7 @@
 ;----------------------------
 ROM_START = $c000
 TILESET_START = ROM_START
-TILEMAP_START = $e000
+TILEMAP_START = TILESET_START + $2000
 ;----------------------------
 
 ; Tiles position (0xc000 - 0xdfff)
