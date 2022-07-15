@@ -174,11 +174,12 @@ LDA #RED
 STA $06
 
 ; 16, 17 x,y pixel coords
-LDA #$0f
+LDA #$00
 STA $16
-LDA #$03
+LDA #$10
 STA $17
 
+;JSR draw_square
 JSR draw_square
 
 end: JMP end
@@ -218,15 +219,38 @@ convert_coords_to_mem:
 ; Multiply y coord by 64 (64 bytes each row)
 LDA $17
 ASL
+; If overflow, rotate left byte
+BCC conv_coor_mem_01
+INC $11
+conv_coor_mem_01:
 ASL
+; If overflow, rotate left byte
+BCC conv_coor_mem_02
+INC $11
+conv_coor_mem_02:
 ASL
+; If overflow, rotate left byte
+BCC conv_coor_mem_03
+INC $11
+conv_coor_mem_03:
 ASL
+; If overflow, rotate left byte
+BCC conv_coor_mem_04
+INC $11
+conv_coor_mem_04:
 ASL
+; If overflow, rotate left byte
+BCC conv_coor_mem_05
+INC $11
+conv_coor_mem_05:
 ASL
-CLC
+; If overflow, rotate left byte
+BCC conv_coor_mem_06
+INC $11
+conv_coor_mem_06:
 ; Add to initial memory address, and save it
-ADC $10
 STA $10
+RTS
 ; Divide x coord by 2 (2 pixel each byte)
 LDA $16
 LSR
@@ -235,6 +259,10 @@ CLC
 ADC $10
 ; Store in video memory position
 STA $10
+; If overflow, increment left byte
+BCC conv_coor_mem_07
+INC $10
+conv_coor_mem_07:
 RTS
 
 
@@ -563,4 +591,3 @@ RTS
     .word begin
     .word begin
     .word begin
-
