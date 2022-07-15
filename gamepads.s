@@ -1,5 +1,11 @@
+;----------------------------
+ROM_START = $c000
+TILESET_START = ROM_START
+TILEMAP_START = $e000
+;----------------------------
+
 ; Tiles position (0xc000 - 0xdfff)
-*=$C000
+*=ROM_START
 ; ----- TILES ------
 tiles:
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00, ; Tile $00
@@ -113,7 +119,7 @@ tiles:
 .byt $66,$6B,$BB,$BB,$AA,$6A,$AA,$AA,$AA,$6A,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00, ; Tile $6C
 .byt $BB,$BB,$BA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00, ; Tile $6D
 ; Fill unused tiles
-.dsb $e000-*, $00; tiles in 0xc000 - 0xdfff
+.dsb TILEMAP_START-*, $ff; tiles in 0xc000 - 0xdfff
 
 ; ----- MAP ------
 ; First map 0xe000
@@ -269,14 +275,11 @@ STA $12
 ;LDA $13
 ;STA $07
 LDA $08
-CLC
+LSR
+LSR
 LSR
 CLC
-LSR
-CLC
-LSR
-CLC
-ADC #$C0;80
+ADC #>TILESET_START
 STA $13
 RTS
 ; --------------------------------------------------------
