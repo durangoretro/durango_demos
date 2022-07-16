@@ -273,16 +273,16 @@ ADC $10
 STA $10
 
 ; If overflow, add one to more sig byte
-BCC conv_coor_mem_07
+BCC conv_coor_mem_01
 INX
-conv_coor_mem_07:
+conv_coor_mem_01:
 ; Add calculated offset to $11 (more sig)
 TXA
 CLC
 ADC $11
 STA $11
 
-RTS
+; Calculate X coord
 ; Divide x coord by 2 (2 pixel each byte)
 LDA $16
 LSR
@@ -292,9 +292,9 @@ ADC $10
 ; Store in video memory position
 STA $10
 ; If overflow, increment left byte
-BCC conv_coor_mem_08
-INC $10
-conv_coor_mem_08:
+BCC conv_coor_mem_02
+INC $11
+conv_coor_mem_02:
 RTS
 
 
