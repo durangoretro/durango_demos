@@ -216,40 +216,72 @@ RTS
 ; 16, 17 x,y pixel coords
 ; $10 $11 current video memory pointer
 convert_coords_to_mem:
+LDX #$00
 ; Multiply y coord by 64 (64 bytes each row)
 LDA $17
 ASL
-; If overflow, rotate left byte
-BCC conv_coor_mem_01
-INC $11
-conv_coor_mem_01:
+; Also shift more sig byte
+TAY
+TXA
+ROL
+TAX
+TYA
+; Shift less sig byte
 ASL
-; If overflow, rotate left byte
-BCC conv_coor_mem_02
-INC $11
-conv_coor_mem_02:
+; Also shift more sig byte
+TAY
+TXA
+ROL
+TAX
+TYA
+; Shift less sig byte
 ASL
-; If overflow, rotate left byte
-BCC conv_coor_mem_03
-INC $11
-conv_coor_mem_03:
+; Also shift more sig byte
+TAY
+TXA
+ROL
+TAX
+TYA
+; Shift less sig byte
 ASL
-; If overflow, rotate left byte
-BCC conv_coor_mem_04
-INC $11
-conv_coor_mem_04:
+; Also shift more sig byte
+TAY
+TXA
+ROL
+TAX
+TYA
+; Shift less sig byte
 ASL
-; If overflow, rotate left byte
-BCC conv_coor_mem_05
-INC $11
-conv_coor_mem_05:
+; Also shift more sig byte
+TAY
+TXA
+ROL
+TAX
+TYA
+; Shift less sig byte
 ASL
-; If overflow, rotate left byte
-BCC conv_coor_mem_06
-INC $11
-conv_coor_mem_06:
+; Also shift more sig byte
+TAY
+TXA
+ROL
+TAX
+TYA
+; Shift less sig byte
 ; Add to initial memory address, and save it
+CLC
+ADC $10
 STA $10
+
+; If overflow, add one to more sig byte
+BCC conv_coor_mem_07
+INX
+conv_coor_mem_07:
+; Add calculated offset to $11 (more sig)
+TXA
+CLC
+ADC $11
+STA $11
+
 RTS
 ; Divide x coord by 2 (2 pixel each byte)
 LDA $16
@@ -260,9 +292,9 @@ ADC $10
 ; Store in video memory position
 STA $10
 ; If overflow, increment left byte
-BCC conv_coor_mem_07
+BCC conv_coor_mem_08
 INC $10
-conv_coor_mem_07:
+conv_coor_mem_08:
 RTS
 
 
