@@ -174,11 +174,20 @@ LDA #RED
 STA $06
 
 ; 16, 17 x,y pixel coords
+
+; Gamepad 1 up
 LDA #$19
 STA $16
 LDA #$1d
 STA $17
+;JSR draw_square
+JSR draw_square
 
+; Gamepad 1 down
+LDA #$19
+STA $16
+LDA #$30
+STA $17
 ;JSR draw_square
 JSR draw_square
 
@@ -200,6 +209,11 @@ STA $10
 LDA $19
 STA $11
 JSR draw_pixel
+; Restore video memory position
+LDA $18
+STA $10
+LDA $19
+STA $11
 RTS
 
 draw_pixel:
