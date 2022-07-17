@@ -175,6 +175,7 @@ STA $06
 
 ; 16, 17 x,y pixel coords
 
+; ==== GAMEPAD 1 ============
 ; Gamepad 1 up
 LDA #$19
 STA $16
@@ -191,6 +192,121 @@ STA $17
 ;JSR draw_square
 JSR draw_square
 
+; Gamepad 1 left
+LDA #$10
+STA $16
+LDA #$26
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 1 right
+LDA #$22
+STA $16
+LDA #$26
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 1 select
+LDA #$35
+STA $16
+LDA #$2d
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 1 start
+LDA #$44
+STA $16
+LDA #$2d
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 1 A
+LDA #$6b
+STA $16
+LDA #$2d
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 1 B
+LDA #$5b
+STA $16
+LDA #$2d
+STA $17
+;JSR draw_square
+JSR draw_square
+
+
+; ==== GAMEPAD 2 ============
+; Gamepad 2 up
+LDA #$19
+STA $16
+LDA #$55
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 2 down
+LDA #$19
+STA $16
+LDA #$68
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 2 left
+LDA #$10
+STA $16
+LDA #$5e
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 2 right
+LDA #$22
+STA $16
+LDA #$5e
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 2 select
+LDA #$35
+STA $16
+LDA #$65
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 2 start
+LDA #$44
+STA $16
+LDA #$65
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 2 A
+LDA #$6b
+STA $16
+LDA #$65
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; Gamepad 2 B
+LDA #$5b
+STA $16
+LDA #$65
+STA $17
+;JSR draw_square
+JSR draw_square
+
+; ======================
 end: JMP end
 
 
