@@ -238,16 +238,45 @@ read_gamepads_02:
 STA $0200,y
 INY
 
-
 ; START
-LDA #$22
-STA $0201
+TXA
+AND #BUTTON_START
+STA $4000
+BEQ read_gamepads_03
+LDA #RED
+BCC read_gamepads_04
+read_gamepads_03:
+LDA #DARK_GREEN
+read_gamepads_04:
+STA $0200,y
+INY
+
 ; B
-LDA #$22
-STA $0202
+TXA
+AND #BUTTON_B
+STA $4000
+BEQ read_gamepads_05
+LDA #RED
+BCC read_gamepads_06
+read_gamepads_05:
+LDA #DARK_GREEN
+read_gamepads_06:
+STA $0200,y
+INY
+
 ; SELECT
-LDA #$22
-STA $0203
+TXA
+AND #BUTTON_SELECT
+STA $4000
+BEQ read_gamepads_07
+LDA #RED
+BCC read_gamepads_08
+read_gamepads_07:
+LDA #DARK_GREEN
+read_gamepads_08:
+STA $0200,y
+INY
+
 ; UP
 LDA #$22
 STA $0204
