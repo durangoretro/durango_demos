@@ -278,17 +278,56 @@ STA $0200,y
 INY
 
 ; UP
-LDA #$22
-STA $0204
+TXA
+AND #BUTTON_UP
+STA $4000
+BEQ read_gamepads_09
+LDA #RED
+BCC read_gamepads_10
+read_gamepads_09:
+LDA #DARK_GREEN
+read_gamepads_10:
+STA $0200,y
+INY
+
 ; LEFT
-LDA #$22
-STA $0205
+TXA
+AND #BUTTON_LEFT
+STA $4000
+BEQ read_gamepads_11
+LDA #RED
+BCC read_gamepads_12
+read_gamepads_11:
+LDA #DARK_GREEN
+read_gamepads_12:
+STA $0200,y
+INY
+
 ; DOWN
-LDA #$22
-STA $0206
+TXA
+AND #BUTTON_DOWN
+STA $4000
+BEQ read_gamepads_13
+LDA #RED
+BCC read_gamepads_14
+read_gamepads_13:
+LDA #DARK_GREEN
+read_gamepads_14:
+STA $0200,y
+INY
+
 ; RIGHT
-LDA #$22
-STA $0207
+TXA
+AND #BUTTON_RIGHT
+STA $4000
+BEQ read_gamepads_15
+LDA #RED
+BCC read_gamepads_16
+read_gamepads_15:
+LDA #DARK_GREEN
+read_gamepads_16:
+STA $0200,y
+INY
 
 ; Second controller
 LDA #$22
