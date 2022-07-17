@@ -220,11 +220,18 @@ STA CONTROLLER_2
 
 ; 3. read first controller in $DF9C
 CLC
+; First controller
 LDY #$00
 LDX CONTROLLER_1
+JSR proccess_controller
+; Second controller
+LDX CONTROLLER_2
+JSR proccess_controller
+RTS
 ; 4. read second controller in $DF9D
 
-; First controller
+; Process controller
+proccess_controller:
 ; A
 TXA
 AND #BUTTON_A
@@ -328,24 +335,6 @@ LDA #DARK_GREEN
 read_gamepads_16:
 STA $0200,y
 INY
-
-; Second controller
-LDA #$22
-STA $0208
-LDA #$22
-STA $0209
-LDA #$22
-STA $020a
-LDA #$22
-STA $020b
-LDA #$22
-STA $020c
-LDA #$22
-STA $020d
-LDA #$22
-STA $020e
-LDA #$22
-STA $020f
 RTS
 
 
