@@ -5,6 +5,14 @@ TILESET_START = ROM_START
 TILEMAP_START = TILESET_START + $2000
 CONTROLLER_1 = $df9c
 CONTROLLER_2 = $df9d
+BUTTON_A = $80
+BUTTON_START = $40
+BUTTON_B = $20
+BUTTON_SELECT = $10
+BUTTON_UP = $08
+BUTTON_LEFT = $04
+BUTTON_DOWN = $02
+BUTTON_RIGHT = $01
 ;----------------------------
 RED = $22
 DARK_GREEN = $44
@@ -175,6 +183,11 @@ STA $10
 LDA #RED
 STA $06
 
+; Mock data
+LDA #$80
+LDA #$00
+STA CONTROLLER_1
+
 JSR read_gamepads
 JSR draw_gamepads
 
@@ -199,14 +212,38 @@ STA CONTROLLER_2
 STA CONTROLLER_2
 STA CONTROLLER_2
 STA CONTROLLER_2
+; ---- keys ----
+; A      -> #$80
+; START  -> #$40
+; B      -> #$20
+; SELECT -> #$10
+; UP     -> #$08
+; LEFT   -> #$04
+; DOWN   -> #$02
+; RIGHT  -> #$01
+; --------------
+
 ; 3. read first controller in $DF9C
+CLC
+LDY #$00
+LDX CONTROLLER_1
 
 ; 4. read second controller in $DF9D
 
 ; First controller
 ; A
-LDA #$22
-STA $0200
+TXA
+AND #BUTTON_A
+BEQ read_gamepads_01
+LDA #RED
+BCS read_gamepads_02
+read_gamepads_01:
+LDA #DARK_GREEN
+read_gamepads_02:
+STA $0200,y
+INY
+
+
 ; START
 LDA #$22
 STA $0201
