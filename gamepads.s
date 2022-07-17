@@ -3,6 +3,8 @@
 ROM_START = $c000
 TILESET_START = ROM_START
 TILEMAP_START = TILESET_START + $2000
+CONTROLLER_1 = $df9c
+CONTROLLER_2 = $df9d
 ;----------------------------
 RED = $22
 DARK_GREEN = $44
@@ -173,47 +175,91 @@ STA $10
 LDA #RED
 STA $06
 
-; 16, 17 x,y pixel coords
+JSR read_gamepads
+JSR draw_gamepads
 
-; ==== GAMEPAD 1 ============
-; Gamepad 1 up
-LDA #$19
-STA $16
-LDA #$1d
-STA $17
-;JSR draw_square
-JSR draw_square
 
-; Gamepad 1 down
-LDA #$19
-STA $16
-LDA #$30
-STA $17
-;JSR draw_square
-JSR draw_square
+end: JMP end
 
-; Gamepad 1 left
-LDA #$10
-STA $16
-LDA #$26
-STA $17
-;JSR draw_square
-JSR draw_square
 
-; Gamepad 1 right
+; === FUNCTIONS ====
+
+read_gamepads:
+; 1. write into $DF9C
+LDA #$ff
+STA CONTROLLER_1
+; 2. write into $DF9D 8 times
+LDY #$08
+LDA #$ff
+STA CONTROLLER_2
+STA CONTROLLER_2
+STA CONTROLLER_2
+STA CONTROLLER_2
+STA CONTROLLER_2
+STA CONTROLLER_2
+STA CONTROLLER_2
+STA CONTROLLER_2
+; 3. read first controller in $DF9C
+
+; 4. read second controller in $DF9D
+
+; First controller
+; A
 LDA #$22
-STA $16
-LDA #$26
-STA $17
-;JSR draw_square
-JSR draw_square
+STA $0200
+; START
+LDA #$22
+STA $0201
+; B
+LDA #$22
+STA $0202
+; SELECT
+LDA #$22
+STA $0203
+; UP
+LDA #$22
+STA $0204
+; LEFT
+LDA #$22
+STA $0205
+; DOWN
+LDA #$22
+STA $0206
+; RIGHT
+LDA #$22
+STA $0207
 
-; Gamepad 1 select
-LDA #$35
+; Second controller
+LDA #$22
+STA $0208
+LDA #$22
+STA $0209
+LDA #$22
+STA $020a
+LDA #$22
+STA $020b
+LDA #$22
+STA $020c
+LDA #$22
+STA $020d
+LDA #$22
+STA $020e
+LDA #$22
+STA $020f
+RTS
+
+
+draw_gamepads:
+; ==== GAMEPAD 1 ============
+; Gamepad 1 A
+LDA #$6b
 STA $16
 LDA #$2d
 STA $17
-;JSR draw_square
+; Load color
+LDA $0200
+STA $06
+; Draw square
 JSR draw_square
 
 ; Gamepad 1 start
@@ -221,15 +267,10 @@ LDA #$44
 STA $16
 LDA #$2d
 STA $17
-;JSR draw_square
-JSR draw_square
-
-; Gamepad 1 A
-LDA #$6b
-STA $16
-LDA #$2d
-STA $17
-;JSR draw_square
+; Load color
+LDA $0201
+STA $06
+; Draw square
 JSR draw_square
 
 ; Gamepad 1 B
@@ -237,49 +278,78 @@ LDA #$5b
 STA $16
 LDA #$2d
 STA $17
-;JSR draw_square
+; Load color
+LDA $0202
+STA $06
+; Draw square
+JSR draw_square
+
+; Gamepad 1 select
+LDA #$35
+STA $16
+LDA #$2d
+STA $17
+; Load color
+LDA $0203
+STA $06
+; Draw square
+JSR draw_square
+
+; Gamepad 1 up
+LDA #$19
+STA $16
+LDA #$1d
+STA $17
+; Load color
+LDA $0204
+STA $06
+; Draw square
+JSR draw_square
+
+; Gamepad 1 left
+LDA #$10
+STA $16
+LDA #$26
+STA $17
+; Load color
+LDA $0205
+STA $06
+; Draw square
+JSR draw_square
+
+; Gamepad 1 down
+LDA #$19
+STA $16
+LDA #$30
+STA $17
+; Load color
+LDA $0206
+STA $06
+; Draw square
+JSR draw_square
+
+; Gamepad 1 right
+LDA #$22
+STA $16
+LDA #$26
+STA $17
+; Load color
+LDA $0207
+STA $06
+; Draw square
 JSR draw_square
 
 
 ; ==== GAMEPAD 2 ============
-; Gamepad 2 up
-LDA #$19
-STA $16
-LDA #$55
-STA $17
-;JSR draw_square
-JSR draw_square
-
-; Gamepad 2 down
-LDA #$19
-STA $16
-LDA #$68
-STA $17
-;JSR draw_square
-JSR draw_square
-
-; Gamepad 2 left
-LDA #$10
-STA $16
-LDA #$5e
-STA $17
-;JSR draw_square
-JSR draw_square
-
-; Gamepad 2 right
-LDA #$22
-STA $16
-LDA #$5e
-STA $17
-;JSR draw_square
-JSR draw_square
-
-; Gamepad 2 select
-LDA #$35
+; Gamepad 2 A
+LDA #$6b
 STA $16
 LDA #$65
 STA $17
-;JSR draw_square
+; Load color
+LDA $0208
+STA $06
+; Draw square
 JSR draw_square
 
 ; Gamepad 2 start
@@ -287,15 +357,10 @@ LDA #$44
 STA $16
 LDA #$65
 STA $17
-;JSR draw_square
-JSR draw_square
-
-; Gamepad 2 A
-LDA #$6b
-STA $16
-LDA #$65
-STA $17
-;JSR draw_square
+; Load color
+LDA $0209
+STA $06
+; Draw square
 JSR draw_square
 
 ; Gamepad 2 B
@@ -303,11 +368,71 @@ LDA #$5b
 STA $16
 LDA #$65
 STA $17
-;JSR draw_square
+; Load color
+LDA $020a
+STA $06
+; Draw square
 JSR draw_square
 
+; Gamepad 2 select
+LDA #$35
+STA $16
+LDA #$65
+STA $17
+; Load color
+LDA $020b
+STA $06
+; Draw square
+JSR draw_square
+
+
+; Gamepad 2 up
+LDA #$19
+STA $16
+LDA #$55
+STA $17
+; Load color
+LDA $020c
+STA $06
+; Draw square
+JSR draw_square
+
+; Gamepad 2 left
+LDA #$10
+STA $16
+LDA #$5e
+STA $17
+; Load color
+LDA $020d
+STA $06
+; Draw square
+JSR draw_square
+
+; Gamepad 2 down
+LDA #$19
+STA $16
+LDA #$68
+STA $17
+; Load color
+LDA $020e
+STA $06
+; Draw square
+JSR draw_square
+
+; Gamepad 2 right
+LDA #$22
+STA $16
+LDA #$5e
+STA $17
+; Load color
+LDA $020f
+STA $06
+; Draw square
+JSR draw_square
+
+
+RTS
 ; ======================
-end: JMP end
 
 
 ;18 19 -> video memory backup
