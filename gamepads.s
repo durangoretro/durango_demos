@@ -183,16 +183,11 @@ STA $10
 LDA #RED
 STA $06
 
-; Mock data
-LDA #$80
-LDA #$00
-STA CONTROLLER_1
 
+loop:
 JSR read_gamepads
 JSR draw_gamepads
-
-
-end: JMP end
+JMP loop
 
 
 ; === FUNCTIONS ====
@@ -227,16 +222,16 @@ STA CONTROLLER_2
 CLC
 LDY #$00
 LDX CONTROLLER_1
-
 ; 4. read second controller in $DF9D
 
 ; First controller
 ; A
 TXA
 AND #BUTTON_A
+STA $4000
 BEQ read_gamepads_01
 LDA #RED
-BCS read_gamepads_02
+BCC read_gamepads_02
 read_gamepads_01:
 LDA #DARK_GREEN
 read_gamepads_02:
