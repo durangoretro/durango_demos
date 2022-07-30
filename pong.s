@@ -1,22 +1,6 @@
-; -----------------------------------------------
-; 0 0000
-; 1 0001
-; 2 0010
-; 3 0011
-; 4 0100
-; 5 0101
-; 6 0110
-; 7 0111
-; 8 1000
-; 9 1001
-; a 1010
-; b 1011
-; c 1100
-; d 1101
-; e 1110
-; f 1111
-; Constants
+; -- Constants --
 ROM_START = $c000
+*=ROM_START
 VIDEO_MODE = $df80
 HIRES = $80
 INVERT = $40
@@ -42,21 +26,20 @@ AZUR = $cc
 CIAN = $dd
 FUCSIA = $ee
 BLANCO = $ff
-; Functions pointers
+
+; -- Functions args pointers --
 VMEM_POINTER = $10 ; $11
 X_COORD = $16
 Y_COORD = $17
 CURRENT_COLOR = $06
-; Game pointers
+
+; -- Global Game vars pointers --
 p1_begin = $00
 
 
-; -----------------------------------------------
 
-; -- main --
-*=ROM_START
+; -- main method --
 _main:
-
 
 ; Set video mode
 LDA #(RGB | SCREEN_3)
@@ -86,6 +69,7 @@ STA CURRENT_COLOR
 STA (VMEM_POINTER), Y
 
 end: JMP end
+; -- end main method --
 
 ; ------- FUNCTIONS --------------------------------
 
