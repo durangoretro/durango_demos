@@ -2,20 +2,20 @@
 ; Constants
 ROM_START = $c000
 NEGRO = $00
-VERDE = $01
-ROJO = $02
-NARANJA = $03
-BOTELLA = $04
-LIMA = $05
-LADRILLO = $06
-AMARILLO = $07
-AZUL = $08
-CELESTE = $09
-MAGENTA = $0a
-ROSITA = $0b
-AZUR = $0c
-CIAN = $0d
-FUCSIA = $0e
+VERDE = $11
+ROJO = $22
+NARANJA = $33
+BOTELLA = $44
+LIMA = $55
+LADRILLO = $66
+AMARILLO = $77
+AZUL = $88
+CELESTE = $99
+MAGENTA = $aa
+ROSITA = $bb
+AZUR = $cc
+CIAN = $dd
+FUCSIA = $ee
 BLANCO = $ff
 ; Functions pointers
 VMEM_POINTER = $10 ; $11
@@ -45,7 +45,16 @@ STA X_COORD
 LDA #$20
 STA Y_COORD
 
+; Set color
+LDA CIAN
+STA CURRENT_COLOR
+
 JSR convert_coords_to_mem
+
+LDA #$60
+STA VMEM_POINTER+1
+LDA #$00
+STA VMEM_POINTER
 
 ; Draw pixel
 LDA #$11
