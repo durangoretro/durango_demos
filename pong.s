@@ -167,6 +167,7 @@ _init:
     LDX #$FF  ; Initialize stack pointer to $01FF
     TXS
     CLD       ; Clear decimal mode
+    SEI       ; Disable interrupts
     JSR _main
 .)
 
