@@ -2,7 +2,6 @@
 ROM_START = $c000
 *=ROM_START
 VIDEO_MODE = $df80
-SERIAL_PORT = $df93
 HIRES = $80
 INVERT = $40
 SCREEN_0 = $00
@@ -11,6 +10,9 @@ SCREEN_2 = $20
 SCREEN_3 = $30
 RGB = $08
 LED = $04
+SERIAL_PORT = $df93
+CONTROLLER_1 = $df9c
+CONTROLLER_2 = $df9d
 NEGRO = $00
 VERDE = $11
 ROJO = $22
@@ -51,13 +53,24 @@ _main:
     STA VIDEO_MODE
 
 	JSR _draw_background
-    
     JSR _draw_first_player
-
 	JSR _draw_second_player
-    
+loop:
+	JSR _fetch_gamepads
+	LDA CONTROLLER_1
+    ASL
+	BCC up
+	; Button pushed
+	LDX #'D'
+	STX SERIAL_PORT
+	BCS down
+up:
+	; Button up
+	LDX #'U'
+	STX SERIAL_PORT
+down:
 
-    end: JMP end
+    end: JMP loop
 .)
 ; -- end main method --
 
@@ -275,10 +288,38 @@ loop:
 .)
 ;-- end fill screen ---
 
+; Fetch gamepads
+_fetch_gamepads:
+.(
+	; ---- keys ----
+	; A      -> #$80
+	; START  -> #$40
+	; B      -> #$20
+	; SELECT -> #$10
+	; UP     -> #$08
+	; LEFT   -> #$04
+	; DOWN   -> #$02
+	; RIGHT  -> #$01
+	; --------------
+	
+	; 1. write into $DF9C
+	STA CONTROLLER_1
+	; 2. write into $DF9D 8 times
+	STA CONTROLLER_2
+	STA CONTROLLER_2
+	STA CONTROLLER_2
+	STA CONTROLLER_2
+	STA CONTROLLER_2
+	STA CONTROLLER_2
+	STA CONTROLLER_2
+	STA CONTROLLER_2
+	RTS
+.)
 
 
 
 ; --- Aux methods ---
+; ===================
 _init:
 .(
     LDX #$FF  ; Initialize stack pointer to $01FF
