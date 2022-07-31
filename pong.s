@@ -2,6 +2,7 @@
 ROM_START = $c000
 *=ROM_START
 VIDEO_MODE = $df80
+SERIAL_PORT = $df93
 HIRES = $80
 INVERT = $40
 SCREEN_0 = $00
@@ -31,6 +32,8 @@ BLANCO = $ff
 VMEM_POINTER = $10 ; $11
 X_COORD = $16
 Y_COORD = $17
+SQ_WIDTH = $08
+SQ_HEIGHT = $09
 CURRENT_COLOR = $06
 
 ; -- Global Game vars pointers --
@@ -46,22 +49,23 @@ _main:
     STA VIDEO_MODE
     
     ; Set coords
-    LDA #10
+    LDA #0
     STA X_COORD
-    LDA #20
+    LDA #0
     STA Y_COORD
+    
+    ; Set size
+    LDA #8
+    STA SQ_WIDTH
+    LDA #1
+    STA SQ_HEIGHT
 
     ; Set color
-    LDA CIAN
+    LDA #VERDE
     STA CURRENT_COLOR
 
-    JSR _convert_coords_to_mem
-
-
-    ; Draw pixel
-    LDA #$11
-    STA CURRENT_COLOR
-    STA (VMEM_POINTER), Y
+    JSR _draw_square
+    
 
     end: JMP end
 .)
@@ -69,7 +73,30 @@ _main:
 
 ; ------- FUNCTIONS --------------------------------
 
+; Draw square
+; X_COORD, Y_COORD, SQ_WIDTH, SQ_HEIGHT
+; VMEM_POINTER VMEM_POINTER+1 final video memory pointer
+_draw_square:
+.(
+JSR _convert_coords_to_mem
+; Divide width by 2
+LDA SQ_WIDTH
+LSR
+; Store it in Y
+TAY
+; Load current color
+LDA CURRENT_COLOR
+; Draw as many pixels as Y register says
+paint:
+STA (VMEM_POINTER), Y
+DEY
+BNE paint:
+STA (VMEM_POINTER), Y
+RTS
+.)
+; --- end draw_square
 
+; Converts x,y coord into memory pointer.
 ; X_COORD, Y_COORD pixel coords
 ; VMEM_POINTER VMEM_POINTER+1 current video memory pointer
 _convert_coords_to_mem:
@@ -162,6 +189,8 @@ _convert_coords_to_mem:
     RTS
 .)
 ; --- end convert_coords_to_mem ---
+
+
 
 
 
