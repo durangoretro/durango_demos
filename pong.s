@@ -44,12 +44,7 @@ _main:
     ; Set video mode
     LDA #(RGB | SCREEN_3)
     STA VIDEO_MODE
-    ; Init video pointer
-    LDA #$60
-    STA VMEM_POINTER+1
-    LDA #$00
-    STA VMEM_POINTER
-
+    
     ; Set coords
     LDA #10
     STA X_COORD
@@ -79,6 +74,12 @@ _main:
 ; VMEM_POINTER VMEM_POINTER+1 current video memory pointer
 _convert_coords_to_mem:
 .(
+    ; Init video pointer
+    LDA #$60
+    STA VMEM_POINTER+1
+    LDA #$00
+    STA VMEM_POINTER
+    ; Clear X reg
     LDX #$00
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
@@ -162,6 +163,9 @@ _convert_coords_to_mem:
 .)
 ; --- end convert_coords_to_mem ---
 
+
+
+; --- Aux methods ---
 _init:
 .(
     LDX #$FF  ; Initialize stack pointer to $01FF
@@ -170,18 +174,15 @@ _init:
     SEI       ; Disable interrupts
     JSR _main
 .)
-
 _stop:
 .(
     .byte $DB
 .)
-
 _nmi_int:
 .(
     BRK
     RTI
 .)
-
 _irq_int:
 .(
     ; Filter interrupt
@@ -198,14 +199,12 @@ _irq_int:
     PLX                    ; Restore X register contents
     RTI                    ; Return from all IRQ interrupts
 .)
-
-
 ; --------------------------------------------------
 
-; Fill unused ROM
-.dsb $fffa-*, $00
+; --- Fill unused ROM ---
+.dsb $fffa-*, $ff
 
-; Set initial PC
+; --- Vectors ---
 * = $fffa
     .word _nmi_int ; NMI vector
     .word _init ; Reset vector
