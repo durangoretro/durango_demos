@@ -49,15 +49,15 @@ _main:
     STA VIDEO_MODE
     
     ; Set coords
-    LDA #0
+    LDA #5
     STA X_COORD
-    LDA #0
+    LDA #5
     STA Y_COORD
     
     ; Set size
-    LDA #8
+    LDA #6
     STA SQ_WIDTH
-    LDA #2
+    LDA #32
     STA SQ_HEIGHT
 
     ; Set color
