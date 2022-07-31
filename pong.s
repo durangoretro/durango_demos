@@ -47,6 +47,11 @@ _main:
     ; Set video mode
     LDA #(RGB | SCREEN_3)
     STA VIDEO_MODE
+
+	; Set back color
+    LDA #ROSITA
+    STA CURRENT_COLOR
+	JSR fill_screen
     
     ; Set coords
     LDA #2
@@ -216,6 +221,33 @@ _convert_coords_to_mem:
 .)
 ; --- end convert_coords_to_mem ---
 
+
+; Fill screen with solid color
+fill_screen:
+.(
+    ; Init video pointer
+    LDA #$60
+    STA VMEM_POINTER+1
+    LDA #$00
+    STA VMEM_POINTER
+loop2:
+	; Load current color
+	LDA CURRENT_COLOR
+    ; Iterate over less significative memory address
+    LDY #$00
+loop:
+    STA (VMEM_POINTER), Y
+    INY
+    BNE loop
+
+    ; Iterate over more significative memory address
+    INC VMEM_POINTER+1 ; Increment memory pointer Hi address using accumulator
+	LDA #$80 ; Compare with end memory position
+	CMP VMEM_POINTER+1
+    BNE loop2
+    RTS
+.)
+;-- end fill screen ---
 
 
 
