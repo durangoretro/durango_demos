@@ -49,7 +49,7 @@ _main:
     STA VIDEO_MODE
     
     ; Set coords
-    LDA #5
+    LDA #2
     STA X_COORD
     LDA #5
     STA Y_COORD
@@ -62,6 +62,19 @@ _main:
 
     ; Set color
     LDA #VERDE
+    STA CURRENT_COLOR
+
+	JSR _draw_square
+
+	; Right
+	; Set coords
+    LDA #118
+    STA X_COORD
+    LDA #5
+    STA Y_COORD
+
+	; Set color
+    LDA #ROJO
     STA CURRENT_COLOR
 
     JSR _draw_square
