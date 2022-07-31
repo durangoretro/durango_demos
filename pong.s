@@ -57,7 +57,7 @@ _main:
     ; Set size
     LDA #8
     STA SQ_WIDTH
-    LDA #1
+    LDA #2
     STA SQ_HEIGHT
 
     ; Set color
@@ -79,6 +79,9 @@ _main:
 _draw_square:
 .(
 JSR _convert_coords_to_mem
+; Load height in x
+LDX SQ_HEIGHT
+paint_row:
 ; Divide width by 2
 LDA SQ_WIDTH
 LSR
@@ -92,6 +95,16 @@ STA (VMEM_POINTER), Y
 DEY
 BNE paint:
 STA (VMEM_POINTER), Y
+; Next row
+LDA VMEM_POINTER
+CLC
+ADC #$40
+STA VMEM_POINTER
+BCC skip_upper
+INC VMEM_POINTER+1
+skip_upper:
+DEX
+BNE paint_row
 RTS
 .)
 ; --- end draw_square
