@@ -37,6 +37,8 @@ SQ_HEIGHT = $09
 CURRENT_COLOR = $06
 
 ; -- Global Game vars pointers --
+PADDLE_WIDTH = 6
+PADDLE_HEIGHT =32
 p1_begin = $00
 
 
@@ -48,21 +50,38 @@ _main:
     LDA #(RGB | SCREEN_3)
     STA VIDEO_MODE
 
+	JSR _draw_background
+    
+    JSR _draw_first_player
+
+	JSR _draw_second_player
+    
+
+    end: JMP end
+.)
+; -- end main method --
+
+; --- Draw background. ---
+_draw_background
+.(
 	; Set back color
     LDA #ROSITA
     STA CURRENT_COLOR
 	JSR fill_screen
-    
-    ; Set coords
+.)
+
+_draw_first_player
+.(
+	; Set coords
     LDA #2
     STA X_COORD
     LDA #5
     STA Y_COORD
     
     ; Set size
-    LDA #6
+    LDA #PADDLE_WIDTH
     STA SQ_WIDTH
-    LDA #32
+    LDA #PADDLE_HEIGHT
     STA SQ_HEIGHT
 
     ; Set color
@@ -70,7 +89,10 @@ _main:
     STA CURRENT_COLOR
 
 	JSR _draw_square
+.)
 
+_draw_second_player
+.(
 	; Right
 	; Set coords
     LDA #118
@@ -78,52 +100,56 @@ _main:
     LDA #5
     STA Y_COORD
 
+	; Set size
+    LDA #PADDLE_WIDTH
+    STA SQ_WIDTH
+    LDA #PADDLE_HEIGHT
+    STA SQ_HEIGHT
+
 	; Set color
     LDA #ROJO
     STA CURRENT_COLOR
 
     JSR _draw_square
-    
-
-    end: JMP end
 .)
-; -- end main method --
 
-; ------- FUNCTIONS --------------------------------
+; ============
+; --- LIBS ---
+; ============
 
 ; Draw square
 ; X_COORD, Y_COORD, SQ_WIDTH, SQ_HEIGHT
 ; VMEM_POINTER VMEM_POINTER+1 final video memory pointer
 _draw_square:
 .(
-JSR _convert_coords_to_mem
-; Load height in x
-LDX SQ_HEIGHT
-paint_row:
-; Divide width by 2
-LDA SQ_WIDTH
-LSR
-; Store it in Y
-TAY
-; Load current color
-LDA CURRENT_COLOR
-; Draw as many pixels as Y register says
-paint:
-STA (VMEM_POINTER), Y
-DEY
-BNE paint:
-STA (VMEM_POINTER), Y
-; Next row
-LDA VMEM_POINTER
-CLC
-ADC #$40
-STA VMEM_POINTER
-BCC skip_upper
-INC VMEM_POINTER+1
-skip_upper:
-DEX
-BNE paint_row
-RTS
+	JSR _convert_coords_to_mem
+	; Load height in x
+	LDX SQ_HEIGHT
+	paint_row:
+	; Divide width by 2
+	LDA SQ_WIDTH
+	LSR
+	; Store it in Y
+	TAY
+	; Load current color
+	LDA CURRENT_COLOR
+	; Draw as many pixels as Y register says
+	paint:
+	STA (VMEM_POINTER), Y
+	DEY
+	BNE paint:
+	STA (VMEM_POINTER), Y
+	; Next row
+	LDA VMEM_POINTER
+	CLC
+	ADC #$40
+	STA VMEM_POINTER
+	BCC skip_upper
+	INC VMEM_POINTER+1
+	skip_upper:
+	DEX
+	BNE paint_row
+	RTS
 .)
 ; --- end draw_square
 
