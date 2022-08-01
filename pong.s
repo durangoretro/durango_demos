@@ -41,6 +41,7 @@ CURRENT_COLOR = $06
 ; -- Global Game constants --
 PADDLE_WIDTH = 6
 PADDLE_HEIGHT =32
+BACKGROUND = ROSITA
 ; -- Global Game vars pointers --
 p1_vertical_x = $00
 p1_vertical_y = $01
@@ -64,6 +65,9 @@ loop:
 	JSR _update_game
 
 	JMP loop
+
+	; End main
+	end: JMP end
 .)
 ; -- end main method --
 
@@ -73,15 +77,17 @@ _init_game:
     STA p1_vertical_x
     LDA #5
     STA p1_vertical_y 
+	RTS
 .)
 
 ; --- Draw background. ---
 _draw_background:
 .(
     ; Set back color
-    LDA #ROSITA
+    LDA #BACKGROUND
     STA CURRENT_COLOR
     JSR fill_screen
+	RTS
 .)
 
 _draw_first_player:
@@ -103,6 +109,29 @@ _draw_first_player:
     STA CURRENT_COLOR
 
     JSR _draw_square
+	RTS
+.)
+
+_undraw_first_player:
+.(
+    ; Set coords
+    LDA p1_vertical_x
+    STA X_COORD
+    LDA p1_vertical_y
+    STA Y_COORD
+    
+    ; Set size
+    LDA #PADDLE_WIDTH
+    STA SQ_WIDTH
+    LDA #PADDLE_HEIGHT
+    STA SQ_HEIGHT
+
+    ; Set color
+    LDA #BACKGROUND
+    STA CURRENT_COLOR
+
+    JSR _draw_square
+	RTS
 .)
 
 _draw_second_player:
@@ -125,6 +154,7 @@ _draw_second_player:
     STA CURRENT_COLOR
 
     JSR _draw_square
+	RTS
 .)
 
 _update_game:
@@ -188,12 +218,30 @@ _update_game:
 	    RTS
 .)
 
+; Player 1 moves up
 _player1_up:
 .(
+	; Erase current paddle
+	JSR _undraw_first_player
+	; Move paddle
+	DEC p1_vertical_y
+	.byte $cb
+	; Draw current paddle
+	JSR _draw_first_player
+	; Return
     RTS
 .)
+
+; Player 1 moves down
 _player1_down:
 .(
+    ; Erase current paddle
+	JSR _undraw_first_player
+	; Move paddle
+	INC p1_vertical_y
+	; Draw current paddle
+	JSR _draw_first_player
+	; Return
     RTS
 .)
 
@@ -429,6 +477,8 @@ _irq_int:
     RTI                    ; Return from all IRQ interrupts
 .)
 ; --------------------------------------------------
+
+; I/O->  $df80 - $dfff
 
 ; --- Fill unused ROM ---
 .dsb $fffa-*, $ff
