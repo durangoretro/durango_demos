@@ -38,57 +38,58 @@ SQ_WIDTH = $08
 SQ_HEIGHT = $09
 CURRENT_COLOR = $06
 
-; -- Global Game vars pointers --
+; -- Global Game constants --
 PADDLE_WIDTH = 6
 PADDLE_HEIGHT =32
-p1_begin = $00
+; -- Global Game vars pointers --
+p1_vertical_x = $00
+p1_vertical_y = $01
 
 
 
 ; -- main method --
 _main:
 .(
-    ; Set video mode
-    LDA #(RGB | SCREEN_3)
-    STA VIDEO_MODE
+	; Set video mode
+	LDA #(RGB | SCREEN_3)
+	STA VIDEO_MODE
+	
+	; Init variables
+	JSR _init_game
 
 	JSR _draw_background
-    JSR _draw_first_player
+	JSR _draw_first_player
 	JSR _draw_second_player
 loop:
-	JSR _fetch_gamepads
-	LDA CONTROLLER_1
-    ASL
-	BCC up
-	; Button pushed
-	LDX #'D'
-	STX SERIAL_PORT
-	BCS down
-up:
-	; Button up
-	LDX #'U'
-	STX SERIAL_PORT
-down:
+	JSR _update_game
 
-    end: JMP loop
+	JMP loop
 .)
 ; -- end main method --
 
-; --- Draw background. ---
-_draw_background
+_init_game:
 .(
-	; Set back color
-    LDA #ROSITA
-    STA CURRENT_COLOR
-	JSR fill_screen
+    LDA #2
+    STA p1_vertical_x
+    LDA #5
+    STA p1_vertical_y 
 .)
 
-_draw_first_player
+; --- Draw background. ---
+_draw_background:
 .(
-	; Set coords
-    LDA #2
+    ; Set back color
+    LDA #ROSITA
+    STA CURRENT_COLOR
+    JSR fill_screen
+.)
+
+_draw_first_player:
+.(
+    ; Set coords
+    LDA p1_vertical_x
     STA X_COORD
-    LDA #5
+    LDA p1_vertical_y
     STA Y_COORD
     
     ; Set size
@@ -101,10 +102,10 @@ _draw_first_player
     LDA #VERDE
     STA CURRENT_COLOR
 
-	JSR _draw_square
+    JSR _draw_square
 .)
 
-_draw_second_player
+_draw_second_player:
 .(
 	; Right
 	; Set coords
@@ -124,6 +125,76 @@ _draw_second_player
     STA CURRENT_COLOR
 
     JSR _draw_square
+.)
+
+_update_game:
+.(
+	JSR _fetch_gamepads
+	    ; Player 1
+	    TXA	
+	    ; A
+	    ASL
+	    BCC next1
+	    ; START
+    next1:	ASL
+	    BCC next2
+	    ; B
+    next2:	ASL
+	    BCC next3
+	    ; SELECT
+    next3:	ASL
+	    BCC next4
+	    ; UP
+    next4:	ASL
+	    BCC next5
+	    JSR _player1_up
+	    ; LEFT
+    next5:	ASL
+	    BCC next6
+	    ; DOWN
+    next6:	ASL
+	    BCC next7
+	    JSR _player1_down
+	    ; RIGHT
+    next7:	ASL
+	    BCC next8
+	    ; Player 2
+	    TYA
+	    ; A
+    next8:	ASL
+	    BCC next9
+	    ; START
+    next9:	ASL
+	    BCC next10
+	    ; B
+    next10:	ASL
+	    BCC next11
+	    ; SELECT
+    next11:	ASL
+	    BCC next12
+	    ; UP
+    next12:	ASL
+	    BCC next13
+	    ; LEFT
+    next13:	ASL
+	    BCC next14
+	    ; DOWN
+    next14:	ASL
+	    BCC next15
+	    ; RIGHT
+    next15:	ASL
+	    BCC next16	    
+    next16:
+	    RTS
+.)
+
+_player1_up:
+.(
+    RTS
+.)
+_player1_down:
+.(
+    RTS
 .)
 
 ; ============
@@ -313,6 +384,10 @@ _fetch_gamepads:
 	STA CONTROLLER_2
 	STA CONTROLLER_2
 	STA CONTROLLER_2
+	; 4. read first controller
+	LDX CONTROLLER_1
+	; 5. read second controller
+	LDY CONTROLLER_2
 	RTS
 .)
 
