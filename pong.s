@@ -495,6 +495,8 @@ _irq_int:
 
 ; I/O->  $df80 - $dfff
 
+player_1_string: .asc "Player 1\0"
+
 ; --- Fill unused ROM ---
 .dsb $fffa-*, $ff
 
