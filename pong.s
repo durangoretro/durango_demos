@@ -1,6 +1,4 @@
 ; -- Constants --
-ROM_START = $c000
-*=ROM_START
 VIDEO_MODE = $df80
 HIRES = $80
 INVERT = $40
@@ -46,6 +44,8 @@ BACKGROUND = ROSITA
 p1_vertical_x = $00
 p1_vertical_y = $01
 
+; == 16K ROM. FIRST 8K BLOCK ==
+*=$c000
 
 
 ; -- main method --
@@ -497,14 +497,29 @@ _irq_int:
 .)
 ; --------------------------------------------------
 
-; I/O->  $df80 - $dfff
 
-player_1_string: .asc "Player 1\0"
+#if(*>$df80)
+#echo First segment is too big!
+#endif
+.dsb $df80-*, $ff
+; === END OF FIRST 8K BLOCK ===
 
-; --- Fill unused ROM ---
+; === RESERVED IO SPACE ($df80 - $dfff) ===
+* = $df80
+.asc "DURANGO"
+.byte $00
+.byte $00
+.asc "ROM cooked by emiliollbb"
+.dsb $e000-*, $ff
+; === END OF RESERVED IO SPACE ===
+
+; === 16K ROM. SECOND 8K BLOCK ===
+.asc "Second block"
 .dsb $fffa-*, $ff
+; === END OF SECOND 8K BLOCK ===
 
-; --- Vectors ---
+
+; === VECTORS ===
 * = $fffa
     .word _nmi_int ; NMI vector
     .word _init ; Reset vector
