@@ -61,10 +61,10 @@ _main:
 	JSR _draw_background
 	JSR _draw_first_player
 	JSR _draw_second_player
-loop:
+gameloop:
+	JSR _wait_vsync
 	JSR _update_game
-
-	JMP loop
+	JMP gameloop
 
 	; End main
 	end: JMP end
@@ -437,6 +437,14 @@ _fetch_gamepads:
 	; 5. read second controller
 	LDY CONTROLLER_2
 	RTS
+.)
+
+_wait_vsync:
+.(
+    wait_loop:
+    BIT $DF88
+    BVC wait_loop
+    RTS
 .)
 
 
