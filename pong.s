@@ -232,7 +232,6 @@ _player1_up:
     JSR _undraw_first_player
     ; Move paddle
     DEC p1_vertical_y
-    .byte $cb
     ; Draw current paddle
     JSR _draw_first_player
     ; Return
