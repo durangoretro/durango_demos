@@ -56,11 +56,9 @@ _main:
 	STA VIDEO_MODE
 	
 	; Init variables
-	JSR _init_game
-
-	JSR _draw_background
-	JSR _draw_first_player
-	JSR _draw_second_player
+	JSR _init_game_data
+	JSR _init_game_screen
+	
 gameloop:
 	JSR _wait_vsync
 	JSR _update_game
@@ -71,13 +69,22 @@ gameloop:
 .)
 ; -- end main method --
 
-_init_game:
+_init_game_data:
 .(
     LDA #2
     STA p1_vertical_x
     LDA #5
     STA p1_vertical_y 
-	RTS
+    RTS
+.)
+
+; Init game screen
+_init_game_screen:
+.(
+    JSR _draw_background
+    JSR _draw_first_player
+    JSR _draw_second_player
+    RTS
 .)
 
 ; --- Draw background. ---
@@ -221,14 +228,14 @@ _update_game:
 ; Player 1 moves up
 _player1_up:
 .(
-	; Erase current paddle
-	JSR _undraw_first_player
-	; Move paddle
-	DEC p1_vertical_y
-	.byte $cb
-	; Draw current paddle
-	JSR _draw_first_player
-	; Return
+    ; Erase current paddle
+    JSR _undraw_first_player
+    ; Move paddle
+    DEC p1_vertical_y
+    .byte $cb
+    ; Draw current paddle
+    JSR _draw_first_player
+    ; Return
     RTS
 .)
 
@@ -236,12 +243,12 @@ _player1_up:
 _player1_down:
 .(
     ; Erase current paddle
-	JSR _undraw_first_player
-	; Move paddle
-	INC p1_vertical_y
-	; Draw current paddle
-	JSR _draw_first_player
-	; Return
+    JSR _undraw_first_player
+    ; Move paddle
+    INC p1_vertical_y
+    ; Draw current paddle
+    JSR _draw_first_player
+    ; Return
     RTS
 .)
 
@@ -439,6 +446,7 @@ _fetch_gamepads:
 	RTS
 .)
 
+; Wait for vsync.
 _wait_vsync:
 .(
     wait_loop:
