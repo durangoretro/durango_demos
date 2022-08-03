@@ -41,8 +41,10 @@ PADDLE_WIDTH = 6
 PADDLE_HEIGHT =32
 BACKGROUND = ROSITA
 ; -- Global Game vars pointers --
-p1_vertical_x = $00
-p1_vertical_y = $01
+p1_vertical_x = 00
+p1_vertical_y = 01
+p2_vertical_x = 02
+p2_vertical_y = 03
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -74,7 +76,11 @@ _init_game_data:
     LDA #2
     STA p1_vertical_x
     LDA #5
-    STA p1_vertical_y 
+    STA p1_vertical_y    
+    LDA #118
+    STA p2_vertical_x
+    LDA #5
+    STA p2_vertical_y
     RTS
 .)
 
@@ -116,7 +122,7 @@ _draw_first_player:
     STA CURRENT_COLOR
 
     JSR _draw_square
-	RTS
+    RTS
 .)
 
 _undraw_first_player:
@@ -138,30 +144,51 @@ _undraw_first_player:
     STA CURRENT_COLOR
 
     JSR _draw_square
-	RTS
+    RTS
 .)
 
 _draw_second_player:
 .(
-	; Right
-	; Set coords
-    LDA #118
+    ; Set coords
+    LDA p2_vertical_x
     STA X_COORD
-    LDA #5
+    LDA p2_vertical_y
     STA Y_COORD
-
-	; Set size
+    
+    ; Set size
     LDA #PADDLE_WIDTH
     STA SQ_WIDTH
     LDA #PADDLE_HEIGHT
     STA SQ_HEIGHT
 
-	; Set color
+    ; Set color
     LDA #ROJO
     STA CURRENT_COLOR
 
     JSR _draw_square
-	RTS
+    RTS
+.)
+
+_undraw_second_player:
+.(
+    ; Set coords
+    LDA p2_vertical_x
+    STA X_COORD
+    LDA p2_vertical_y
+    STA Y_COORD
+    
+    ; Set size
+    LDA #PADDLE_WIDTH
+    STA SQ_WIDTH
+    LDA #PADDLE_HEIGHT
+    STA SQ_HEIGHT
+
+    ; Set color
+    LDA #BACKGROUND
+    STA CURRENT_COLOR
+
+    JSR _draw_square
+    RTS
 .)
 
 _update_game:
@@ -182,11 +209,11 @@ _update_game:
     next3:	ASL
 	    BCC next4
 	    ; UP
-    next4:	ASL
+    next4:  ASL
 	    BCC next5
-		PHA
+	    PHA
 	    JSR _player1_up
-		PLA
+	    PLA
 	    ; LEFT
     next5:	ASL
 	    BCC next6
@@ -199,10 +226,11 @@ _update_game:
 	    ; RIGHT
     next7:	ASL
 	    BCC next8
-	    ; Player 2
+next8:	    ; Player 2
+	    JSR _fetch_gamepads
 	    TYA
 	    ; A
-    next8:	ASL
+    	ASL
 	    BCC next9
 	    ; START
     next9:	ASL
@@ -216,12 +244,18 @@ _update_game:
 	    ; UP
     next12:	ASL
 	    BCC next13
+	    PHA
+	    JSR _player2_up
+	    PLA
 	    ; LEFT
     next13:	ASL
 	    BCC next14
 	    ; DOWN
     next14:	ASL
 	    BCC next15
+	    PHA
+	    JSR _player2_down
+	    PLA
 	    ; RIGHT
     next15:	ASL
 	    BCC next16	    
@@ -251,6 +285,32 @@ _player1_down:
     INC p1_vertical_y
     ; Draw current paddle
     JSR _draw_first_player
+    ; Return
+    RTS
+.)
+
+; Player 2 moves up
+_player2_up:
+.(
+    ; Erase current paddle
+    JSR _undraw_second_player
+    ; Move paddle
+    DEC p2_vertical_y
+    ; Draw current paddle
+    JSR _draw_second_player
+    ; Return
+    RTS
+.)
+
+; Player 2 moves down
+_player2_down:
+.(
+    ; Erase current paddle
+    JSR _undraw_second_player
+    ; Move paddle
+    INC p2_vertical_y
+    ; Draw current paddle
+    JSR _draw_second_player
     ; Return
     RTS
 .)
