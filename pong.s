@@ -89,8 +89,7 @@ _init_game_screen:
 .(
     JSR _draw_background
     JSR _draw_first_player
-    JSR _draw_second_player
-    RTS
+    JMP _draw_second_player
 .)
 
 ; --- Draw background. ---
@@ -99,8 +98,7 @@ _draw_background:
     ; Set back color
     LDA #BACKGROUND
     STA CURRENT_COLOR
-    JSR fill_screen
-	RTS
+    JMP fill_screen
 .)
 
 _draw_first_player:
@@ -121,8 +119,7 @@ _draw_first_player:
     LDA #VERDE
     STA CURRENT_COLOR
 
-    JSR _draw_square
-    RTS
+    JMP _draw_square
 .)
 
 _undraw_first_player:
@@ -143,8 +140,7 @@ _undraw_first_player:
     LDA #BACKGROUND
     STA CURRENT_COLOR
 
-    JSR _draw_square
-    RTS
+    JMP _draw_square
 .)
 
 _draw_second_player:
@@ -165,8 +161,7 @@ _draw_second_player:
     LDA #ROJO
     STA CURRENT_COLOR
 
-    JSR _draw_square
-    RTS
+    JMP _draw_square
 .)
 
 _undraw_second_player:
@@ -187,8 +182,7 @@ _undraw_second_player:
     LDA #BACKGROUND
     STA CURRENT_COLOR
 
-    JSR _draw_square
-    RTS
+    JMP _draw_square
 .)
 
 _update_game:
@@ -270,10 +264,8 @@ _player1_up:
     JSR _undraw_first_player
     ; Move paddle
     DEC p1_vertical_y
-    ; Draw current paddle
-    JSR _draw_first_player
-    ; Return
-    RTS
+    ; Draw current paddle & Return
+    JMP _draw_first_player
 .)
 
 ; Player 1 moves down
@@ -284,9 +276,7 @@ _player1_down:
     ; Move paddle
     INC p1_vertical_y
     ; Draw current paddle
-    JSR _draw_first_player
-    ; Return
-    RTS
+    JMP _draw_first_player
 .)
 
 ; Player 2 moves up
@@ -297,9 +287,7 @@ _player2_up:
     ; Move paddle
     DEC p2_vertical_y
     ; Draw current paddle
-    JSR _draw_second_player
-    ; Return
-    RTS
+    JMP _draw_second_player
 .)
 
 ; Player 2 moves down
@@ -310,9 +298,7 @@ _player2_down:
     ; Move paddle
     INC p2_vertical_y
     ; Draw current paddle
-    JSR _draw_second_player
-    ; Return
-    RTS
+    JMP _draw_second_player
 .)
 
 ; ============
