@@ -504,9 +504,13 @@ _wait_vsync:
 ; ===================
 _init:
 .(
+    SEI	      ; Disable interrupts
     LDX #$FF  ; Initialize stack pointer to $01FF
     TXS
     CLD       ; Clear decimal mode
+    LDA #$01
+    STA $DFA0
+    CLI       ; Enable interrupts
     JSR _main
 .)
 _stop:
@@ -530,7 +534,6 @@ _irq_int:
     
     ; Actual interrupt code
     JSR _fetch_gamepads
-    STA SERIAL_PORT
     
     ; Return from interrupt
     PLA                    ; Restore accumulator contents
