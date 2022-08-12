@@ -186,10 +186,9 @@ _undraw_second_player:
 .)
 
 _update_game:
-.(
-	JSR _fetch_gamepads
+.(	
 	    ; Player 1
-	    TXA	
+	    LDA CONTROLLER_1
 	    ; A
 	    ASL
 	    BCC next1
@@ -221,8 +220,7 @@ _update_game:
     next7:	ASL
 	    BCC next8
 next8:	    ; Player 2
-	    JSR _fetch_gamepads
-	    TYA
+	    LDA CONTROLLER_2
 	    ; A
     	ASL
 	    BCC next9
@@ -488,10 +486,6 @@ _fetch_gamepads:
 	STA CONTROLLER_2
 	STA CONTROLLER_2
 	STA CONTROLLER_2
-	; 4. read first controller
-	LDX CONTROLLER_1
-	; 5. read second controller
-	LDY CONTROLLER_2
 	RTS
 .)
 
@@ -513,16 +507,15 @@ _init:
     LDX #$FF  ; Initialize stack pointer to $01FF
     TXS
     CLD       ; Clear decimal mode
-    SEI       ; Disable interrupts
     JSR _main
 .)
 _stop:
 .(
-    .byte $DB
+    end: JMP end
 .)
 _nmi_int:
 .(
-    BRK
+    BRK    
     RTI
 .)
 _irq_int:
@@ -534,8 +527,11 @@ _irq_int:
     LDA $102,X  ; Load status register contents
     AND #$10    ; Isolate B status bit
     BNE _stop   ; If B = 1, BRK detected
+    
     ; Actual interrupt code
-    NOP
+    JSR _fetch_gamepads
+    STA SERIAL_PORT
+    
     ; Return from interrupt
     PLA                    ; Restore accumulator contents
     PLX                    ; Restore X register contents
