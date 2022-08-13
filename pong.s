@@ -11,6 +11,14 @@ LED = $04
 SERIAL_PORT = $df93
 CONTROLLER_1 = $df9c
 CONTROLLER_2 = $df9d
+BUTTON_A = $80
+BUTTON_START = $40
+BUTTON_B = $20
+BUTTON_SELECT = $10
+BUTTON_UP = $08
+BUTTON_LEFT = $04
+BUTTON_DOWN = $02
+BUTTON_RIGHT = $01
 NEGRO = $00
 VERDE = $11
 ROJO = $22
@@ -187,72 +195,33 @@ _undraw_second_player:
 
 _update_game:
 .(	
-	    ; Player 1
-	    LDA CONTROLLER_1
-	    ; A
-	    ASL
-	    BCC next1
-	    ; START
-    next1:	ASL
-	    BCC next2
-	    ; B
-    next2:	ASL
-	    BCC next3
-	    ; SELECT
-    next3:	ASL
-	    BCC next4
-	    ; UP
-    next4:  ASL
-	    BCC next5
-	    PHA
-	    JSR _player1_up
-	    PLA
-	    ; LEFT
-    next5:	ASL
-	    BCC next6
-	    ; DOWN
-    next6:	ASL
-	    BCC next7
-		PHA
-	    JSR _player1_down
-		PLA
-	    ; RIGHT
-    next7:	ASL
-	    BCC next8
-next8:	    ; Player 2
-	    LDA CONTROLLER_2
-	    ; A
-    	ASL
-	    BCC next9
-	    ; START
-    next9:	ASL
-	    BCC next10
-	    ; B
-    next10:	ASL
-	    BCC next11
-	    ; SELECT
-    next11:	ASL
-	    BCC next12
-	    ; UP
-    next12:	ASL
-	    BCC next13
-	    PHA
-	    JSR _player2_up
-	    PLA
-	    ; LEFT
-    next13:	ASL
-	    BCC next14
-	    ; DOWN
-    next14:	ASL
-	    BCC next15
-	    PHA
-	    JSR _player2_down
-	    PLA
-	    ; RIGHT
-    next15:	ASL
-	    BCC next16	    
-    next16:
-	    RTS
+    ; Player 1
+    up1:
+    LDA #BUTTON_UP
+    BIT CONTROLLER_1
+    BEQ down1
+    JSR _player1_up
+
+    down1:
+    LDA #BUTTON_DOWN
+    BIT CONTROLLER_1
+    BEQ up2
+    JSR _player1_down
+    
+    up2:
+    LDA #BUTTON_UP
+    BIT CONTROLLER_2
+    BEQ down2
+    JSR _player2_up
+
+    down2:
+    LDA #BUTTON_DOWN
+    BIT CONTROLLER_2
+    BEQ end
+    JSR _player2_down
+
+    end:
+    RTS
 .)
 
 ; Player 1 moves up
