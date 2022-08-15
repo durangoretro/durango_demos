@@ -373,8 +373,8 @@ fill_screen:
     LDA #$00
     STA VMEM_POINTER
 loop2:
-	; Load current color
-	LDA CURRENT_COLOR
+    ; Load current color
+    LDA CURRENT_COLOR
     ; Iterate over less significative memory address
     LDY #$00
 loop:
@@ -384,8 +384,8 @@ loop:
 
     ; Iterate over more significative memory address
     INC VMEM_POINTER+1 ; Increment memory pointer Hi address using accumulator
-	LDA #$80 ; Compare with end memory position
-	CMP VMEM_POINTER+1
+    LDA #$80 ; Compare with end memory position
+    CMP VMEM_POINTER+1
     BNE loop2
     RTS
 .)
@@ -394,29 +394,29 @@ loop:
 ; Fetch gamepads
 _fetch_gamepads:
 .(
-	; ---- keys ----
-	; A      -> #$80
-	; START  -> #$40
-	; B      -> #$20
-	; SELECT -> #$10
-	; UP     -> #$08
-	; LEFT   -> #$04
-	; DOWN   -> #$02
-	; RIGHT  -> #$01
-	; --------------
+    ; ---- keys ----
+    ; A      -> #$80
+    ; START  -> #$40
+    ; B      -> #$20
+    ; SELECT -> #$10
+    ; UP     -> #$08
+    ; LEFT   -> #$04
+    ; DOWN   -> #$02
+    ; RIGHT  -> #$01
+    ; --------------
 	
-	; 1. write into $DF9C
-	STA CONTROLLER_1
-	; 2. write into $DF9D 8 times
-	STA CONTROLLER_2
-	STA CONTROLLER_2
-	STA CONTROLLER_2
-	STA CONTROLLER_2
-	STA CONTROLLER_2
-	STA CONTROLLER_2
-	STA CONTROLLER_2
-	STA CONTROLLER_2
-	RTS
+    ; 1. write into $DF9C
+    STA CONTROLLER_1
+    ; 2. write into $DF9D 8 times
+    STA CONTROLLER_2
+    STA CONTROLLER_2
+    STA CONTROLLER_2
+    STA CONTROLLER_2
+    STA CONTROLLER_2
+    STA CONTROLLER_2
+    STA CONTROLLER_2
+    STA CONTROLLER_2
+    RTS
 .)
 
 ; Wait for vsync.
