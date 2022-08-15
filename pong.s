@@ -9,6 +9,12 @@ SCREEN_3 = $30
 RGB = $08
 LED = $04
 SERIAL_PORT = $df93
+SERIAL_HEX = $00
+SERIAL_ASCII = $01
+SERIAL_BINARY = $02
+SERIAL_DUMP = $fd
+SERIAL_STACK = $fe
+SERIAL_STAT = $ff
 CONTROLLER_1 = $df9c
 CONTROLLER_2 = $df9d
 BUTTON_A = $80
@@ -313,78 +319,26 @@ _draw_square:
 ; VMEM_POINTER VMEM_POINTER+1 current video memory pointer
 _convert_coords_to_mem:
 .(
-    ; Init video pointer
-    LDA #$60
-    STA VMEM_POINTER+1
-    LDA #$00
-    STA VMEM_POINTER
     ; Clear X reg
     LDX #$00
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
-    ASL
-    ; Also shift more sig byte
-    TAY
-    TXA
-    ROL
-    TAX
-    TYA
-    ; Shift less sig byte
-    ASL
-    ; Also shift more sig byte
-    TAY
-    TXA
-    ROL
-    TAX
-    TYA
-    ; Shift less sig byte
-    ASL
-    ; Also shift more sig byte
-    TAY
-    TXA
-    ROL
-    TAX
-    TYA
-    ; Shift less sig byte
-    ASL
-    ; Also shift more sig byte
-    TAY
-    TXA
-    ROL
-    TAX
-    TYA
-    ; Shift less sig byte
-    ASL
-    ; Also shift more sig byte
-    TAY
-    TXA
-    ROL
-    TAX
-    TYA
-    ; Shift less sig byte
-    ASL
-    ; Also shift more sig byte
-    TAY
-    TXA
-    ROL
-    TAX
-    TYA
-    ; Shift less sig byte
-    ; Add to initial memory address, and save it
-    CLC
-    ADC VMEM_POINTER
-    STA VMEM_POINTER
-
-    ; If overflow, add one to more sig byte
-    BCC conv_coor_mem_01
-    INX
-    conv_coor_mem_01:
-    ; Add calculated offset to VMEM_POINTER+1 (more sig)
-    TXA
-    CLC
-    ADC VMEM_POINTER+1
+    LSR
     STA VMEM_POINTER+1
-
+    ROR VMEM_POINTER    
+    ; Sencond shift
+    LSR VMEM_POINTER+1
+    ROR VMEM_POINTER
+    
+    ; Add base memory address
+    CLC
+    LDA VMEM_POINTER+1
+    ADC #$60
+    STA VMEM_POINTER+1
+    LDA VMEM_POINTER
+    ADC #$00
+    STA VMEM_POINTER
+    
     ; Calculate X coord
     ; Divide x coord by 2 (2 pixel each byte)
     LDA X_COORD
@@ -392,12 +346,10 @@ _convert_coords_to_mem:
     ; Add to memory address
     CLC
     ADC VMEM_POINTER
-    ; Store in video memory position
     STA VMEM_POINTER
-    ; If overflow, increment left byte
-    BCC conv_coor_mem_02
-    INC VMEM_POINTER+1
-    conv_coor_mem_02:
+    LDA VMEM_POINTER+1
+    ADC #$00
+    STA VMEM_POINTER+1
     RTS
 .)
 ; --- end convert_coords_to_mem ---
