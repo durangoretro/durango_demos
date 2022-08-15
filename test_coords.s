@@ -64,15 +64,37 @@ p2_vertical_y = 03
 *=$c000
 begin:
 
-LDA #$33
+; Set video mode
+; [HiRes Invert S1 S0    RGB LED NC NC]
+LDA #$3c
+STA $df80
+
+LDA #5
 STA Y_COORD
 STA VMEM_POINTER+1
 
-LDA #120
+LDA #118
 STA X_COORD
 
 
+
+
+LDA #PADDLE_WIDTH
+STA SQ_WIDTH
+LDA #PADDLE_HEIGHT
+STA SQ_HEIGHT
+LDA #BLANCO
+STA CURRENT_COLOR
+
+;JSR debug3
 JSR _convert_coords_to_mem
+JSR debug2
+JSR _draw_square
+
+;JSR debug3
+JSR _convert_coords_to_mem
+JSR debug2
+JSR _draw_square
 
 end: JMP end
 
@@ -84,17 +106,17 @@ _convert_coords_to_mem:
 .(
     ; Clear X reg
     LDX #$00
+    ; Clear VMEM_POINTER
+    STX VMEM_POINTER
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
     LSR
     STA VMEM_POINTER+1
-    ROR VMEM_POINTER    
+    ROR VMEM_POINTER
     ; Sencond shift
     LSR VMEM_POINTER+1
     ROR VMEM_POINTER
     
-    JSR debug2
-        
     ; Add base memory address
     CLC
     LDA VMEM_POINTER+1
@@ -103,8 +125,6 @@ _convert_coords_to_mem:
     LDA VMEM_POINTER
     ADC #$00
     STA VMEM_POINTER
-    
-    JSR debug2
     
     ; Calculate X coord
     ; Divide x coord by 2 (2 pixel each byte)
@@ -118,11 +138,45 @@ _convert_coords_to_mem:
     ADC #$00
     STA VMEM_POINTER+1
     
-    JSR debug2
-    
     RTS
 .)
 ; --- end convert_coords_to_mem ---
+
+; Draw square
+; X_COORD, Y_COORD, SQ_WIDTH, SQ_HEIGHT
+; VMEM_POINTER VMEM_POINTER+1 final video memory pointer
+_draw_square:
+.(
+	JSR _convert_coords_to_mem
+	; Load height in x
+	LDX SQ_HEIGHT
+	paint_row:
+	; Divide width by 2
+	LDA SQ_WIDTH
+	LSR
+	; Store it in Y
+	TAY
+	; Load current color
+	LDA CURRENT_COLOR
+	; Draw as many pixels as Y register says
+	paint:
+	STA (VMEM_POINTER), Y
+	DEY
+	BNE paint:
+	STA (VMEM_POINTER), Y
+	; Next row
+;	LDA VMEM_POINTER
+;	CLC
+;	ADC #$40
+;	STA VMEM_POINTER
+;	BCC skip_upper
+;	INC VMEM_POINTER+1
+;	skip_upper:
+;	DEX
+;	BNE paint_row
+	RTS
+.)
+; --- end draw_square
 
 debug:
 .(
@@ -150,6 +204,18 @@ debug2:
     RTS
 .)
 
+debug3:
+.(
+    PHA
+    LDA #SERIAL_HEX
+    STA SERIAL_PORT+1
+    LDA X_COORD
+    STA SERIAL_PORT
+    LDA Y_COORD
+    STA SERIAL_PORT
+    PLA
+    RTS
+.)
 
 .dsb    $fffa-*, $ff    ; filling
 * = $fffa

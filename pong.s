@@ -55,10 +55,10 @@ PADDLE_WIDTH = 6
 PADDLE_HEIGHT =32
 BACKGROUND = ROSITA
 ; -- Global Game vars pointers --
-p1_vertical_x = 00
-p1_vertical_y = 01
-p2_vertical_x = 02
-p2_vertical_y = 03
+p1_vertical_x = $00
+p1_vertical_y = $01
+p2_vertical_x = $02
+p2_vertical_y = $03
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -76,8 +76,14 @@ _main:
 	JSR _init_game_screen
 	
 gameloop:
+	; Wait vsync
 	JSR _wait_vsync
+	; Run game
 	JSR _update_game
+	; Wait 1 frame
+	LDX #$01
+	JSR _waitFrames
+	; loop
 	JMP gameloop
 
 	; End main
@@ -321,11 +327,13 @@ _convert_coords_to_mem:
 .(
     ; Clear X reg
     LDX #$00
+    ; Clear VMEM_POINTER
+    STX VMEM_POINTER
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
     LSR
     STA VMEM_POINTER+1
-    ROR VMEM_POINTER    
+    ROR VMEM_POINTER
     ; Sencond shift
     LSR VMEM_POINTER+1
     ROR VMEM_POINTER
@@ -350,6 +358,7 @@ _convert_coords_to_mem:
     LDA VMEM_POINTER+1
     ADC #$00
     STA VMEM_POINTER+1
+    
     RTS
 .)
 ; --- end convert_coords_to_mem ---
@@ -419,6 +428,19 @@ _wait_vsync:
     RTS
 .)
 
+; Wait frames in X
+_waitFrames:
+.(
+    wait_vsync_end:
+    BIT $DF88
+    BVS wait_vsync_end
+    wait_vsync_begin:
+    BIT $DF88
+    BVC wait_vsync_begin   
+    DEX
+    BNE wait_vsync_end
+    RTS
+.)
 
 
 ; --- Aux methods ---
