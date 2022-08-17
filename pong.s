@@ -76,14 +76,14 @@ _main:
 	LDA #(RGB | SCREEN_3)
 	STA VIDEO_MODE
 	
-	; Init variables
+	; Display title for 120 frames
+    JSR _draw_title
+	LDX #120
+	JSR _waitFrames
+    
+    ; Init variables
 	JSR _init_game_data
 	JSR _init_game_screen
-    
-    JSR _draw_title
-    ; Wait 10 frames
-	LDX #10
-	JSR _waitFrames
 	
 gameloop:
 	; Wait vsync
@@ -298,7 +298,7 @@ _draw_title:
     LDA #<title ; LSB
     STA MAP_TO_DRAW
     ; Draw map 1
-    JSR draw_map
+    JMP draw_map
 .)
 
 .asc "#end game#"
