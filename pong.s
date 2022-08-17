@@ -43,12 +43,16 @@ FUCSIA = $ee
 BLANCO = $ff
 
 ; -- Functions args pointers --
-VMEM_POINTER = $10 ; $11
-X_COORD = $16
-Y_COORD = $17
+CURRENT_COLOR = $06
+TEMP1 = $07
 SQ_WIDTH = $08
 SQ_HEIGHT = $09
-CURRENT_COLOR = $06
+VMEM_POINTER = $10 ; $11
+TILE_TO_DRAW = $12 ; $13
+MAP_TO_DRAW = $14 ; 15
+X_COORD = $16
+Y_COORD = $17
+TEMP2 = $20
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 6
@@ -75,6 +79,11 @@ _main:
 	; Init variables
 	JSR _init_game_data
 	JSR _init_game_screen
+    
+    JSR _draw_title
+    ; Wait 10 frames
+	LDX #10
+	JSR _waitFrames
 	
 gameloop:
 	; Wait vsync
@@ -285,11 +294,11 @@ _draw_title:
 .(
     ; $14, $15 tilemap to draw
     LDA #>title ; MSB
-    STA $15
+    STA MAP_TO_DRAW+1
     LDA #<title ; LSB
-    STA $14
+    STA MAP_TO_DRAW
     ; Draw map 1
-    ;JSR draw_map
+    JSR draw_map
 .)
 
 .asc "#end game#"
@@ -470,6 +479,329 @@ _waitFrames:
 .)
 
 
+
+; -- -- -- -- -- -- 
+; $14, $15 tilemap to draw
+; MAP_TO_DRAW, MAP_TO_DRAW+1 tilemap to draw
+draw_map:
+.(
+    ; Init video pointer
+    LDA #$60
+    STA VMEM_POINTER+1
+    LDA #$00
+    STA VMEM_POINTER
+    
+    ; $07 tiles rows counter
+    ;LDA #$a0
+    LDA #$10 ; Count 16 with temp1
+    STA TEMP1
+    draw_map_loop1:
+    ; First tiles row
+    ; tile 0
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 1
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 2
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 3
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 4
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 5
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 6
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 7
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 8
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 9
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 10
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 11
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 12
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 13
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 14
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    ; tile 15
+    INC MAP_TO_DRAW
+    JSR convert_tile_index_to_mem
+    JSR draw_back_tile
+    INC MAP_TO_DRAW
+
+    ; Change row
+    LDA #$00
+    STA VMEM_POINTER
+    INC VMEM_POINTER+1
+    INC VMEM_POINTER+1
+    DEC TEMP1
+    BEQ draw_map_end
+    JMP draw_map_loop1
+    draw_map_end:
+    RTS
+.)
+;------------------------------------------------------
+
+; Input $14 $15 Tilemap position
+; DRAW_MAP, DRAW_MAP+1 tilemap to draw
+; output $12, $13 tile to draw (initial position in mem
+; TILE_TO_DRAW, TILE_TO_DRAW+1 tile to draw (initial position in mem
+; TEMP2 internal, backup of current tile index
+convert_tile_index_to_mem:
+.(
+    ; Load tile index in X
+    LDY #$00
+    LDA (MAP_TO_DRAW), Y
+    ;$08 backup of current tile index ($14)
+    PHA
+    ; Calculate tile memory position by multiplying (shifting) tile number * 0x20
+    ASL
+    ASL
+    ASL
+    ASL
+    ASL
+    ; Store tile memory position in TILE_TO_DRAW
+    STA TILE_TO_DRAW
+
+    ; Calculate more significative tile memory position ($13)
+    ;$07 backup of current tile index ($13)
+    ;LDA $13
+    ;STA $07
+    PLA
+    LSR
+    LSR
+    LSR
+    CLC
+    ADC #>TILESET_START
+    STA TILE_TO_DRAW+1
+    RTS
+.)
+; --------------------------------------------------------
+
+;TILE_TO_DRAW, TILE_TO_DRAW+1 -> tile number, tile bank
+;VMEM_POINTER,VMEM_POINTER+1 -> screen position
+;$09 backup of VMEM_POINTER original value
+draw_back_tile:
+.(
+    ; Save screen position as backup in $09
+    LDA VMEM_POINTER
+    PHA
+    ; First row
+    LDY #$00
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    ; Change row
+    LDA VMEM_POINTER; Increment using acumulator less significative screen pos (VMEM_POINTER)
+    CLC
+    ADC #$40; Each row is 0x40 (64) bytes 
+    STA VMEM_POINTER
+    LDA TILE_TO_DRAW; Increment first tile byte position (TILE_TO_DRAW), so it points to next byte
+    CLC
+    ADC #$04; Increment by 4 (already drawn 8 pixels)
+    STA TILE_TO_DRAW
+    LDY #$00; Initialize pixel counter to 0
+    ; Second row
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    ; Change row
+    LDA VMEM_POINTER
+    CLC
+    ADC #$40
+    STA VMEM_POINTER
+    LDA TILE_TO_DRAW
+    CLC
+    ADC #$04
+    STA TILE_TO_DRAW
+    LDY #$00
+    ; Third row
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    ; Change row
+    LDA VMEM_POINTER
+    CLC
+    ADC #$40
+    STA VMEM_POINTER
+    LDA TILE_TO_DRAW
+    CLC
+    ADC #$04
+    STA TILE_TO_DRAW
+    LDY #$00
+    ; Fourth row
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    ; Change row and block
+    LDA VMEM_POINTER
+    CLC
+    ADC #$40
+    STA VMEM_POINTER
+    INC VMEM_POINTER+1; Each 4 rows, high significative byte should be increased
+    LDA TILE_TO_DRAW
+    CLC
+    ADC #$04
+    STA TILE_TO_DRAW
+    LDY #$00
+    ; Fith row
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    ; Change row
+    LDA VMEM_POINTER
+    CLC
+    ADC #$40
+    STA VMEM_POINTER
+    LDA TILE_TO_DRAW
+    CLC
+    ADC #$04
+    STA TILE_TO_DRAW
+    LDY #$00
+    ; Sixth row
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    ; Change row
+    LDA VMEM_POINTER
+    CLC
+    ADC #$40
+    STA VMEM_POINTER
+    LDA TILE_TO_DRAW
+    CLC
+    ADC #$04
+    STA TILE_TO_DRAW
+    LDY #$00
+    ; Seventh row
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    ; Change row
+    LDA VMEM_POINTER
+    CLC
+    ADC #$40
+    STA VMEM_POINTER
+    LDA TILE_TO_DRAW
+    CLC
+    ADC #$04
+    STA TILE_TO_DRAW
+    LDY #$00
+    ; Eight row
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+    INY
+    LDA (TILE_TO_DRAW), Y
+    STA (VMEM_POINTER), Y
+
+    ; Finalize tile drawing
+    LDA TILE_TO_DRAW; Go to next tile by incrementing TILE_TO_DRAW by 0x04 (already drawn 8 pixels)
+    CLC
+    ADC #$04
+    DEC VMEM_POINTER+1; Restore VMEM_POINTER+1 to original value, so next tile is at same row
+    PLA ; Restore VMEM_POINTER using backup and add 0x04 to set at next screen position 
+    CLC
+    ADC #$04
+    STA VMEM_POINTER
+    RTS
+.)
+;--------------------------------------------------------
+
+
 ; --- Aux methods ---
 ; ===================
 _init:
@@ -533,6 +865,7 @@ _irq_int:
 ; === END OF RESERVED IO SPACE ===
 
 ; === 16K ROM. SECOND 8K BLOCK ===
+TILESET_START:
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00, ; Tile $00
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$04,$44, ; Tile $01
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$40,$00,$00,$00, ; Tile $02
