@@ -62,7 +62,7 @@ p2_vertical_y = $03
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
-
+JMP _main
 
 ; -- main method --
 _main:
@@ -280,9 +280,12 @@ _player2_down:
     JMP _draw_second_player
 .)
 
+
+.dsb $d000-*, $ff
 ; ============
 ; --- LIBS ---
 ; ============
+.asc "#dglib#"
 
 ; Draw square
 ; X_COORD, Y_COORD, SQ_WIDTH, SQ_HEIGHT
@@ -454,7 +457,7 @@ _init:
     LDA #$01
     STA $DFA0
     CLI       ; Enable interrupts
-    JSR _main
+    JMP $c000
 .)
 _stop:
 .(
