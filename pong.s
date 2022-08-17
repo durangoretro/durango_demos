@@ -471,10 +471,10 @@ _nmi_int:
 _irq_int:
 .(
     ; Filter interrupt
-    PHX         ; Save X register contents to stack
-    TSX         ; Transfer stack pointer to X
     PHA         ; Save accumulator contents to stack
-    LDA $102,X  ; Load status register contents
+    PHX         ; Save X register contents to stack
+    TSX         ; Transfer stack pointer to X    
+    LDA $103,X  ; Load status register contents
     AND #$10    ; Isolate B status bit
     BNE _stop   ; If B = 1, BRK detected
     
@@ -482,8 +482,8 @@ _irq_int:
     JSR _fetch_gamepads
     
     ; Return from interrupt
-    PLA                    ; Restore accumulator contents
     PLX                    ; Restore X register contents
+    PLA                    ; Restore accumulator contents
     RTI                    ; Return from all IRQ interrupts
 .)
 ; --------------------------------------------------
