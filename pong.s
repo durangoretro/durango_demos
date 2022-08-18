@@ -52,7 +52,7 @@ TILE_TO_DRAW = $12 ; $13
 MAP_TO_DRAW = $14 ; 15
 X_COORD = $16
 Y_COORD = $17
-TEMP2 = $20
+DRAW_BUFFER = $18
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 6
@@ -73,8 +73,10 @@ JMP _main
 _main:
 .(
 	; Set video mode
-	LDA #(RGB | SCREEN_3)
+	LDA #(RGB | SCREEN_3 | LED)
 	STA VIDEO_MODE
+    LDA #$60
+    STA DRAW_BUFFER
 	
 	; Display title for 120 frames
     JSR _draw_title
@@ -377,7 +379,7 @@ _convert_coords_to_mem:
     ; Add base memory address
     CLC
     LDA VMEM_POINTER+1
-    ADC #$60
+    ADC DRAW_BUFFER
     STA VMEM_POINTER+1
     LDA VMEM_POINTER
     ADC #$00
@@ -404,7 +406,7 @@ _convert_coords_to_mem:
 fill_screen:
 .(
     ; Init video pointer
-    LDA #$60
+    LDA DRAW_BUFFER
     STA VMEM_POINTER+1
     LDA #$00
     STA VMEM_POINTER
@@ -486,7 +488,7 @@ _waitFrames:
 draw_map:
 .(
     ; Init video pointer
-    LDA #$60
+    LDA DRAW_BUFFER
     STA VMEM_POINTER+1
     LDA #$00
     STA VMEM_POINTER
