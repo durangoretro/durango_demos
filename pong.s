@@ -43,16 +43,16 @@ FUCSIA = $ee
 BLANCO = $ff
 
 ; -- Functions args pointers --
-CURRENT_COLOR = $06
-TEMP1 = $07
-SQ_WIDTH = $08
-SQ_HEIGHT = $09
 VMEM_POINTER = $10 ; $11
 TILE_TO_DRAW = $12 ; $13
 MAP_TO_DRAW = $14 ; 15
 X_COORD = $16
 Y_COORD = $17
-DRAW_BUFFER = $18
+SQ_WIDTH = $18
+SQ_HEIGHT = $19
+DRAW_BUFFER = $1a
+CURRENT_COLOR = $1b
+TEMP1 = $1c
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 6
