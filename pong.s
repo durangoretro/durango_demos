@@ -512,7 +512,7 @@ _fetch_gamepads:
     ; 1. write into $DF9C
     STA CONTROLLER_1
     ; 2. write into $DF9D 8 times
-    STA CONTROLLER_2			; OK, aunque creo que tampoco pasa nada por usar un bucle...
+    STA CONTROLLER_2			; OK, aunque creo que tampoco pasa nada por usar un bucle... preferiblemente con X, que ya ha salvado la ISR
     STA CONTROLLER_2
     STA CONTROLLER_2
     STA CONTROLLER_2
@@ -551,7 +551,7 @@ _wait_start:
 .(
     wait_loop:
     BIT CONTROLLER_1
-    BVC wait_loop		; MUY FINO! ;-) ;-)
+    BVC wait_loop		; BRAVO! MUY FINO! ;-) ;-)
     RTS
 .)
 
@@ -566,7 +566,7 @@ draw_map:
     LDA DRAW_BUFFER
     STA VMEM_POINTER+1
     LDA #$00
-    STA VMEM_POINTER
+    STA VMEM_POINTER				; STZ se puede usar
     
     ; $07 tiles rows counter
     ;LDA #$a0
@@ -575,7 +575,7 @@ draw_map:
     draw_map_loop1:
     ; First tiles row
     ; tile 0
-    JSR convert_tile_index_to_mem
+    JSR convert_tile_index_to_mem	; en general, repetir código que llama a funciones lentas no vale la pena, mejor un bucle; la ventaja en velocidad así es pírrica
     JSR draw_back_tile
     ; tile 1
     INC MAP_TO_DRAW
@@ -641,12 +641,12 @@ draw_map:
 
     ; Change row
     LDA #$00
-    STA VMEM_POINTER
+    STA VMEM_POINTER		; CMOS puede usar STZ
     INC VMEM_POINTER+1
     INC VMEM_POINTER+1
-    DEC TEMP1
+    DEC TEMP1				; muy bien, los bucles lentos pueden estar en memoria; al no usar el índice, va bien el BEQ
     BEQ draw_map_end
-    JMP draw_map_loop1
+    JMP draw_map_loop1		; (quizá con bucles interiores podrías saltar directamente con BNE)
     draw_map_end:
     RTS
 .)
@@ -661,12 +661,12 @@ convert_tile_index_to_mem:
 .(
     ; Load tile index in X
     LDY #$00
-    LDA (MAP_TO_DRAW), Y
-    ;$08 backup of current tile index ($14)
+    LDA (MAP_TO_DRAW), Y	; en CMOS es posible hacer LDA (MAP_TO_DRAW) sin indexar... con permiso de CA65 >-(
+    ;$08 backup of current tile index ($14)		; deuda técnica!
     PHA
     ; Calculate tile memory position by multiplying (shifting) tile number * 0x20
-    ASL
-    ASL
+    ASL						; curiosa forma de obtener los dos bytes...
+    ASL						; ...pero en general no trae cuenta hacer más de 4 desplazamientos
     ASL
     ASL
     ASL
@@ -674,7 +674,7 @@ convert_tile_index_to_mem:
     STA TILE_TO_DRAW
 
     ; Calculate more significative tile memory position ($13)
-    ;$07 backup of current tile index ($13)
+    ;$07 backup of current tile index ($13)		; deuda técnica! conviene eliminar los comentarios que no procedan
     ;LDA $13
     ;STA $07
     PLA
@@ -682,8 +682,21 @@ convert_tile_index_to_mem:
     LSR
     LSR
     CLC
-    ADC #>TILESET_START
+    ADC #>TILESET_START		; asumimos que <TILESET_START es siempre cero?
     STA TILE_TO_DRAW+1
+							; en general correcto, tenía la duda sobre su rendimiento...
+							; esta versión son 21 bytes, 40 ciclos (37 si usas TAX/TXA en vez de PHA/PLA)
+							; mi propuesta (17 bytes, 34 ciclos) sería
+							;	STZ TILE_TO_DRAW
+							;	LDA (MAP_TO_DRAW)
+							;	LSR
+							;	ROR TILE_TO_DRAW
+							;	LSR
+							;	ROR TILE_TO_DRAW
+							;	LSR
+							;	ROR TILE_TO_DRAW	; puesto a cero, tras 3 rotaciones C es cero SEGURO
+							;	ADC #>TILESET_START	; no necesita CLC por lo anterior
+							;	STA TILE_TO_DRAW+1
     RTS
 .)
 ; --------------------------------------------------------
@@ -698,7 +711,7 @@ draw_back_tile:
     PHA
     ; First row
     LDY #$00
-    LDA (TILE_TO_DRAW), Y
+    LDA (TILE_TO_DRAW), Y		; esta parte es buena que no sea bucle, porque afectaría mucho al rendimiento (13t + 3 del bucle)
     STA (VMEM_POINTER), Y
     INY
     LDA (TILE_TO_DRAW), Y
@@ -718,7 +731,7 @@ draw_back_tile:
     CLC
     ADC #$04; Increment by 4 (already drawn 8 pixels)
     STA TILE_TO_DRAW
-    LDY #$00; Initialize pixel counter to 0
+    LDY #$00; Initialize pixel counter to 0	; ...pero el resto seguro que se puede compactar con bucles, sin pérdida apreciable de velocidad
     ; Second row
     LDA (TILE_TO_DRAW), Y
     STA (VMEM_POINTER), Y
@@ -780,7 +793,7 @@ draw_back_tile:
     CLC
     ADC #$40
     STA VMEM_POINTER
-    INC VMEM_POINTER+1; Each 4 rows, high significative byte should be increased
+    INC VMEM_POINTER+1; Each 4 rows, high significative byte should be increased	; el carry del anterior lo determina, fácilmente integrable en el bucle
     LDA TILE_TO_DRAW
     CLC
     ADC #$04
@@ -889,16 +902,16 @@ _init:
     CLD       ; Clear decimal mode
     LDA #$01
     STA $DFA0
-    CLI       ; Enable interrupts
+    CLI       ; Enable interrupts	; no necesitas inicializar ninguna otra cosa para ejecutar las interrupciones, verdad?
     JMP $c000
 .)
 _stop:
 .(
-    end: JMP end
+    end: JMP end					; BRA es posible en CMOS
 .)
 _nmi_int:
 .(
-    BRK    
+    BRK    							; una posibilidad es apuntar NMI al RTI final de IRQ, para que no haga absolutamente nada.
     RTI
 .)
 _irq_int:
@@ -909,10 +922,10 @@ _irq_int:
     TSX         ; Transfer stack pointer to X    
     LDA $103,X  ; Load status register contents
     AND #$10    ; Isolate B status bit
-    BNE _stop   ; If B = 1, BRK detected
+    BNE _stop   ; If B = 1, BRK detected	; todo OK, pero dado que el BRK será algo catastrófico, casi mejor detectarlo al final de la rutina
     
     ; Actual interrupt code
-    JSR _fetch_gamepads
+    JSR _fetch_gamepads						; correcto, pero recuerda que esa rutina no podrá afectar Y, pues no se ha salvado
     
     ; Return from interrupt
     PLX                    ; Restore X register contents
@@ -921,13 +934,13 @@ _irq_int:
 .)
 ; --------------------------------------------------
 
-
+						; buena idea ésta!
 #if(*>$df00)
 #echo First segment is too big!
 #endif
 .dsb $df00-*, $ff
 
-; Metadata area
+; Metadata area			; esta parte es LEGIBLE por la CPU de Durango
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -945,7 +958,7 @@ _irq_int:
 .dsb $df80-*, $ff
 ; === END OF FIRST 8K BLOCK ===
 
-; === RESERVED IO SPACE ($df80 - $dfff) ===
+; === RESERVED IO SPACE ($df80 - $dfff) ===		; esta parte NO es legible por la CPU
 .asc "DURANGO"
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
