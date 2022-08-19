@@ -55,7 +55,7 @@ CURRENT_COLOR = $1b
 TEMP1 = $1c
 
 ; -- Global Game constants --
-PADDLE_WIDTH = 6
+PADDLE_WIDTH = 8
 PADDLE_HEIGHT =32
 BACKGROUND = ROSITA
 ; -- Global Game vars pointers --
@@ -393,7 +393,6 @@ _draw_square:
 	STA (VMEM_POINTER), Y
 	DEY
 	BNE paint:
-	STA (VMEM_POINTER), Y
 	; Next row
 	LDA VMEM_POINTER
 	CLC
