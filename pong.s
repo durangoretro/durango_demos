@@ -80,8 +80,7 @@ _main:
 	
 	; Display title for 120 frames
     JSR _draw_title
-	LDX #120
-	JSR _waitFrames
+	JSR _wait_start
     
     ; Init variables
 	JSR _init_game_data
@@ -94,7 +93,7 @@ gameloop:
 	JSR _update_game
 	; Wait 1 frame
 	LDX #$01
-	JSR _waitFrames
+	JSR _wait_frames
 	; loop
 	JMP gameloop
 
@@ -467,7 +466,7 @@ _wait_vsync:
 .)
 
 ; Wait frames in X
-_waitFrames:
+_wait_frames:
 .(
     wait_vsync_end:
     BIT $DF88
@@ -477,6 +476,15 @@ _waitFrames:
     BVC wait_vsync_begin   
     DEX
     BNE wait_vsync_end
+    RTS
+.)
+
+; Wait START button
+_wait_start:
+.(
+    wait_loop:
+    BIT CONTROLLER_1
+    BVC wait_loop
     RTS
 .)
 
