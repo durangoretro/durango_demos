@@ -63,6 +63,10 @@ p1_vertical_x = $00
 p1_vertical_y = $01
 p2_vertical_x = $02
 p2_vertical_y = $03
+p1_horizontal_x = $04
+p1_horizontal_y = $05
+p2_horizontal_x = $06
+p2_horizontal_y = $07
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -112,6 +116,12 @@ _init_game_data:
     STA p2_vertical_x
     LDA #5
     STA p2_vertical_y
+    
+    LDA #5
+    STA p1_horizontal_y
+    LDA #50
+    STA p1_horizontal_x
+    
     RTS
 .)
 
@@ -134,26 +144,14 @@ _draw_background:
 
 _draw_first_player:
 .(
-    ; Set coords
-    LDA p1_vertical_x
-    STA X_COORD
-    LDA p1_vertical_y
-    STA Y_COORD
-    
-    ; Set size
-    LDA #PADDLE_WIDTH
-    STA SQ_WIDTH
-    LDA #PADDLE_HEIGHT
-    STA SQ_HEIGHT
-
     ; Set color
     LDA #VERDE
     STA CURRENT_COLOR
-
-    JMP _draw_square
+    
+    JMP _draw_p1_internal
 .)
 
-_undraw_first_player:
+_draw_p1_internal:
 .(
     ; Set coords
     LDA p1_vertical_x
@@ -167,11 +165,30 @@ _undraw_first_player:
     LDA #PADDLE_HEIGHT
     STA SQ_HEIGHT
 
+    JSR _draw_square
+    
+    ; Set coords
+    LDA p1_horizontal_x
+    STA X_COORD
+    LDA p1_horizontal_y
+    STA Y_COORD
+    
+    ; Set size
+    LDA #PADDLE_HEIGHT
+    STA SQ_WIDTH
+    LDA #PADDLE_WIDTH
+    STA SQ_HEIGHT
+    
+    JMP _draw_square
+.)
+
+_undraw_first_player:
+.(
     ; Set color
     LDA #BACKGROUND
     STA CURRENT_COLOR
-
-    JMP _draw_square
+    
+    JMP _draw_p1_internal
 .)
 
 _draw_second_player:
@@ -228,8 +245,20 @@ _update_game:
     down1:
     LDA #BUTTON_DOWN
     BIT CONTROLLER_1
-    BEQ up2
+    BEQ left1
     JSR _player1_down
+    
+    left1:
+    LDA #BUTTON_LEFT
+    BIT CONTROLLER_1
+    BEQ right1
+    JSR _player1_left
+    
+    right1:
+    LDA #BUTTON_RIGHT
+    BIT CONTROLLER_1
+    BEQ up2
+    JSR _player1_right
     
     up2:
     LDA #BUTTON_UP
@@ -266,6 +295,28 @@ _player1_down:
     ; Move paddle
     INC p1_vertical_y
     ; Draw current paddle
+    JMP _draw_first_player
+.)
+
+; Player 1 moves left
+_player1_left:
+.(
+    ; Erase current paddle
+    JSR _undraw_first_player
+    ; Move paddle
+    DEC p1_horizontal_x
+    ; Draw current paddle & Return
+    JMP _draw_first_player
+.)
+
+; Player 1 moves right
+_player1_right:
+.(
+    ; Erase current paddle
+    JSR _undraw_first_player
+    ; Move paddle
+    INC p1_horizontal_x
+    ; Draw current paddle & Return
     JMP _draw_first_player
 .)
 
