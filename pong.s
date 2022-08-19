@@ -114,10 +114,10 @@ _init_game_data:
     STA p1_vertical_y    
     LDA #118
     STA p2_vertical_x
-    LDA #5
+    LDA #5				; usando distintos registros se puede reutilizar uno que contenga este 5, y si decides usar otro valor se puede añadir LD?#
     STA p2_vertical_y
     
-    LDA #5
+    LDA #5				; lo mismo de antes, no hay obligación de usar A en todas las cargas
     STA p1_horizontal_y
     LDA #50
     STA p1_horizontal_x
@@ -150,7 +150,10 @@ _draw_first_player:
     
     JMP _draw_p1_internal
 .)
-
+; todas estas funciones son básicamente iguales a diferencia del color y, en el caso de los dos jugadores, también las coordenadas
+; para el color, si para las transferencias usas otros registros, puedes simplemente llamar a una función común cargando en A el color deseado, sea ROJO, VERDE o BACKGROUND
+; pero para las distintas coordenadas, si las dispones como arrays de dos elementos (p1_vertical_x vaya seguida de p2_vertical_x, y así)
+;  puedes cargar un registro índice (ej. X) con 0 o 1 para seleccionar el jugador, usando direccionamiento indexado (ej. LDY p_vertical_x, X  ...que deja libre A para el color)
 _draw_p1_internal:
 .(
     ; Set coords
@@ -167,7 +170,8 @@ _draw_p1_internal:
 
     JSR _draw_square
     
-    ; Set coords
+    ; Set coords		; esta parte no la entiendo, por qué se pinta el jugador 1 otra vez con otras coordenadas?
+						; VALE, ya lo pillo, el jugador 1 puede moverse horizontalmente! El 2 no puede hacerlo?
     LDA p1_horizontal_x
     STA X_COORD
     LDA p1_horizontal_y
@@ -240,7 +244,10 @@ _update_game:
     LDA #BUTTON_UP
     BIT CONTROLLER_1
     BEQ down1
-    JSR _player1_up
+    JSR _player1_up		; imagino que tocará A (y de todo), de lo contrario en CMOS es posible hacer un único LDA CONTROLLER_1 y sucesivos BIT #BUTTON...
+						; alternativamente, ir haciendo LSR y en las condiciones usar BCC en vez de BEQ (de nuevo con un único LDA CONTROLLER_1)
+						; pero nada de esto es aplicable si A no se preserva al llamar _player1_up
+						; Hay otras ideas muy locas que no te comentaré de momento ;-)
 
     down1:
     LDA #BUTTON_DOWN
@@ -276,7 +283,8 @@ _update_game:
     RTS
 .)
 
-; Player 1 moves up
+; Player 1 moves up		; de nuevo, up/down son comunes a ambos jugadores, si usas los arrays anteriores puede ser función común especificando jugador en p. ej. X
+						; aunque quizá convenga salvarlo por si _undraw (que debería ser comun draw/undraw para todos los jugadores) altera X, en CMOS es fácil (PHX, PLX)
 _player1_up:
 .(
     ; Erase current paddle
@@ -378,10 +386,13 @@ title:
 _draw_square:
 .(
 	JSR _convert_coords_to_mem
+								; por mucho que se optimice (a menos que uses tablas ;-) esta conversión es MUY lenta
+								; si los movimientos no son "aleatorios" y se van a hacer de uno en uno (como parece), casi mejor NO trabajar con coordenadas X/Y
+								; sino directamente con direcciones, Y+1 sería +$40 etc
 	; Load height in x
 	LDX SQ_HEIGHT
 	paint_row:
-	; Divide width by 2
+	; Divide width by 2			; correcto, aunque puedes plantearte si la anchura va a tener precisión de píxel (parece que no, porque ignoras C), mejor expresarla en bytes
 	LDA SQ_WIDTH
 	LSR
 	; Store it in Y
@@ -392,17 +403,21 @@ _draw_square:
 	paint:
 	STA (VMEM_POINTER), Y
 	DEY
-	BNE paint:
+	BNE paint:					; en la etiqueta de los saltos no se pone 'dos puntos' ;-)
+								; FALLO! te va a pintar la cosa DOS PÍXELES A LA DERECHA de lo especificado
+								; si eran p.ej. 4 px de ancho, Y=2 (2 bytes) y el bucle va a escribir en (VMEM_POINTER)+2 y (VMEM_POINTER)+1, al llegar a 0 no se ejecuta
+								; para bucles "pequeños" carga Y con uno MENOS del total y usa BPL en vez de BNE en el bucle, así las iteraciones anteriores serían 1 y 0, que es lo correcto
 	; Next row
 	LDA VMEM_POINTER
 	CLC
 	ADC #$40
 	STA VMEM_POINTER
-	BCC skip_upper
+	BCC skip_upper				; MUY BIEN, la alternativa de usar ADC #0 es más lenta y pesada... sólo interesa si necesitas que se ejecute en tiempo constante
 	INC VMEM_POINTER+1
-	skip_upper:
+ 	skip_upper:
 	DEX
-	BNE paint_row
+	BNE paint_row				; no hay problema aquí porque no se usa como índice, vas avanzando líneas con el ADC #$40
+								; si por uniformidad con la anchura prefieres especificar la altura como un píxel menos (0...n-1), úsese BPL en su lugar
 	RTS
 .)
 ; --- end draw_square
@@ -415,23 +430,23 @@ _convert_coords_to_mem:
     ; Clear X reg
     LDX #$00
     ; Clear VMEM_POINTER
-    STX VMEM_POINTER
+    STX VMEM_POINTER			; correcto, aunque en CMOS tenemos STZ y no necesitas usar X
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
     LSR
-    STA VMEM_POINTER+1
+    STA VMEM_POINTER+1			; empiezas bien, pero por qué lo escribes en memoria AHORA? vas a seguir desplazándolo, lo suyo para 16 bits es uno en memoria y otro en A (preferiblemente el que antes se vaya a seguir procesando)
     ROR VMEM_POINTER
     ; Sencond shift
-    LSR VMEM_POINTER+1
-    ROR VMEM_POINTER
+    LSR VMEM_POINTER+1			; lo dicho, debería seguir en A
+    ROR VMEM_POINTER			; si VMEM_POINTER se puso a 0, tras rotarlo dos veces es SEGURO que Carry es 0!
     
     ; Add base memory address
-    CLC
-    LDA VMEM_POINTER+1
+    CLC							; afinando mucho, en virtud de lo anterior no es necesario
+    LDA VMEM_POINTER+1			; de nuevo, este valor lo habrías tenido ya en A, no necesitarías cargarlo
     ADC DRAW_BUFFER
     STA VMEM_POINTER+1
-    LDA VMEM_POINTER
-    ADC #$00
+    LDA VMEM_POINTER			; ERROR! El Carry va del byte bajo al alto, NUNCA al revés. En tu caso jamás se produciría C, por lo que no notarías el fallo 
+    ADC #$00					;  pero precisamente por eso estas tres instrucciones sobran
     STA VMEM_POINTER
     
     ; Calculate X coord
@@ -442,7 +457,7 @@ _convert_coords_to_mem:
     CLC
     ADC VMEM_POINTER
     STA VMEM_POINTER
-    LDA VMEM_POINTER+1
+    LDA VMEM_POINTER+1			; de nuevo, suele traer cuenta hacer el BCC que se salte un INC
     ADC #$00
     STA VMEM_POINTER+1
     
@@ -457,23 +472,25 @@ fill_screen:
     ; Init video pointer
     LDA DRAW_BUFFER
     STA VMEM_POINTER+1
-    LDA #$00
+    LDA #$00					; puedes usar Y para el byte bajo... y ya tienes el índice del bucle cargado
     STA VMEM_POINTER
 loop2:
     ; Load current color
-    LDA CURRENT_COLOR
+    LDA CURRENT_COLOR			; como te comenté en la Jaquería, si respetas A esto debe ir FUERA del bucle
     ; Iterate over less significative memory address
-    LDY #$00
+    LDY #$00					; no debería hacer falta, en cada iteración mayor se garantiza que Y es 0
 loop:
     STA (VMEM_POINTER), Y
     INY
     BNE loop
-
+								; si llega aquí, es SEGURO que Y=0
     ; Iterate over more significative memory address
     INC VMEM_POINTER+1 ; Increment memory pointer Hi address using accumulator
     LDA #$80 ; Compare with end memory position
+								; simplemente usando LDX# (QUE DEBE ESTAR FUERA DE TODO BUCLE) y luego CPX se respeta A
     CMP VMEM_POINTER+1
-    BNE loop2
+								; pero si es seguro que va a ser en la pantalla 3 estándar, como $80 es el "primer" número negativo, basta con usar BPL en vez de BNE
+    BNE loop2					; debería ser la misma etiqueta
     RTS
 .)
 ;-- end fill screen ---
@@ -495,7 +512,7 @@ _fetch_gamepads:
     ; 1. write into $DF9C
     STA CONTROLLER_1
     ; 2. write into $DF9D 8 times
-    STA CONTROLLER_2
+    STA CONTROLLER_2			; OK, aunque creo que tampoco pasa nada por usar un bucle...
     STA CONTROLLER_2
     STA CONTROLLER_2
     STA CONTROLLER_2
@@ -534,7 +551,7 @@ _wait_start:
 .(
     wait_loop:
     BIT CONTROLLER_1
-    BVC wait_loop
+    BVC wait_loop		; MUY FINO! ;-) ;-)
     RTS
 .)
 
