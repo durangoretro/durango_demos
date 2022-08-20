@@ -121,6 +121,10 @@ _init_game_data:
     STX p1_horizontal_y
     LDY #50
     STY p1_horizontal_x
+    STY p2_horizontal_x
+    
+    LDY #120
+    STY p2_horizontal_y
     
     RTS
 .)
@@ -151,13 +155,26 @@ _draw_first_player:
     ; Set player
     LDX #0
     
-    JMP _draw_p1_internal
+    JMP _draw_player_internal
 .)
+
+_draw_second_player:
+.(
+    ; Set color
+    LDA #ROJO
+    STA CURRENT_COLOR
+    
+    ; Set player
+    LDX #1
+    
+    JMP _draw_player_internal
+.)
+
 ; todas estas funciones son básicamente iguales a diferencia del color y, en el caso de los dos jugadores, también las coordenadas
 ; para el color, si para las transferencias usas otros registros, puedes simplemente llamar a una función común cargando en A el color deseado, sea ROJO, VERDE o BACKGROUND
 ; pero para las distintas coordenadas, si las dispones como arrays de dos elementos (p1_vertical_x vaya seguida de p2_vertical_x, y así)
 ;  puedes cargar un registro índice (ej. X) con 0 o 1 para seleccionar el jugador, usando direccionamiento indexado (ej. LDY p_vertical_x, X  ...que deja libre A para el color)
-_draw_p1_internal:
+_draw_player_internal:
 .(
     ; Set coords
     LDY p1_vertical_x, X
@@ -171,20 +188,26 @@ _draw_p1_internal:
     LDY #PADDLE_HEIGHT
     STY SQ_HEIGHT
 
+    PHA
+    PHX
+    PHY
     JSR _draw_square
+    PLY
+    PLX
+    PLA
     
     ; Set coords		; esta parte no la entiendo, por qué se pinta el jugador 1 otra vez con otras coordenadas?
 						; VALE, ya lo pillo, el jugador 1 puede moverse horizontalmente! El 2 no puede hacerlo?
-    LDA p1_horizontal_x
-    STA X_COORD
-    LDA p1_horizontal_y
-    STA Y_COORD
+    LDY p1_horizontal_x, X
+    STY X_COORD
+    LDY p1_horizontal_y, X
+    STY Y_COORD
     
     ; Set size
-    LDA #PADDLE_HEIGHT
-    STA SQ_WIDTH
-    LDA #PADDLE_WIDTH
-    STA SQ_HEIGHT
+    LDY #PADDLE_HEIGHT
+    STY SQ_WIDTH
+    LDY #PADDLE_WIDTH
+    STY SQ_HEIGHT
     
     JMP _draw_square
 .)
@@ -195,29 +218,13 @@ _undraw_first_player:
     LDA #BACKGROUND
     STA CURRENT_COLOR
     
-    JMP _draw_p1_internal
-.)
-
-_draw_second_player:
-.(
-    ; Set coords
-    LDA p2_vertical_x
-    STA X_COORD
-    LDA p2_vertical_y
-    STA Y_COORD
+    ; Set player
+    LDX #0
     
-    ; Set size
-    LDA #PADDLE_WIDTH
-    STA SQ_WIDTH
-    LDA #PADDLE_HEIGHT
-    STA SQ_HEIGHT
-
-    ; Set color
-    LDA #ROJO
-    STA CURRENT_COLOR
-
-    JMP _draw_square
+    JMP _draw_player_internal
 .)
+
+
 
 _undraw_second_player:
 .(
