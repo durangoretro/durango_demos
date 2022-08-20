@@ -109,8 +109,6 @@ gameloop:
 
 _init_game_data:
 .(
-                        ; usando distintos registros se puede reutilizar uno que contenga este 5, y si decides usar otro valor se puede añadir LD?#
-                        ; lo mismo de antes, no hay obligación de usar A en todas las cargas *** OK!
     LDA #2
     STA p1_vertical_x
     LDX #5
@@ -125,7 +123,7 @@ _init_game_data:
     STY p2_horizontal_x
     
     LDY #120
-    STY p2_horizontal_y	; *** pero me sigo liando un poco con lo de vertical/horizontal x/y
+    STY p2_horizontal_y
     
     RTS
 .)
@@ -150,10 +148,8 @@ _draw_first_player:
 .(
     ; Set color
     LDA #VERDE
-    
     ; Set player
     LDX #0
-    
     JMP _draw_player_internal
 .)
 
@@ -161,10 +157,8 @@ _draw_second_player:
 .(
     ; Set color
     LDA #ROJO
-    
     ; Set player
     LDX #1
-    
     JMP _draw_player_internal
 .)
 
@@ -172,10 +166,8 @@ _undraw_first_player:
 .(
     ; Set color
     LDA #BACKGROUND
-    
     ; Set player
     LDX #0
-    
     JMP _draw_player_internal
 .)
 
@@ -183,17 +175,13 @@ _undraw_second_player:
 .(
     ; Set color
     LDA #BACKGROUND
-    
     ; Set player
     LDX #1
-    
     JMP _draw_player_internal
 .)
-; *** OK!
-; todas estas funciones son básicamente iguales a diferencia del color y, en el caso de los dos jugadores, también las coordenadas
-; para el color, si para las transferencias usas otros registros, puedes simplemente llamar a una función común cargando en A el color deseado, sea ROJO, VERDE o BACKGROUND
-; pero para las distintas coordenadas, si las dispones como arrays de dos elementos (p1_vertical_x vaya seguida de p2_vertical_x, y así)
-;  puedes cargar un registro índice (ej. X) con 0 o 1 para seleccionar el jugador, usando direccionamiento indexado (ej. LDY p_vertical_x, X  ...que deja libre A para el color)
+
+; X player
+; A player color
 _draw_player_internal:
 .(
     ; Set coords
@@ -210,9 +198,7 @@ _draw_player_internal:
 
     PHA
     PHX
-    PHY					; *** si Y lo machacas a continuación, no es preciso salvarlo. A (color) y X (jugador) sí deben ser salvados.
     JSR _draw_square
-    PLY
     PLX
     PLA
     
@@ -240,10 +226,7 @@ _update_game:
     LDA #BUTTON_UP
     BIT CONTROLLER_1
     BEQ down1
-    JSR _player1_up		; imagino que tocará A (y de todo), de lo contrario en CMOS es posible hacer un único LDA CONTROLLER_1 y sucesivos BIT #BUTTON...
-						; alternativamente, ir haciendo LSR y en las condiciones usar BCC en vez de BEQ (de nuevo con un único LDA CONTROLLER_1)
-						; pero nada de esto es aplicable si A no se preserva al llamar _player1_up *** OK... en esta ocasión
-						; Hay otras ideas muy locas que no te comentaré de momento ;-)
+    JSR _player1_up
 
     down1:
     LDA #BUTTON_DOWN
