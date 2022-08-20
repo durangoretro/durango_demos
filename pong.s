@@ -110,17 +110,15 @@ _init_game_data:
 .(
     LDA #2
     STA p1_vertical_x
-    LDA #5
-    STA p1_vertical_y    
-    LDA #118
-    STA p2_vertical_x
-    LDA #5				; usando distintos registros se puede reutilizar uno que contenga este 5, y si decides usar otro valor se puede añadir LD?#
-    STA p2_vertical_y
+    LDX #5
+    STX p1_vertical_y    
+    LDY #118
+    STY p2_vertical_x
+    STX p2_vertical_y
     
-    LDA #5				; lo mismo de antes, no hay obligación de usar A en todas las cargas
-    STA p1_horizontal_y
-    LDA #50
-    STA p1_horizontal_x
+    STX p1_horizontal_y
+    LDY #50
+    STY p1_horizontal_x
     
     RTS
 .)
