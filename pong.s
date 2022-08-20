@@ -476,9 +476,9 @@ _convert_coords_to_mem:
                                 ; de nuevo, este valor lo habrías tenido ya en A, no necesitarías cargarlo
     ADC DRAW_BUFFER
     STA VMEM_POINTER+1
-    LDA VMEM_POINTER			; ERROR! El Carry va del byte bajo al alto, NUNCA al revés. En tu caso jamás se produciría C, por lo que no notarías el fallo 
-    ADC #$00					;  pero precisamente por eso estas tres instrucciones sobran
-    STA VMEM_POINTER
+                                ; ERROR! El Carry va del byte bajo al alto, NUNCA al revés. En tu caso jamás se produciría C, por lo que no notarías el fallo 
+                                ;  pero precisamente por eso estas tres instrucciones sobran
+    
     
     ; Calculate X coord
     ; Divide x coord by 2 (2 pixel each byte)
@@ -488,10 +488,9 @@ _convert_coords_to_mem:
     CLC
     ADC VMEM_POINTER
     STA VMEM_POINTER
-    LDA VMEM_POINTER+1			; de nuevo, suele traer cuenta hacer el BCC que se salte un INC
-    ADC #$00
-    STA VMEM_POINTER+1
-    
+    BCC skip_upper
+    INC VMEM_POINTER+1			; de nuevo, suele traer cuenta hacer el BCC que se salte un INC    
+    skip_upper:
     RTS
 .)
 ; --- end convert_coords_to_mem ---
