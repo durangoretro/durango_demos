@@ -60,12 +60,12 @@ PADDLE_HEIGHT =32
 BACKGROUND = ROSITA
 ; -- Global Game vars pointers --
 p1_vertical_x = $00
-p1_vertical_y = $01
-p2_vertical_x = $02
+p2_vertical_x = $01
+p1_vertical_y = $02
 p2_vertical_y = $03
 p1_horizontal_x = $04
-p1_horizontal_y = $05
-p2_horizontal_x = $06
+p2_horizontal_x = $05
+p1_horizontal_y = $06
 p2_horizontal_y = $07
 
 ; == 16K ROM. FIRST 8K BLOCK ==
@@ -108,6 +108,8 @@ gameloop:
 
 _init_game_data:
 .(
+                        ; usando distintos registros se puede reutilizar uno que contenga este 5, y si decides usar otro valor se puede añadir LD?#
+                        ; lo mismo de antes, no hay obligación de usar A en todas las cargas
     LDA #2
     STA p1_vertical_x
     LDX #5
