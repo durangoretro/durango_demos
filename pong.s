@@ -856,7 +856,7 @@ _init:
 .)
 _stop:
 .(
-    end: JMP end					; BRA es posible en CMOS
+    end: BRA end					; BRA es posible en CMOS
 .)
 _nmi_int:
 .(
@@ -984,8 +984,7 @@ TILESET_START:
 
 
 ; === VECTORS ===
-* = $fffa
-    .word _nmi_int ; NMI vector
-    .word _init ; Reset vector
-    .word _irq_int ; IRQ/BRK vector
+.word _nmi_int ; NMI vector
+.word _init ; Reset vector
+.word _irq_int ; IRQ/BRK vector
     
