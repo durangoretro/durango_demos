@@ -143,7 +143,6 @@ _draw_background:
 .(
     ; Set back color
     LDA #BACKGROUND
-    STA CURRENT_COLOR	; *** si fill_screen respeta A (como indicado) no hace falta esta variable
     JMP fill_screen
 .)
 
@@ -151,7 +150,6 @@ _draw_first_player:
 .(
     ; Set color
     LDA #VERDE
-    STA CURRENT_COLOR	; *** no hacen falta, pues se preserva en el camino hasta _draw_square
     
     ; Set player
     LDX #0
@@ -163,7 +161,6 @@ _draw_second_player:
 .(
     ; Set color
     LDA #ROJO
-    STA CURRENT_COLOR	; *** etc...
     
     ; Set player
     LDX #1
@@ -175,7 +172,6 @@ _undraw_first_player:
 .(
     ; Set color
     LDA #BACKGROUND
-    STA CURRENT_COLOR
     
     ; Set player
     LDX #0
@@ -187,7 +183,6 @@ _undraw_second_player:
 .(
     ; Set color
     LDA #BACKGROUND
-    STA CURRENT_COLOR
     
     ; Set player
     LDX #1
