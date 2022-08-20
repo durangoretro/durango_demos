@@ -542,14 +542,11 @@ _fetch_gamepads:
     ; 1. write into $DF9C
     STA CONTROLLER_1
     ; 2. write into $DF9D 8 times
+    LDX #8
+    loop:
     STA CONTROLLER_2			; OK, aunque creo que tampoco pasa nada por usar un bucle... preferiblemente con X, que ya ha salvado la ISR
-    STA CONTROLLER_2
-    STA CONTROLLER_2
-    STA CONTROLLER_2
-    STA CONTROLLER_2
-    STA CONTROLLER_2
-    STA CONTROLLER_2
-    STA CONTROLLER_2
+    DEX
+    BNE loop    
     RTS
 .)
 
