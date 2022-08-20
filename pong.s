@@ -483,14 +483,12 @@ _convert_coords_to_mem:
 ; Fill screen with solid color
 fill_screen:
 .(
-    STA CURRENT_COLOR
-	; Init video pointer
-    LDA DRAW_BUFFER				; *** usa X, por ejemplo, y te ahorras CURRENT_COLOR
-    STA VMEM_POINTER+1
+    ; Init video pointer
+    LDX DRAW_BUFFER				; *** usa X, por ejemplo, y te ahorras CURRENT_COLOR
+    STX VMEM_POINTER+1
     LDY #$00					; puedes usar Y para el byte bajo... y ya tienes el índice del bucle cargado
     STY VMEM_POINTER
     ; Load current color
-    LDA CURRENT_COLOR			; como te comenté en la Jaquería, si respetas A esto debe ir FUERA del bucle *** respetando A se puede QUITAR
 loop2:
     ; Iterate over less significative memory address
     LDY #$00					; no debería hacer falta, en cada iteración mayor se garantiza que Y es 0 *** QUITAR
