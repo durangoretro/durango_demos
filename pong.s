@@ -502,11 +502,11 @@ fill_screen:
     ; Init video pointer
     LDA DRAW_BUFFER
     STA VMEM_POINTER+1
-    LDA #$00					; puedes usar Y para el byte bajo... y ya tienes el índice del bucle cargado
-    STA VMEM_POINTER
-loop2:
+    LDY #$00					; puedes usar Y para el byte bajo... y ya tienes el índice del bucle cargado
+    STY VMEM_POINTER
     ; Load current color
     LDA CURRENT_COLOR			; como te comenté en la Jaquería, si respetas A esto debe ir FUERA del bucle
+loop2:
     ; Iterate over less significative memory address
     LDY #$00					; no debería hacer falta, en cada iteración mayor se garantiza que Y es 0
 loop:
@@ -516,9 +516,9 @@ loop:
 								; si llega aquí, es SEGURO que Y=0
     ; Iterate over more significative memory address
     INC VMEM_POINTER+1 ; Increment memory pointer Hi address using accumulator
-    LDA #$80 ; Compare with end memory position
+    LDX #$80 ; Compare with end memory position
 								; simplemente usando LDX# (QUE DEBE ESTAR FUERA DE TODO BUCLE) y luego CPX se respeta A
-    CMP VMEM_POINTER+1
+    CPX VMEM_POINTER+1
 								; pero si es seguro que va a ser en la pantalla 3 estándar, como $80 es el "primer" número negativo, basta con usar BPL en vez de BNE
     BNE loop2					; debería ser la misma etiqueta
     RTS
