@@ -148,6 +148,9 @@ _draw_first_player:
     LDA #VERDE
     STA CURRENT_COLOR
     
+    ; Set player
+    LDX #0
+    
     JMP _draw_p1_internal
 .)
 ; todas estas funciones son básicamente iguales a diferencia del color y, en el caso de los dos jugadores, también las coordenadas
@@ -157,16 +160,16 @@ _draw_first_player:
 _draw_p1_internal:
 .(
     ; Set coords
-    LDA p1_vertical_x
-    STA X_COORD
-    LDA p1_vertical_y
-    STA Y_COORD
+    LDY p1_vertical_x, X
+    STY X_COORD
+    LDY p1_vertical_y, X
+    STY Y_COORD
     
     ; Set size
-    LDA #PADDLE_WIDTH
-    STA SQ_WIDTH
-    LDA #PADDLE_HEIGHT
-    STA SQ_HEIGHT
+    LDY #PADDLE_WIDTH
+    STY SQ_WIDTH
+    LDY #PADDLE_HEIGHT
+    STY SQ_HEIGHT
 
     JSR _draw_square
     
