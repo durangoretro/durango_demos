@@ -415,7 +415,7 @@ title:
 ; VMEM_POINTER VMEM_POINTER+1 final video memory pointer
 _draw_square:
 .(
-								; *** aquí se va a machacar A (el color), así que lo óptimo sería guardarlo en CURRENT_COLOR *aquí*... o tal vez en la pila
+	STA CURRENT_COLOR							; *** aquí se va a machacar A (el color), así que lo óptimo sería guardarlo en CURRENT_COLOR *aquí*... o tal vez en la pila
 	JSR _convert_coords_to_mem
 								; por mucho que se optimice (a menos que uses tablas ;-) esta conversión es MUY lenta
 								; si los movimientos no son "aleatorios" y se van a hacer de uno en uno (como parece), casi mejor NO trabajar con coordenadas X/Y
@@ -500,7 +500,8 @@ _convert_coords_to_mem:
 ; Fill screen with solid color
 fill_screen:
 .(
-    ; Init video pointer
+    STA CURRENT_COLOR
+	; Init video pointer
     LDA DRAW_BUFFER				; *** usa X, por ejemplo, y te ahorras CURRENT_COLOR
     STA VMEM_POINTER+1
     LDY #$00					; puedes usar Y para el byte bajo... y ya tienes el índice del bucle cargado
