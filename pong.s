@@ -53,6 +53,7 @@ SQ_HEIGHT = $19
 DRAW_BUFFER = $1a
 CURRENT_COLOR = $1b
 TEMP1 = $1c
+TEMP2 = $1d
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 8
@@ -600,70 +601,18 @@ draw_map:
     LDA #$10 ; Count 16 with temp1
     STA TEMP1
     draw_map_loop1:
-    ; First tiles row
-    ; tile 0
+    ; First tiles row. 16 tiles
+    LDX #15
+    ; Draw tile
+    row_loop:
+    PHX
     JSR convert_tile_index_to_mem	; en general, repetir código que llama a funciones lentas no vale la pena, mejor un bucle; la ventaja en velocidad así es pírrica
     JSR draw_back_tile
-    ; tile 1
+    PLX
     INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 2
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 3
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 4
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 5
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 6
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 7
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 8
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 9
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 10
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 11
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 12
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 13
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 14
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
-    ; tile 15
-    INC MAP_TO_DRAW
-    JSR convert_tile_index_to_mem
-    JSR draw_back_tile
+    DEX
+    BNE row_loop
+    
     INC MAP_TO_DRAW
 
     ; Change row
@@ -675,6 +624,7 @@ draw_map:
     BEQ draw_map_end
     JMP draw_map_loop1		; (quizá con bucles interiores podrías saltar directamente con BNE)
     draw_map_end:
+  
     RTS
 .)
 ;------------------------------------------------------
