@@ -170,6 +170,32 @@ _draw_second_player:
     JMP _draw_player_internal
 .)
 
+_undraw_first_player:
+.(
+    ; Set color
+    LDA #BACKGROUND
+    STA CURRENT_COLOR
+    
+    ; Set player
+    LDX #0
+    
+    JMP _draw_player_internal
+.)
+
+
+
+_undraw_second_player:
+.(
+    ; Set color
+    LDA #BACKGROUND
+    STA CURRENT_COLOR
+    
+    ; Set player
+    LDX #1
+    
+    JMP _draw_player_internal
+.)
+
 ; todas estas funciones son básicamente iguales a diferencia del color y, en el caso de los dos jugadores, también las coordenadas
 ; para el color, si para las transferencias usas otros registros, puedes simplemente llamar a una función común cargando en A el color deseado, sea ROJO, VERDE o BACKGROUND
 ; pero para las distintas coordenadas, si las dispones como arrays de dos elementos (p1_vertical_x vaya seguida de p2_vertical_x, y así)
@@ -209,41 +235,6 @@ _draw_player_internal:
     LDY #PADDLE_WIDTH
     STY SQ_HEIGHT
     
-    JMP _draw_square
-.)
-
-_undraw_first_player:
-.(
-    ; Set color
-    LDA #BACKGROUND
-    STA CURRENT_COLOR
-    
-    ; Set player
-    LDX #0
-    
-    JMP _draw_player_internal
-.)
-
-
-
-_undraw_second_player:
-.(
-    ; Set coords
-    LDA p2_vertical_x
-    STA X_COORD
-    LDA p2_vertical_y
-    STA Y_COORD
-    
-    ; Set size
-    LDA #PADDLE_WIDTH
-    STA SQ_WIDTH
-    LDA #PADDLE_HEIGHT
-    STA SQ_HEIGHT
-
-    ; Set color
-    LDA #BACKGROUND
-    STA CURRENT_COLOR
-
     JMP _draw_square
 .)
 
