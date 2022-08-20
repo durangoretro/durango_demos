@@ -629,16 +629,15 @@ draw_map:
 ;------------------------------------------------------
 
 ; Input $14 $15 Tilemap position
-; DRAW_MAP, DRAW_MAP+1 tilemap to draw
+; MAP_TO_DRAW, MAP_TO_DRAW+1 tilemap to draw
 ; output $12, $13 tile to draw (initial position in mem
 ; TILE_TO_DRAW, TILE_TO_DRAW+1 tile to draw (initial position in mem
 ; TEMP2 internal, backup of current tile index
 convert_tile_index_to_mem:
 .(
     ; Load tile index in X
-    LDY #$00
-    LDA (MAP_TO_DRAW), Y	; en CMOS es posible hacer LDA (MAP_TO_DRAW) sin indexar... con permiso de CA65 >-(
-    ;$08 backup of current tile index ($14)		; deuda técnica!
+    LDA (MAP_TO_DRAW)	; en CMOS es posible hacer LDA (MAP_TO_DRAW) sin indexar... con permiso de CA65 >-(
+    ; backup current tile index		; deuda técnica!
     PHA
     ; Calculate tile memory position by multiplying (shifting) tile number * 0x20
     ASL						; curiosa forma de obtener los dos bytes...
@@ -650,9 +649,7 @@ convert_tile_index_to_mem:
     STA TILE_TO_DRAW
 
     ; Calculate more significative tile memory position ($13)
-    ;$07 backup of current tile index ($13)		; deuda técnica! conviene eliminar los comentarios que no procedan
-    ;LDA $13
-    ;STA $07
+    ; Restore backup of current tile index		; deuda técnica! conviene eliminar los comentarios que no procedan
     PLA
     LSR
     LSR
