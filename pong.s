@@ -628,33 +628,21 @@ draw_map:
 .)
 ;------------------------------------------------------
 
-; Input $14 $15 Tilemap position
-; MAP_TO_DRAW, MAP_TO_DRAW+1 tilemap to draw
-; output $12, $13 tile to draw (initial position in mem
-; TILE_TO_DRAW, TILE_TO_DRAW+1 tile to draw (initial position in mem
-; TEMP2 internal, backup of current tile index
+; Input MAP_TO_DRAW, MAP_TO_DRAW+1 tilemap to draw
+; output TILE_TO_DRAW, TILE_TO_DRAW+1 tile to draw (initial position in mem)
 convert_tile_index_to_mem:
 .(
+    STZ TILE_TO_DRAW    
     ; Load tile index in X
     LDA (MAP_TO_DRAW)	; en CMOS es posible hacer LDA (MAP_TO_DRAW) sin indexar... con permiso de CA65 >-(
-    ; backup current tile index		; deuda técnica!
-    PHA
-    ; Calculate tile memory position by multiplying (shifting) tile number * 0x20
-    ASL						; curiosa forma de obtener los dos bytes...
-    ASL						; ...pero en general no trae cuenta hacer más de 4 desplazamientos
-    ASL
-    ASL
-    ASL
-    ; Store tile memory position in TILE_TO_DRAW
-    STA TILE_TO_DRAW
-
-    ; Calculate more significative tile memory position ($13)
-    ; Restore backup of current tile index		; deuda técnica! conviene eliminar los comentarios que no procedan
-    PLA
+    
     LSR
-    LSR
-    LSR
-    CLC
+	ROR TILE_TO_DRAW
+	LSR
+	ROR TILE_TO_DRAW
+	LSR
+	ROR TILE_TO_DRAW	; puesto a cero, tras 3 rotaciones C es cero SEGURO
+    
     ADC #>TILESET_START		; asumimos que <TILESET_START es siempre cero?
     STA TILE_TO_DRAW+1
 							; en general correcto, tenía la duda sobre su rendimiento...
