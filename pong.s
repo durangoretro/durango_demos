@@ -484,26 +484,17 @@ _convert_coords_to_mem:
 fill_screen:
 .(
     ; Init video pointer
-    LDX DRAW_BUFFER				; *** usa X, por ejemplo, y te ahorras CURRENT_COLOR
+    LDX DRAW_BUFFER
     STX VMEM_POINTER+1
-    LDY #$00					; puedes usar Y para el byte bajo... y ya tienes el índice del bucle cargado
+    LDY #$00
     STY VMEM_POINTER
     ; Load current color
-loop2:
-    ; Iterate over less significative memory address
-    LDY #$00					; no debería hacer falta, en cada iteración mayor se garantiza que Y es 0 *** QUITAR
 loop:
     STA (VMEM_POINTER), Y
     INY
     BNE loop
-								; si llega aquí, es SEGURO que Y=0
-    ; Iterate over more significative memory address
-    INC VMEM_POINTER+1 ; Increment memory pointer Hi address using accumulator
-    LDX #$80 ; Compare with end memory position
-								; simplemente usando LDX# (QUE DEBE ESTAR FUERA DE TODO BUCLE) y luego CPX se respeta A *** en realidad *QUITAR* LDX y CPX
-    CPX VMEM_POINTER+1
-								; pero si es seguro que va a ser en la pantalla 3 estándar, como $80 es el "primer" número negativo, basta con usar BPL en vez de BNE
-    BNE loop2					; debería ser la misma etiqueta *** como es siempre pantalla 3, poner *BPL*  y QUITAR el LDX/CPX anterior
+	INC VMEM_POINTER+1
+    BPL loop
     RTS
 .)
 ;-- end fill screen ---
