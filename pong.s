@@ -645,19 +645,7 @@ convert_tile_index_to_mem:
     
     ADC #>TILESET_START		; asumimos que <TILESET_START es siempre cero?
     STA TILE_TO_DRAW+1
-							; en general correcto, tenía la duda sobre su rendimiento...
-							; esta versión son 21 bytes, 40 ciclos (37 si usas TAX/TXA en vez de PHA/PLA)
-							; mi propuesta (17 bytes, 34 ciclos) sería
-							;	STZ TILE_TO_DRAW
-							;	LDA (MAP_TO_DRAW)
-							;	LSR
-							;	ROR TILE_TO_DRAW
-							;	LSR
-							;	ROR TILE_TO_DRAW
-							;	LSR
-							;	ROR TILE_TO_DRAW	; puesto a cero, tras 3 rotaciones C es cero SEGURO
-							;	ADC #>TILESET_START	; no necesita CLC por lo anterior
-							;	STA TILE_TO_DRAW+1
+
     RTS
 .)
 ; --------------------------------------------------------
