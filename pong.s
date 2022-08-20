@@ -182,8 +182,6 @@ _undraw_first_player:
     JMP _draw_player_internal
 .)
 
-
-
 _undraw_second_player:
 .(
     ; Set color
@@ -277,8 +275,20 @@ _update_game:
     down2:
     LDA #BUTTON_DOWN
     BIT CONTROLLER_2
-    BEQ end
+    BEQ left2
     JSR _player2_down
+    
+    left2:
+    LDA #BUTTON_LEFT
+    BIT CONTROLLER_2
+    BEQ right2
+    JSR _player2_left
+    
+    right2:
+    LDA #BUTTON_RIGHT
+    BIT CONTROLLER_2
+    BEQ end
+    JSR _player2_right
 
     end:
     RTS
@@ -348,6 +358,28 @@ _player2_down:
     ; Move paddle
     INC p2_vertical_y
     ; Draw current paddle
+    JMP _draw_second_player
+.)
+
+; Player 2 moves left
+_player2_left:
+.(
+    ; Erase current paddle
+    JSR _undraw_second_player
+    ; Move paddle
+    DEC p2_horizontal_x
+    ; Draw current paddle & Return
+    JMP _draw_second_player
+.)
+
+; Player 2 moves right
+_player2_right:
+.(
+    ; Erase current paddle
+    JSR _undraw_second_player
+    ; Move paddle
+    INC p2_horizontal_x
+    ; Draw current paddle & Return
     JMP _draw_second_player
 .)
 
