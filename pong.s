@@ -436,7 +436,7 @@ _draw_square:
 	paint:
 	STA (VMEM_POINTER), Y
 	DEY
-	BNE paint:					; en la etiqueta de los saltos no se pone 'dos puntos' ;-)
+	BNE paint					; en la etiqueta de los saltos no se pone 'dos puntos' ;-)
 								; FALLO! te va a pintar la cosa DOS PÍXELES A LA DERECHA de lo especificado
 								; si eran p.ej. 4 px de ancho, Y=2 (2 bytes) y el bucle va a escribir en (VMEM_POINTER)+2 y (VMEM_POINTER)+1, al llegar a 0 no se ejecuta
 								; para bucles "pequeños" carga Y con uno MENOS del total y usa BPL en vez de BNE en el bucle, así las iteraciones anteriores serían 1 y 0, que es lo correcto
@@ -460,22 +460,20 @@ _draw_square:
 ; VMEM_POINTER VMEM_POINTER+1 current video memory pointer
 _convert_coords_to_mem:
 .(
-    ; Clear X reg
-    LDX #$00
     ; Clear VMEM_POINTER
-    STX VMEM_POINTER			; correcto, aunque en CMOS tenemos STZ y no necesitas usar X
+    STZ VMEM_POINTER			; correcto, aunque en CMOS tenemos STZ y no necesitas usar X
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
     LSR
-    STA VMEM_POINTER+1			; empiezas bien, pero por qué lo escribes en memoria AHORA? vas a seguir desplazándolo, lo suyo para 16 bits es uno en memoria y otro en A (preferiblemente el que antes se vaya a seguir procesando)
+                                ; empiezas bien, pero por qué lo escribes en memoria AHORA? vas a seguir desplazándolo, lo suyo para 16 bits es uno en memoria y otro en A (preferiblemente el que antes se vaya a seguir procesando)
     ROR VMEM_POINTER
     ; Sencond shift
-    LSR VMEM_POINTER+1			; lo dicho, debería seguir en A
+    LSR			                ; lo dicho, debería seguir en A
     ROR VMEM_POINTER			; si VMEM_POINTER se puso a 0, tras rotarlo dos veces es SEGURO que Carry es 0!
     
     ; Add base memory address
-    CLC							; afinando mucho, en virtud de lo anterior no es necesario
-    LDA VMEM_POINTER+1			; de nuevo, este valor lo habrías tenido ya en A, no necesitarías cargarlo
+    							; afinando mucho, en virtud de lo anterior no es necesario
+                                ; de nuevo, este valor lo habrías tenido ya en A, no necesitarías cargarlo
     ADC DRAW_BUFFER
     STA VMEM_POINTER+1
     LDA VMEM_POINTER			; ERROR! El Carry va del byte bajo al alto, NUNCA al revés. En tu caso jamás se produciría C, por lo que no notarías el fallo 
