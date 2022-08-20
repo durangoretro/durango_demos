@@ -616,13 +616,12 @@ draw_map:
     INC MAP_TO_DRAW
 
     ; Change row
-    LDA #$00
-    STA VMEM_POINTER		; CMOS puede usar STZ
+    STZ VMEM_POINTER		; CMOS puede usar STZ
     INC VMEM_POINTER+1
     INC VMEM_POINTER+1
     DEC TEMP1				; muy bien, los bucles lentos pueden estar en memoria; al no usar el índice, va bien el BEQ
     BEQ draw_map_end
-    JMP draw_map_loop1		; (quizá con bucles interiores podrías saltar directamente con BNE)
+    BNE draw_map_loop1		; (quizá con bucles interiores podrías saltar directamente con BNE)
     draw_map_end:
   
     RTS
