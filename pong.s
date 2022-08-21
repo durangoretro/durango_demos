@@ -395,46 +395,44 @@ title:
 
 ; Draw square
 ; X_COORD, Y_COORD, SQ_WIDTH, SQ_HEIGHT
-; VMEM_POINTER VMEM_POINTER+1 final video memory pointer
+; TEMP1
 _draw_square:
 .(
-	STA CURRENT_COLOR							; *** aquí se va a machacar A (el color), así que lo óptimo sería guardarlo en CURRENT_COLOR *aquí*... o tal vez en la pila
+	PHA  ; Store current color in stack
 	JSR _convert_coords_to_mem
-								; por mucho que se optimice (a menos que uses tablas ;-) esta conversión es MUY lenta
-								; si los movimientos no son "aleatorios" y se van a hacer de uno en uno (como parece), casi mejor NO trabajar con coordenadas X/Y
-								; sino directamente con direcciones, Y+1 sería +$40 etc
-								; *** vale, entiendo que esto se llama desde todos sitios, no procede el comentario anterior
+    
+    
+    ; Divide width by 2
+	LDA SQ_WIDTH
+	LSR
+    STA TEMP1
+    
+    PLA
+
 	; Load height in x
 	LDX SQ_HEIGHT
 	paint_row:
-	; Divide width by 2			; correcto, aunque puedes plantearte si la anchura va a tener precisión de píxel (parece que no, porque ignoras C), mejor expresarla en bytes
-	LDA SQ_WIDTH
-	LSR
-	; Store it in Y
-	TAY							; *** según digo abajo, hacer *también* un DEY para corregir el índice
-	; Load current color
-	LDA CURRENT_COLOR			; *** ...o quizá PLA (ver arriba)
+    LDY TEMP1
 	; Draw as many pixels as Y register says
+    DEY
 	paint:
 	STA (VMEM_POINTER), Y
 	DEY
-	BNE paint					; en la etiqueta de los saltos no se pone 'dos puntos' ;-)
-								; *** repito, TIENE que ser BPL para que no salga desplazado (véase el uso de DEY arriba)
-								; *** seguimos con el FALLO!!! es BPL, y debes cargar Y con uno MENOS de los bytes deseados (puedes hacer DEY antes del bucle)
-								; FALLO! te va a pintar la cosa DOS PÍXELES A LA DERECHA de lo especificado
-								; si eran p.ej. 4 px de ancho, Y=2 (2 bytes) y el bucle va a escribir en (VMEM_POINTER)+2 y (VMEM_POINTER)+1, al llegar a 0 no se ejecuta
-								; para bucles "pequeños" carga Y con uno MENOS del total y usa BPL en vez de BNE en el bucle, así las iteraciones anteriores serían 1 y 0, que es lo correcto
+	BPL paint
+
 	; Next row
-	LDA VMEM_POINTER
+	PHA
+    LDA VMEM_POINTER
 	CLC
 	ADC #$40
 	STA VMEM_POINTER
-	BCC skip_upper				; MUY BIEN, la alternativa de usar ADC #0 es más lenta y pesada... sólo interesa si necesitas que se ejecute en tiempo constante
+	BCC skip_upper
 	INC VMEM_POINTER+1
  	skip_upper:
-	DEX
-	BNE paint_row				; no hay problema aquí porque no se usa como índice, vas avanzando líneas con el ADC #$40
-								; si por uniformidad con la anchura prefieres especificar la altura como un píxel menos (0...n-1), úsese BPL en su lugar
+	PLA
+    DEX
+	BNE paint_row
+
 	RTS
 .)
 ; --- end draw_square
