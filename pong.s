@@ -57,17 +57,20 @@ TEMP2 = $1d
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 8
+PADDLE_WIDTH_HALF = PADDLE_WIDTH / 2
 PADDLE_HEIGHT =32
 BACKGROUND = ROSITA
 ; -- Global Game vars pointers --
-p1_vertical_x = $00
-p2_vertical_x = $01
-p1_vertical_y = $02
-p2_vertical_y = $03
-p1_horizontal_x = $04
-p2_horizontal_x = $05
-p1_horizontal_y = $06
-p2_horizontal_y = $07
+p1_vertical_x = $0200
+p2_vertical_x = $0201
+p1_vertical_y = $0202
+p2_vertical_y = $0203
+p1_horizontal_x = $0204
+p2_horizontal_x = $0205
+p1_horizontal_y = $0206
+p2_horizontal_y = $0207
+p1vertxmem = $00 ; $01
+p1vertxmem2 = $02 ; $03
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -87,28 +90,57 @@ _main:
     JSR _draw_title
 	JSR _wait_start
     
-    ; Init variables
-	JSR _init_game_data
-	JSR _init_game_screen
+    ; Init
+	JSR _init_game
 	
 gameloop:
 	; Wait vsync
 	JSR _wait_vsync
 	; Run game
 	JSR _update_game
-	; Wait 1 frame
-	LDX #$01
-	JSR _wait_frames
-	; loop
+	; Wait vsync end
+	JSR _wait_vsync_end
+    ; loop
 	JMP gameloop
-
-	; End main
-	end: JMP end
 .)
 ; -- end main method --
 
+_init_game:
+.(
+    LDA #BACKGROUND
+    JSR fill_screen
+    
+    ; Set size
+    LDY #PADDLE_WIDTH
+    STY SQ_WIDTH
+    LDY #PADDLE_HEIGHT
+    STY SQ_HEIGHT
+    
+    LDA #2
+    STA p1_vertical_x
+    STA X_COORD
+    LDA #5
+    STA p1_vertical_y 
+    STA Y_COORD
+    JSR _convert_coords_to_mem
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA p1vertxmem
+    STX p1vertxmem+1
+    LDA #VERDE
+    JSR _draw_square
+    
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA p1vertxmem2
+    STX p1vertxmem2+1
+    
+    RTS
+.)
+
 _init_game_data:
 .(
+        
     LDA #2
     STA p1_vertical_x
     LDX #5
@@ -131,7 +163,11 @@ _init_game_data:
 ; Init game screen
 _init_game_screen:
 .(
-    JSR _draw_background
+    ; Set back color
+    LDA #BACKGROUND
+    ; Draw background
+    JSR fill_screen
+    
     JSR _draw_first_player
     JMP _draw_second_player
 .)
@@ -243,20 +279,8 @@ _update_game:
     down1:
     LDA #BUTTON_DOWN
     BIT CONTROLLER_1
-    BEQ left1
-    JSR _player1_down
-    
-    left1:
-    LDA #BUTTON_LEFT
-    BIT CONTROLLER_1
-    BEQ right1
-    JSR _player1_left
-    
-    right1:
-    LDA #BUTTON_RIGHT
-    BIT CONTROLLER_1
     BEQ up2
-    JSR _player1_right
+    JSR _player1_down
     
     up2:
     LDA #BUTTON_UP
@@ -267,113 +291,99 @@ _update_game:
     down2:
     LDA #BUTTON_DOWN
     BIT CONTROLLER_2
-    BEQ left2
-    JSR _player2_down
-    
-    left2:
-    LDA #BUTTON_LEFT
-    BIT CONTROLLER_2
-    BEQ right2
-    JSR _player2_left
-    
-    right2:
-    LDA #BUTTON_RIGHT
-    BIT CONTROLLER_2
     BEQ end
-    JSR _player2_right
+    JSR _player2_down
 
     end:
     RTS
 .)
 
-; Player 1 moves up		; de nuevo, up/down son comunes a ambos jugadores, si usas los arrays anteriores puede ser función común especificando jugador en p. ej. X
-						; aunque quizá convenga salvarlo por si _undraw (que debería ser comun draw/undraw para todos los jugadores) altera X, en CMOS es fácil (PHX, PLX)
-_player1_up:			; *** correcto porque cada función llamada (son pequeñas) carga A y X adecuadamente
+; Player 1 moves up
+_player1_up:
 .(
-    ; Erase current paddle
-    JSR _undraw_first_player
-    ; Move paddle
     DEC p1_vertical_y
-    ; Draw current paddle & Return
-    JMP _draw_first_player
+    
+    SEC
+    LDA p1vertxmem
+    SBC #$40
+    STA p1vertxmem
+    BCC skip1
+    DEC p1vertxmem+1
+    skip1:
+    
+    SEC
+    LDA p1vertxmem2
+    SBC #$40
+    STA p1vertxmem2
+    BCC skip2
+    DEC p1vertxmem2+1
+    skip2: 
+    
+    LDA #VERDE
+    LDY #PADDLE_WIDTH_HALF
+    DEY
+    PHY
+loop:
+    STA (p1vertxmem),Y
+    DEY
+    BPL loop
+    PLY
+    LDA #BACKGROUND
+loop2:
+    STA (p1vertxmem2),Y
+    DEY
+    BPL loop2    
+    RTS
 .)
 
 ; Player 1 moves down
 _player1_down:
 .(
-    ; Erase current paddle
-    JSR _undraw_first_player
-    ; Move paddle
     INC p1_vertical_y
-    ; Draw current paddle
-    JMP _draw_first_player
+    
+    LDA #BACKGROUND
+    LDY #PADDLE_WIDTH_HALF
+    DEY
+    PHY
+loop:
+    STA (p1vertxmem),Y
+    DEY
+    BPL loop
+    PLY
+    LDA #VERDE
+loop2:
+    STA (p1vertxmem2),Y
+    DEY
+    BPL loop2    
+    
+    CLC
+    LDA p1vertxmem
+    ADC #$40
+    STA p1vertxmem
+    BCC skip1
+    INC p1vertxmem+1
+    skip1:
+    
+    CLC
+    LDA p1vertxmem2
+    ADC #$40
+    STA p1vertxmem2
+    BCC skip2
+    INC p1vertxmem2+1
+    skip2: 
+    
+    RTS
 .)
 
-; Player 1 moves left
-_player1_left:
-.(
-    ; Erase current paddle
-    JSR _undraw_first_player
-    ; Move paddle
-    DEC p1_horizontal_x
-    ; Draw current paddle & Return
-    JMP _draw_first_player
-.)
-
-; Player 1 moves right
-_player1_right:
-.(
-    ; Erase current paddle
-    JSR _undraw_first_player
-    ; Move paddle
-    INC p1_horizontal_x
-    ; Draw current paddle & Return
-    JMP _draw_first_player
-.)
-
-; Player 2 moves up
 _player2_up:
 .(
-    ; Erase current paddle
-    JSR _undraw_second_player
-    ; Move paddle
-    DEC p2_vertical_y
-    ; Draw current paddle
-    JMP _draw_second_player
+    RTS
 .)
-
-; Player 2 moves down
 _player2_down:
 .(
-    ; Erase current paddle
-    JSR _undraw_second_player
-    ; Move paddle
-    INC p2_vertical_y
-    ; Draw current paddle
-    JMP _draw_second_player
+    RTS
 .)
 
-; Player 2 moves left
-_player2_left:
-.(
-    ; Erase current paddle
-    JSR _undraw_second_player
-    ; Move paddle
-    DEC p2_horizontal_x
-    ; Draw current paddle & Return
-    JMP _draw_second_player
-.)
-
-; Player 2 moves right
-_player2_right:
-.(
-    ; Erase current paddle
-    JSR _undraw_second_player
-    ; Move paddle
-    INC p2_horizontal_x
-    ; Draw current paddle & Return
-    JMP _draw_second_player
-.)
 
 _draw_title:
 .(
@@ -536,6 +546,15 @@ _wait_vsync:
     wait_loop:
     BIT $DF88
     BVC wait_loop
+    RTS
+.)
+
+; Wait for vsync end.
+_wait_vsync_end:
+.(
+    wait_loop:
+    BIT $DF88
+    BVS wait_loop
     RTS
 .)
 
