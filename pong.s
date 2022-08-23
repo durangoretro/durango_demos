@@ -198,6 +198,13 @@ _draw_player_internal:
 
     PHA
     PHX
+    ; Set pos
+    JSR _convert_coords_to_mem    
+    PLX
+    PLA
+    
+    PHA
+    PHX
     JSR _draw_square
     PLX
     PLA
@@ -216,7 +223,18 @@ _draw_player_internal:
     LDY #PADDLE_WIDTH
     STY SQ_HEIGHT
     
-    JMP _draw_square
+    PHA
+    PHX
+    ; Set pos
+    JSR _convert_coords_to_mem    
+    PLX
+    PLA
+    
+    PHA
+    PHX
+    JSR _draw_square
+    PLX
+    PLA
 .)
 
 _update_game:
@@ -398,15 +416,11 @@ title:
 ; TEMP1
 _draw_square:
 .(
-	PHA  ; Store current color in stack
-	JSR _convert_coords_to_mem
-    
-    
+    PHA 
     ; Divide width by 2
 	LDA SQ_WIDTH
 	LSR
-    STA TEMP1
-    
+    STA TEMP1    
     PLA
 
 	; Load height in x
@@ -713,7 +727,9 @@ draw_back_tile:
     CLC
     ADC #$40
     STA VMEM_POINTER
+    BCC skip_upper4
     INC VMEM_POINTER+1; Each 4 rows, high significative byte should be increased	; el carry del anterior lo determina, fácilmente integrable en el bucle
+    skip_upper4:
     LDA TILE_TO_DRAW
     CLC
     ADC #$04
