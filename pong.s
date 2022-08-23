@@ -634,9 +634,11 @@ convert_tile_index_to_mem:
 ;$09 backup of VMEM_POINTER original value
 draw_back_tile:
 .(
-    ; Save screen position as backup in $09
+    ; Save screen position and backup in stash
     LDA VMEM_POINTER
     PHA
+    LDX #7
+    loop:
     ; First row
     LDY #$00
     LDA (TILE_TO_DRAW), Y		; esta parte es buena que no sea bucle, porque afectaría mucho al rendimiento (13t + 3 del bucle)
@@ -663,156 +665,9 @@ draw_back_tile:
     ADC #$04
     STA TILE_TO_DRAW
     LDY #$00
-    ; Second row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    BCC skip_upper2
-    INC VMEM_POINTER+1
-    skip_upper2:
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Third row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    BCC skip_upper3
-    INC VMEM_POINTER+1
-    skip_upper3:
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Fourth row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    BCC skip_upper4
-    INC VMEM_POINTER+1
-    skip_upper4:
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Fith row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    BCC skip_upper5
-    INC VMEM_POINTER+1
-    skip_upper5:
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Sixth row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    BCC skip_upper6
-    INC VMEM_POINTER+1
-    skip_upper6:
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Seventh row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    BCC skip_upper7
-    INC VMEM_POINTER+1
-    skip_upper7:
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
+    DEX
+    BNE loop
+    
     ; Eight row
     LDA (TILE_TO_DRAW), Y
     STA (VMEM_POINTER), Y
@@ -827,9 +682,6 @@ draw_back_tile:
     STA (VMEM_POINTER), Y
 
     ; Finalize tile drawing
-    LDA TILE_TO_DRAW; Go to next tile by incrementing TILE_TO_DRAW by 0x04 (already drawn 8 pixels)
-    CLC
-    ADC #$04
     DEC VMEM_POINTER+1; Restore VMEM_POINTER+1 to original value, so next tile is at same row
     PLA ; Restore VMEM_POINTER using backup and add 0x04 to set at next screen position 
     CLC
