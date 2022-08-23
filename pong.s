@@ -196,18 +196,15 @@ _draw_player_internal:
     LDY #PADDLE_HEIGHT
     STY SQ_HEIGHT
 
-    PHA
     PHX
+    PHA
     ; Set pos
     JSR _convert_coords_to_mem    
-    PLX
     PLA
-    
     PHA
-    PHX
     JSR _draw_square
-    PLX
     PLA
+    PLX
     
     ; Set coords		; esta parte no la entiendo, por qué se pinta el jugador 1 otra vez con otras coordenadas?
 						; VALE, ya lo pillo, el jugador 1 puede moverse horizontalmente! El 2 no puede hacerlo?
@@ -223,18 +220,15 @@ _draw_player_internal:
     LDY #PADDLE_WIDTH
     STY SQ_HEIGHT
     
-    PHA
     PHX
+    PHA
     ; Set pos
     JSR _convert_coords_to_mem    
-    PLX
     PLA
-    
     PHA
-    PHX
     JSR _draw_square
-    PLX
     PLA
+    PLX
 .)
 
 _update_game:
@@ -657,15 +651,18 @@ draw_back_tile:
     LDA (TILE_TO_DRAW), Y
     STA (VMEM_POINTER), Y
     ; Change row
-    LDA VMEM_POINTER; Increment using acumulator less significative screen pos (VMEM_POINTER)
+    LDA VMEM_POINTER
     CLC
-    ADC #$40; Each row is 0x40 (64) bytes 
+    ADC #$40
     STA VMEM_POINTER
-    LDA TILE_TO_DRAW; Increment first tile byte position (TILE_TO_DRAW), so it points to next byte
+    BCC skip_upper1
+    INC VMEM_POINTER+1
+    skip_upper1:
+    LDA TILE_TO_DRAW
     CLC
-    ADC #$04; Increment by 4 (already drawn 8 pixels)
+    ADC #$04
     STA TILE_TO_DRAW
-    LDY #$00; Initialize pixel counter to 0	; ...pero el resto seguro que se puede compactar con bucles, sin pérdida apreciable de velocidad *** habrá que revisar esto con calma
+    LDY #$00
     ; Second row
     LDA (TILE_TO_DRAW), Y
     STA (VMEM_POINTER), Y
@@ -683,6 +680,9 @@ draw_back_tile:
     CLC
     ADC #$40
     STA VMEM_POINTER
+    BCC skip_upper2
+    INC VMEM_POINTER+1
+    skip_upper2:
     LDA TILE_TO_DRAW
     CLC
     ADC #$04
@@ -705,6 +705,9 @@ draw_back_tile:
     CLC
     ADC #$40
     STA VMEM_POINTER
+    BCC skip_upper3
+    INC VMEM_POINTER+1
+    skip_upper3:
     LDA TILE_TO_DRAW
     CLC
     ADC #$04
@@ -722,13 +725,13 @@ draw_back_tile:
     INY
     LDA (TILE_TO_DRAW), Y
     STA (VMEM_POINTER), Y
-    ; Change row and block
+    ; Change row
     LDA VMEM_POINTER
     CLC
     ADC #$40
     STA VMEM_POINTER
     BCC skip_upper4
-    INC VMEM_POINTER+1; Each 4 rows, high significative byte should be increased	; el carry del anterior lo determina, fácilmente integrable en el bucle
+    INC VMEM_POINTER+1
     skip_upper4:
     LDA TILE_TO_DRAW
     CLC
@@ -752,6 +755,9 @@ draw_back_tile:
     CLC
     ADC #$40
     STA VMEM_POINTER
+    BCC skip_upper5
+    INC VMEM_POINTER+1
+    skip_upper5:
     LDA TILE_TO_DRAW
     CLC
     ADC #$04
@@ -774,6 +780,9 @@ draw_back_tile:
     CLC
     ADC #$40
     STA VMEM_POINTER
+    BCC skip_upper6
+    INC VMEM_POINTER+1
+    skip_upper6:
     LDA TILE_TO_DRAW
     CLC
     ADC #$04
@@ -796,6 +805,9 @@ draw_back_tile:
     CLC
     ADC #$40
     STA VMEM_POINTER
+    BCC skip_upper7
+    INC VMEM_POINTER+1
+    skip_upper7:
     LDA TILE_TO_DRAW
     CLC
     ADC #$04
