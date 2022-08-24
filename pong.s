@@ -157,135 +157,6 @@ _init_game:
     RTS
 .)
 
-_init_game_data:
-.(
-        
-    LDA #2
-    STA p1_vertical_x
-    LDX #5
-    STX p1_vertical_y    
-    LDY #118
-    STY p2_vertical_x
-    STX p2_vertical_y
-    
-    STX p1_horizontal_y
-    LDY #50
-    STY p1_horizontal_x
-    STY p2_horizontal_x
-    
-    LDY #120
-    STY p2_horizontal_y
-    
-    RTS
-.)
-
-; Init game screen
-_init_game_screen:
-.(
-    ; Set back color
-    LDA #BACKGROUND
-    ; Draw background
-    JSR fill_screen
-    
-    JSR _draw_first_player
-    JMP _draw_second_player
-.)
-
-; --- Draw background. ---
-_draw_background:
-.(
-    ; Set back color
-    LDA #BACKGROUND
-    JMP fill_screen
-.)
-
-_draw_first_player:
-.(
-    ; Set color
-    LDA #VERDE
-    ; Set player
-    LDX #0
-    JMP _draw_player_internal
-.)
-
-_draw_second_player:
-.(
-    ; Set color
-    LDA #ROJO
-    ; Set player
-    LDX #1
-    JMP _draw_player_internal
-.)
-
-_undraw_first_player:
-.(
-    ; Set color
-    LDA #BACKGROUND
-    ; Set player
-    LDX #0
-    JMP _draw_player_internal
-.)
-
-_undraw_second_player:
-.(
-    ; Set color
-    LDA #BACKGROUND
-    ; Set player
-    LDX #1
-    JMP _draw_player_internal
-.)
-
-; X player
-; A player color
-_draw_player_internal:
-.(
-    ; Set coords
-    LDY p1_vertical_x, X
-    STY X_COORD
-    LDY p1_vertical_y, X
-    STY Y_COORD
-    
-    ; Set size
-    LDY #PADDLE_WIDTH
-    STY SQ_WIDTH
-    LDY #PADDLE_HEIGHT
-    STY SQ_HEIGHT
-
-    PHX
-    PHA
-    ; Set pos
-    JSR _convert_coords_to_mem    
-    PLA
-    PHA
-    JSR _draw_square
-    PLA
-    PLX
-    
-    ; Set coords		; esta parte no la entiendo, por qué se pinta el jugador 1 otra vez con otras coordenadas?
-						; VALE, ya lo pillo, el jugador 1 puede moverse horizontalmente! El 2 no puede hacerlo?
-						; *** entonces, con los cambios el jugador 2 también admite horizontal?
-    LDY p1_horizontal_x, X
-    STY X_COORD
-    LDY p1_horizontal_y, X
-    STY Y_COORD
-    
-    ; Set size
-    LDY #PADDLE_HEIGHT
-    STY SQ_WIDTH
-    LDY #PADDLE_WIDTH
-    STY SQ_HEIGHT
-    
-    PHX
-    PHA
-    ; Set pos
-    JSR _convert_coords_to_mem    
-    PLA
-    PHA
-    JSR _draw_square
-    PLA
-    PLX
-.)
-
 _update_game:
 .(	
     ; Player 1
@@ -396,10 +267,75 @@ loop2:
 
 _player2_up:
 .(
+    DEC p1_vertical_y
+    
+    SEC
+    LDA p2vertxmem
+    SBC #$40
+    STA p2vertxmem
+    BCC skip1
+    DEC p2vertxmem+1
+    skip1:
+    
+    SEC
+    LDA p2vertxmem2
+    SBC #$40
+    STA p2vertxmem2
+    BCC skip2
+    DEC p2vertxmem2+1
+    skip2: 
+    
+    LDA #ROJO
+    LDY #PADDLE_WIDTH_HALF
+    DEY
+    PHY
+loop:
+    STA (p2vertxmem),Y
+    DEY
+    BPL loop
+    PLY
+    LDA #BACKGROUND
+loop2:
+    STA (p2vertxmem2),Y
+    DEY
+    BPL loop2
     RTS
 .)
 _player2_down:
 .(
+    INC p2_vertical_y
+    
+    LDA #BACKGROUND
+    LDY #PADDLE_WIDTH_HALF
+    DEY
+    PHY
+loop:
+    STA (p2vertxmem),Y
+    DEY
+    BPL loop
+    PLY
+    LDA #ROJO
+loop2:
+    STA (p2vertxmem2),Y
+    DEY
+    BPL loop2    
+    
+    CLC
+    LDA p2vertxmem
+    ADC #$40
+    STA p2vertxmem
+    BCC skip1
+    INC p2vertxmem+1
+    skip1:
+    
+    CLC
+    LDA p2vertxmem2
+    ADC #$40
+    STA p2vertxmem2
+    BCC skip2
+    INC p2vertxmem2+1
+    skip2:
+    
     RTS
 .)
 
