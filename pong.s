@@ -57,17 +57,22 @@ TEMP2 = $1d
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 8
+PADDLE_WIDTH_HALF = PADDLE_WIDTH / 2
 PADDLE_HEIGHT =32
 BACKGROUND = ROSITA
 ; -- Global Game vars pointers --
-p1_vertical_x = $00
-p2_vertical_x = $01
-p1_vertical_y = $02
-p2_vertical_y = $03
-p1_horizontal_x = $04
-p2_horizontal_x = $05
-p1_horizontal_y = $06
-p2_horizontal_y = $07
+p1_vertical_x = $0200
+p2_vertical_x = $0201
+p1_vertical_y = $0202
+p2_vertical_y = $0203
+p1_horizontal_x = $0204
+p2_horizontal_x = $0205
+p1_horizontal_y = $0206
+p2_horizontal_y = $0207
+p1vertxmem = $00 ; $01
+p1vertxmem2 = $02 ; $03
+p2vertxmem = $04 ; 05
+p2vertxmem2 = $06 ; 07
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -87,155 +92,79 @@ _main:
     JSR _draw_title
 	JSR _wait_start
     
-    ; Init variables
-	JSR _init_game_data
-	JSR _init_game_screen
+    ; Init
+	JSR _init_game
 	
 gameloop:
 	; Wait vsync
 	JSR _wait_vsync
 	; Run game
 	JSR _update_game
-	; Wait 1 frame
-	LDX #$01
-	JSR _wait_frames
-	; loop
+	; Wait vsync end
+	JSR _wait_vsync_end
+    ; loop
 	JMP gameloop
-
-	; End main
-	end: JMP end
 .)
 ; -- end main method --
 
-_init_game_data:
+_init_game:
 .(
-                        ; usando distintos registros se puede reutilizar uno que contenga este 5, y si decides usar otro valor se puede añadir LD?#
-                        ; lo mismo de antes, no hay obligación de usar A en todas las cargas *** OK!
+    LDA #BACKGROUND
+    JSR fill_screen
+    
+    ; Set size
+    LDY #PADDLE_WIDTH
+    STY SQ_WIDTH
+    LDY #PADDLE_HEIGHT
+    STY SQ_HEIGHT
+    
+    ; Draw paddles
     LDA #2
     STA p1_vertical_x
-    LDX #5
-    STX p1_vertical_y    
-    LDY #118
-    STY p2_vertical_x
-    STX p2_vertical_y
+    STA X_COORD
+    LDA #5
+    STA p1_vertical_y 
+    STA p2_vertical_y
+    STA Y_COORD    
+    JSR _convert_coords_to_mem
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA p1vertxmem
+    STX p1vertxmem+1
+    LDA #VERDE
+    JSR _draw_square    
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA p1vertxmem2
+    STX p1vertxmem2+1
     
-    STX p1_horizontal_y
-    LDY #50
-    STY p1_horizontal_x
-    STY p2_horizontal_x
+    ; Second player
+    LDA #118
+    STA p2_vertical_x
+    STA X_COORD
+    JSR _convert_coords_to_mem
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA p2vertxmem
+    STX p2vertxmem+1
+    LDA #ROJO
+    JSR _draw_square    
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA p2vertxmem2
+    STX p2vertxmem2+1
     
-    LDY #120
-    STY p2_horizontal_y	; *** pero me sigo liando un poco con lo de vertical/horizontal x/y
+    LDA #62
+    STA X_COORD
+    STA Y_COORD
+    JSR _convert_coords_to_mem
+    LDA #4
+    STA SQ_WIDTH
+    STA SQ_HEIGHT
+    LDA #AZUR
+    JSR _draw_square
     
     RTS
-.)
-
-; Init game screen
-_init_game_screen:
-.(
-    JSR _draw_background
-    JSR _draw_first_player
-    JMP _draw_second_player
-.)
-
-; --- Draw background. ---
-_draw_background:
-.(
-    ; Set back color
-    LDA #BACKGROUND
-    STA CURRENT_COLOR	; *** si fill_screen respeta A (como indicado) no hace falta esta variable
-    JMP fill_screen
-.)
-
-_draw_first_player:
-.(
-    ; Set color
-    LDA #VERDE
-    STA CURRENT_COLOR	; *** no hacen falta, pues se preserva en el camino hasta _draw_square
-    
-    ; Set player
-    LDX #0
-    
-    JMP _draw_player_internal
-.)
-
-_draw_second_player:
-.(
-    ; Set color
-    LDA #ROJO
-    STA CURRENT_COLOR	; *** etc...
-    
-    ; Set player
-    LDX #1
-    
-    JMP _draw_player_internal
-.)
-
-_undraw_first_player:
-.(
-    ; Set color
-    LDA #BACKGROUND
-    STA CURRENT_COLOR
-    
-    ; Set player
-    LDX #0
-    
-    JMP _draw_player_internal
-.)
-
-_undraw_second_player:
-.(
-    ; Set color
-    LDA #BACKGROUND
-    STA CURRENT_COLOR
-    
-    ; Set player
-    LDX #1
-    
-    JMP _draw_player_internal
-.)
-; *** OK!
-; todas estas funciones son básicamente iguales a diferencia del color y, en el caso de los dos jugadores, también las coordenadas
-; para el color, si para las transferencias usas otros registros, puedes simplemente llamar a una función común cargando en A el color deseado, sea ROJO, VERDE o BACKGROUND
-; pero para las distintas coordenadas, si las dispones como arrays de dos elementos (p1_vertical_x vaya seguida de p2_vertical_x, y así)
-;  puedes cargar un registro índice (ej. X) con 0 o 1 para seleccionar el jugador, usando direccionamiento indexado (ej. LDY p_vertical_x, X  ...que deja libre A para el color)
-_draw_player_internal:
-.(
-    ; Set coords
-    LDY p1_vertical_x, X
-    STY X_COORD
-    LDY p1_vertical_y, X
-    STY Y_COORD
-    
-    ; Set size
-    LDY #PADDLE_WIDTH
-    STY SQ_WIDTH
-    LDY #PADDLE_HEIGHT
-    STY SQ_HEIGHT
-
-    PHA
-    PHX
-    PHY					; *** si Y lo machacas a continuación, no es preciso salvarlo. A (color) y X (jugador) sí deben ser salvados.
-    JSR _draw_square
-    PLY
-    PLX
-    PLA
-    
-    ; Set coords		; esta parte no la entiendo, por qué se pinta el jugador 1 otra vez con otras coordenadas?
-						; VALE, ya lo pillo, el jugador 1 puede moverse horizontalmente! El 2 no puede hacerlo?
-						; *** entonces, con los cambios el jugador 2 también admite horizontal?
-    LDY p1_horizontal_x, X
-    STY X_COORD
-    LDY p1_horizontal_y, X
-    STY Y_COORD
-    
-    ; Set size
-    LDY #PADDLE_HEIGHT
-    STY SQ_WIDTH
-    LDY #PADDLE_WIDTH
-    STY SQ_HEIGHT
-    
-    JMP _draw_square
 .)
 
 _update_game:
@@ -245,28 +174,13 @@ _update_game:
     LDA #BUTTON_UP
     BIT CONTROLLER_1
     BEQ down1
-    JSR _player1_up		; imagino que tocará A (y de todo), de lo contrario en CMOS es posible hacer un único LDA CONTROLLER_1 y sucesivos BIT #BUTTON...
-						; alternativamente, ir haciendo LSR y en las condiciones usar BCC en vez de BEQ (de nuevo con un único LDA CONTROLLER_1)
-						; pero nada de esto es aplicable si A no se preserva al llamar _player1_up *** OK... en esta ocasión
-						; Hay otras ideas muy locas que no te comentaré de momento ;-)
+    JSR _player1_up
 
     down1:
     LDA #BUTTON_DOWN
     BIT CONTROLLER_1
-    BEQ left1
-    JSR _player1_down
-    
-    left1:
-    LDA #BUTTON_LEFT
-    BIT CONTROLLER_1
-    BEQ right1
-    JSR _player1_left
-    
-    right1:
-    LDA #BUTTON_RIGHT
-    BIT CONTROLLER_1
     BEQ up2
-    JSR _player1_right
+    JSR _player1_down
     
     up2:
     LDA #BUTTON_UP
@@ -277,113 +191,176 @@ _update_game:
     down2:
     LDA #BUTTON_DOWN
     BIT CONTROLLER_2
-    BEQ left2
-    JSR _player2_down
-    
-    left2:
-    LDA #BUTTON_LEFT
-    BIT CONTROLLER_2
-    BEQ right2
-    JSR _player2_left
-    
-    right2:
-    LDA #BUTTON_RIGHT
-    BIT CONTROLLER_2
     BEQ end
-    JSR _player2_right
+    JSR _player2_down
 
     end:
     RTS
 .)
 
-; Player 1 moves up		; de nuevo, up/down son comunes a ambos jugadores, si usas los arrays anteriores puede ser función común especificando jugador en p. ej. X
-						; aunque quizá convenga salvarlo por si _undraw (que debería ser comun draw/undraw para todos los jugadores) altera X, en CMOS es fácil (PHX, PLX)
-_player1_up:			; *** correcto porque cada función llamada (son pequeñas) carga A y X adecuadamente
+; Player 1 moves up
+_player1_up:
 .(
-    ; Erase current paddle
-    JSR _undraw_first_player
-    ; Move paddle
+    LDA p1_vertical_y
+    BNE ok
+    RTS
+    ok:
+    
+    
     DEC p1_vertical_y
-    ; Draw current paddle & Return
-    JMP _draw_first_player
+    
+    SEC
+    LDA p1vertxmem
+    SBC #$40
+    STA p1vertxmem
+    BCC skip1
+    DEC p1vertxmem+1
+    skip1:
+    
+    SEC
+    LDA p1vertxmem2
+    SBC #$40
+    STA p1vertxmem2
+    BCC skip2
+    DEC p1vertxmem2+1
+    skip2: 
+    
+    LDA #VERDE
+    LDY #PADDLE_WIDTH_HALF
+    DEY
+    PHY
+loop:
+    STA (p1vertxmem),Y
+    DEY
+    BPL loop
+    PLY
+    LDA #BACKGROUND
+loop2:
+    STA (p1vertxmem2),Y
+    DEY
+    BPL loop2    
+    RTS
 .)
 
 ; Player 1 moves down
 _player1_down:
 .(
-    ; Erase current paddle
-    JSR _undraw_first_player
-    ; Move paddle
+    LDA #96
+    CMP p1_vertical_y
+    BNE ok
+    RTS
+    ok:
+    
     INC p1_vertical_y
-    ; Draw current paddle
-    JMP _draw_first_player
+    
+    LDA #BACKGROUND
+    LDY #PADDLE_WIDTH_HALF
+    DEY
+    PHY
+loop:
+    STA (p1vertxmem),Y
+    DEY
+    BPL loop
+    PLY
+    LDA #VERDE
+loop2:
+    STA (p1vertxmem2),Y
+    DEY
+    BPL loop2    
+    
+    CLC
+    LDA p1vertxmem
+    ADC #$40
+    STA p1vertxmem
+    BCC skip1
+    INC p1vertxmem+1
+    skip1:
+    
+    CLC
+    LDA p1vertxmem2
+    ADC #$40
+    STA p1vertxmem2
+    BCC skip2
+    INC p1vertxmem2+1
+    skip2: 
+    
+    RTS
 .)
 
-; Player 1 moves left
-_player1_left:
-.(
-    ; Erase current paddle
-    JSR _undraw_first_player
-    ; Move paddle
-    DEC p1_horizontal_x
-    ; Draw current paddle & Return
-    JMP _draw_first_player
-.)
-
-; Player 1 moves right
-_player1_right:
-.(
-    ; Erase current paddle
-    JSR _undraw_first_player
-    ; Move paddle
-    INC p1_horizontal_x
-    ; Draw current paddle & Return
-    JMP _draw_first_player
-.)
-
-; Player 2 moves up
 _player2_up:
 .(
-    ; Erase current paddle
-    JSR _undraw_second_player
-    ; Move paddle
-    DEC p2_vertical_y
-    ; Draw current paddle
-    JMP _draw_second_player
+    DEC p1_vertical_y
+    
+    SEC
+    LDA p2vertxmem
+    SBC #$40
+    STA p2vertxmem
+    BCC skip1
+    DEC p2vertxmem+1
+    skip1:
+    
+    SEC
+    LDA p2vertxmem2
+    SBC #$40
+    STA p2vertxmem2
+    BCC skip2
+    DEC p2vertxmem2+1
+    skip2: 
+    
+    LDA #ROJO
+    LDY #PADDLE_WIDTH_HALF
+    DEY
+    PHY
+loop:
+    STA (p2vertxmem),Y
+    DEY
+    BPL loop
+    PLY
+    LDA #BACKGROUND
+loop2:
+    STA (p2vertxmem2),Y
+    DEY
+    BPL loop2
+    RTS
 .)
-
-; Player 2 moves down
 _player2_down:
 .(
-    ; Erase current paddle
-    JSR _undraw_second_player
-    ; Move paddle
     INC p2_vertical_y
-    ; Draw current paddle
-    JMP _draw_second_player
+    
+    LDA #BACKGROUND
+    LDY #PADDLE_WIDTH_HALF
+    DEY
+    PHY
+loop:
+    STA (p2vertxmem),Y
+    DEY
+    BPL loop
+    PLY
+    LDA #ROJO
+loop2:
+    STA (p2vertxmem2),Y
+    DEY
+    BPL loop2    
+    
+    CLC
+    LDA p2vertxmem
+    ADC #$40
+    STA p2vertxmem
+    BCC skip1
+    INC p2vertxmem+1
+    skip1:
+    
+    CLC
+    LDA p2vertxmem2
+    ADC #$40
+    STA p2vertxmem2
+    BCC skip2
+    INC p2vertxmem2+1
+    skip2:
+    
+    RTS
 .)
 
-; Player 2 moves left
-_player2_left:
-.(
-    ; Erase current paddle
-    JSR _undraw_second_player
-    ; Move paddle
-    DEC p2_horizontal_x
-    ; Draw current paddle & Return
-    JMP _draw_second_player
-.)
-
-; Player 2 moves right
-_player2_right:
-.(
-    ; Erase current paddle
-    JSR _undraw_second_player
-    ; Move paddle
-    INC p2_horizontal_x
-    ; Draw current paddle & Return
-    JMP _draw_second_player
-.)
 
 _draw_title:
 .(
@@ -417,46 +394,40 @@ title:
 
 ; Draw square
 ; X_COORD, Y_COORD, SQ_WIDTH, SQ_HEIGHT
-; VMEM_POINTER VMEM_POINTER+1 final video memory pointer
+; TEMP1
 _draw_square:
 .(
-								; *** aquí se va a machacar A (el color), así que lo óptimo sería guardarlo en CURRENT_COLOR *aquí*... o tal vez en la pila
-	JSR _convert_coords_to_mem
-								; por mucho que se optimice (a menos que uses tablas ;-) esta conversión es MUY lenta
-								; si los movimientos no son "aleatorios" y se van a hacer de uno en uno (como parece), casi mejor NO trabajar con coordenadas X/Y
-								; sino directamente con direcciones, Y+1 sería +$40 etc
-								; *** vale, entiendo que esto se llama desde todos sitios, no procede el comentario anterior
+    PHA 
+    ; Divide width by 2
+	LDA SQ_WIDTH
+	LSR
+    STA TEMP1    
+    PLA
+
 	; Load height in x
 	LDX SQ_HEIGHT
 	paint_row:
-	; Divide width by 2			; correcto, aunque puedes plantearte si la anchura va a tener precisión de píxel (parece que no, porque ignoras C), mejor expresarla en bytes
-	LDA SQ_WIDTH
-	LSR
-	; Store it in Y
-	TAY							; *** según digo abajo, hacer *también* un DEY para corregir el índice
-	; Load current color
-	LDA CURRENT_COLOR			; *** ...o quizá PLA (ver arriba)
+    LDY TEMP1
 	; Draw as many pixels as Y register says
+    DEY
 	paint:
 	STA (VMEM_POINTER), Y
 	DEY
-	BNE paint					; en la etiqueta de los saltos no se pone 'dos puntos' ;-)
-								; *** repito, TIENE que ser BPL para que no salga desplazado (véase el uso de DEY arriba)
-								; *** seguimos con el FALLO!!! es BPL, y debes cargar Y con uno MENOS de los bytes deseados (puedes hacer DEY antes del bucle)
-								; FALLO! te va a pintar la cosa DOS PÍXELES A LA DERECHA de lo especificado
-								; si eran p.ej. 4 px de ancho, Y=2 (2 bytes) y el bucle va a escribir en (VMEM_POINTER)+2 y (VMEM_POINTER)+1, al llegar a 0 no se ejecuta
-								; para bucles "pequeños" carga Y con uno MENOS del total y usa BPL en vez de BNE en el bucle, así las iteraciones anteriores serían 1 y 0, que es lo correcto
+	BPL paint
+
 	; Next row
-	LDA VMEM_POINTER
+	PHA
+    LDA VMEM_POINTER
 	CLC
 	ADC #$40
 	STA VMEM_POINTER
-	BCC skip_upper				; MUY BIEN, la alternativa de usar ADC #0 es más lenta y pesada... sólo interesa si necesitas que se ejecute en tiempo constante
+	BCC skip_upper
 	INC VMEM_POINTER+1
  	skip_upper:
-	DEX
-	BNE paint_row				; no hay problema aquí porque no se usa como índice, vas avanzando líneas con el ADC #$40
-								; si por uniformidad con la anchura prefieres especificar la altura como un píxel menos (0...n-1), úsese BPL en su lugar
+	PLA
+    DEX
+	BNE paint_row
+
 	RTS
 .)
 ; --- end draw_square
@@ -506,27 +477,17 @@ _convert_coords_to_mem:
 fill_screen:
 .(
     ; Init video pointer
-    LDA DRAW_BUFFER				; *** usa X, por ejemplo, y te ahorras CURRENT_COLOR
-    STA VMEM_POINTER+1
-    LDY #$00					; puedes usar Y para el byte bajo... y ya tienes el índice del bucle cargado
+    LDX DRAW_BUFFER
+    STX VMEM_POINTER+1
+    LDY #$00
     STY VMEM_POINTER
     ; Load current color
-    LDA CURRENT_COLOR			; como te comenté en la Jaquería, si respetas A esto debe ir FUERA del bucle *** respetando A se puede QUITAR
-loop2:
-    ; Iterate over less significative memory address
-    LDY #$00					; no debería hacer falta, en cada iteración mayor se garantiza que Y es 0 *** QUITAR
 loop:
     STA (VMEM_POINTER), Y
     INY
     BNE loop
-								; si llega aquí, es SEGURO que Y=0
-    ; Iterate over more significative memory address
-    INC VMEM_POINTER+1 ; Increment memory pointer Hi address using accumulator
-    LDX #$80 ; Compare with end memory position
-								; simplemente usando LDX# (QUE DEBE ESTAR FUERA DE TODO BUCLE) y luego CPX se respeta A *** en realidad *QUITAR* LDX y CPX
-    CPX VMEM_POINTER+1
-								; pero si es seguro que va a ser en la pantalla 3 estándar, como $80 es el "primer" número negativo, basta con usar BPL en vez de BNE
-    BNE loop2					; debería ser la misma etiqueta *** como es siempre pantalla 3, poner *BPL*  y QUITAR el LDX/CPX anterior
+	INC VMEM_POINTER+1
+    BPL loop
     RTS
 .)
 ;-- end fill screen ---
@@ -562,6 +523,15 @@ _wait_vsync:
     wait_loop:
     BIT $DF88
     BVC wait_loop
+    RTS
+.)
+
+; Wait for vsync end.
+_wait_vsync_end:
+.(
+    wait_loop:
+    BIT $DF88
+    BVS wait_loop
     RTS
 .)
 
@@ -660,9 +630,11 @@ convert_tile_index_to_mem:
 ;$09 backup of VMEM_POINTER original value
 draw_back_tile:
 .(
-    ; Save screen position as backup in $09
+    ; Save screen position and backup in stash
     LDA VMEM_POINTER
     PHA
+    LDX #7
+    loop:
     ; First row
     LDY #$00
     LDA (TILE_TO_DRAW), Y		; esta parte es buena que no sea bucle, porque afectaría mucho al rendimiento (13t + 3 del bucle)
@@ -677,148 +649,21 @@ draw_back_tile:
     LDA (TILE_TO_DRAW), Y
     STA (VMEM_POINTER), Y
     ; Change row
-    LDA VMEM_POINTER; Increment using acumulator less significative screen pos (VMEM_POINTER)
-    CLC
-    ADC #$40; Each row is 0x40 (64) bytes 
-    STA VMEM_POINTER
-    LDA TILE_TO_DRAW; Increment first tile byte position (TILE_TO_DRAW), so it points to next byte
-    CLC
-    ADC #$04; Increment by 4 (already drawn 8 pixels)
-    STA TILE_TO_DRAW
-    LDY #$00; Initialize pixel counter to 0	; ...pero el resto seguro que se puede compactar con bucles, sin pérdida apreciable de velocidad *** habrá que revisar esto con calma
-    ; Second row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
     LDA VMEM_POINTER
     CLC
     ADC #$40
     STA VMEM_POINTER
+    BCC skip_upper1
+    INC VMEM_POINTER+1
+    skip_upper1:
     LDA TILE_TO_DRAW
     CLC
     ADC #$04
     STA TILE_TO_DRAW
     LDY #$00
-    ; Third row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Fourth row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row and block
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    INC VMEM_POINTER+1; Each 4 rows, high significative byte should be increased	; el carry del anterior lo determina, fácilmente integrable en el bucle
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Fith row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Sixth row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
-    ; Seventh row
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    INY
-    LDA (TILE_TO_DRAW), Y
-    STA (VMEM_POINTER), Y
-    ; Change row
-    LDA VMEM_POINTER
-    CLC
-    ADC #$40
-    STA VMEM_POINTER
-    LDA TILE_TO_DRAW
-    CLC
-    ADC #$04
-    STA TILE_TO_DRAW
-    LDY #$00
+    DEX
+    BNE loop
+    
     ; Eight row
     LDA (TILE_TO_DRAW), Y
     STA (VMEM_POINTER), Y
@@ -833,9 +678,6 @@ draw_back_tile:
     STA (VMEM_POINTER), Y
 
     ; Finalize tile drawing
-    LDA TILE_TO_DRAW; Go to next tile by incrementing TILE_TO_DRAW by 0x04 (already drawn 8 pixels)
-    CLC
-    ADC #$04
     DEC VMEM_POINTER+1; Restore VMEM_POINTER+1 to original value, so next tile is at same row
     PLA ; Restore VMEM_POINTER using backup and add 0x04 to set at next screen position 
     CLC
