@@ -71,6 +71,8 @@ p1_horizontal_y = $0206
 p2_horizontal_y = $0207
 p1vertxmem = $00 ; $01
 p1vertxmem2 = $02 ; $03
+p2vertxmem = $04 ; 05
+p2vertxmem2 = $06 ; 07
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -116,24 +118,41 @@ _init_game:
     LDY #PADDLE_HEIGHT
     STY SQ_HEIGHT
     
+    ; Draw paddles
     LDA #2
     STA p1_vertical_x
     STA X_COORD
     LDA #5
     STA p1_vertical_y 
-    STA Y_COORD
+    STA p2_vertical_y
+    STA Y_COORD    
     JSR _convert_coords_to_mem
     LDA VMEM_POINTER
     LDX VMEM_POINTER+1
     STA p1vertxmem
     STX p1vertxmem+1
     LDA #VERDE
-    JSR _draw_square
-    
+    JSR _draw_square    
     LDA VMEM_POINTER
     LDX VMEM_POINTER+1
     STA p1vertxmem2
     STX p1vertxmem2+1
+    
+    ; Second player
+    LDA #118
+    STA p2_vertical_x
+    STA X_COORD
+    JSR _convert_coords_to_mem
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA p2vertxmem
+    STX p2vertxmem+1
+    LDA #ROJO
+    JSR _draw_square    
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA p2vertxmem2
+    STX p2vertxmem2+1
     
     RTS
 .)
