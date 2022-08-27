@@ -154,6 +154,16 @@ _init_game:
     STA p2vertxmem2
     STX p2vertxmem2+1
     
+    LDA #62
+    STA X_COORD
+    STA Y_COORD
+    JSR _convert_coords_to_mem
+    LDA #4
+    STA SQ_WIDTH
+    STA SQ_HEIGHT
+    LDA #AZUR
+    JSR _draw_square
+    
     RTS
 .)
 
@@ -191,6 +201,12 @@ _update_game:
 ; Player 1 moves up
 _player1_up:
 .(
+    LDA p1_vertical_y
+    BNE ok
+    RTS
+    ok:
+    
+    
     DEC p1_vertical_y
     
     SEC
@@ -229,6 +245,12 @@ loop2:
 ; Player 1 moves down
 _player1_down:
 .(
+    LDA #96
+    CMP p1_vertical_y
+    BNE ok
+    RTS
+    ok:
+    
     INC p1_vertical_y
     
     LDA #BACKGROUND
