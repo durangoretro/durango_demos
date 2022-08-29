@@ -73,6 +73,7 @@ p1vertxmem = $00 ; $01
 p1vertxmem2 = $02 ; $03
 p2vertxmem = $04 ; 05
 p2vertxmem2 = $06 ; 07
+ballmem = $08
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -158,13 +159,16 @@ _init_game:
     STA X_COORD
     STA Y_COORD
     JSR _convert_coords_to_mem
+    LDA VMEM_POINTER
+    LDX VMEM_POINTER+1
+    STA ballmem
+    STX ballmem+1
     LDA #4
     STA SQ_WIDTH
     STA SQ_HEIGHT
     LDA #AZUR
-    JSR _draw_square
+    JMP _draw_square
     
-    RTS
 .)
 
 _update_game:
@@ -195,7 +199,7 @@ _update_game:
     JSR _player2_down
 
     end:
-    RTS
+    JMP _move_ball
 .)
 
 ; Player 1 moves up
@@ -357,6 +361,40 @@ loop2:
     BCC skip2
     INC p2vertxmem2+1
     skip2:
+    
+    RTS
+.)
+
+_move_ball:
+.(
+    LDA ballmem
+    LDX ballmem+1
+    STA VMEM_POINTER
+    STX VMEM_POINTER+1
+    PHA
+    PHX
+    LDA #4
+    STA SQ_WIDTH
+    STA SQ_HEIGHT
+    LDA #BACKGROUND
+    JSR _draw_square
+    
+    PLX
+    PLA
+    CLC
+    ADC #$02
+    BCC skip_upper
+    INX
+    skip_upper:
+    STA VMEM_POINTER
+    STX VMEM_POINTER+1
+    STA ballmem
+    STX ballmem+1
+    LDA #4
+    STA SQ_WIDTH
+    STA SQ_HEIGHT
+    LDA #AZUR
+    JSR _draw_square
     
     RTS
 .)
