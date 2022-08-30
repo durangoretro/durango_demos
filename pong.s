@@ -217,7 +217,7 @@ _player1_up:
     LDA p1vertxmem
     SBC #$40
     STA p1vertxmem
-    BCC skip1
+    BCS skip1
     DEC p1vertxmem+1
     skip1:
     
@@ -225,7 +225,7 @@ _player1_up:
     LDA p1vertxmem2
     SBC #$40
     STA p1vertxmem2
-    BCC skip2
+    BCS skip2
     DEC p1vertxmem2+1
     skip2: 
     
@@ -299,7 +299,7 @@ _player2_up:
     LDA p2vertxmem
     SBC #$40
     STA p2vertxmem
-    BCC skip1
+    BCS skip1
     DEC p2vertxmem+1
     skip1:
     
@@ -307,7 +307,7 @@ _player2_up:
     LDA p2vertxmem2
     SBC #$40
     STA p2vertxmem2
-    BCC skip2
+    BCS skip2
     DEC p2vertxmem2+1
     skip2: 
     
@@ -381,6 +381,9 @@ _move_ball:
     
     PLX
     PLA
+    
+    BRA left
+    right:
     CLC
     ADC #$02
     BCC skip_upper
@@ -388,6 +391,18 @@ _move_ball:
     skip_upper:
     STA VMEM_POINTER
     STX VMEM_POINTER+1
+    BRA end
+    
+    left:
+    SEC
+    SBC #$02
+    BCS skip_upper2
+    DEX
+    skip_upper2:
+    STA VMEM_POINTER
+    STX VMEM_POINTER+1
+    
+    end:
     STA ballmem
     STX ballmem+1
     LDA #4
