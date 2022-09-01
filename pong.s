@@ -74,6 +74,7 @@ p1vertxmem2 = $02 ; $03
 p2vertxmem = $04 ; 05
 p2vertxmem2 = $06 ; 07
 ballmem = $08
+ball_speed = $09
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -155,6 +156,10 @@ _init_game:
     STA p2vertxmem2
     STX p2vertxmem2+1
     
+    ; Init ball
+    LDA #$00
+    STA ball_speed
+    
     LDA #62
     STA X_COORD
     STA Y_COORD
@@ -168,6 +173,8 @@ _init_game:
     STA SQ_HEIGHT
     LDA #AZUR
     JMP _draw_square
+    
+    
     
 .)
 
@@ -371,40 +378,26 @@ _move_ball:
     LDX ballmem+1
     STA VMEM_POINTER
     STX VMEM_POINTER+1
-    PHA
-    PHX
+    
     LDA #4
     STA SQ_WIDTH
     STA SQ_HEIGHT
     LDA #BACKGROUND
     JSR _draw_square
-    
-    PLX
-    PLA
-    
-    BRA left
-    right:
+        
+    LDY #$02
+    ;LSB
+    LDA vball_lsb,y
     CLC
-    ADC #$02
-    BCC skip_upper
-    INX
-    skip_upper:
-    STA VMEM_POINTER
-    STX VMEM_POINTER+1
-    BRA end
-    
-    left:
-    SEC
-    SBC #$02
-    BCS skip_upper2
-    DEX
-    skip_upper2:
-    STA VMEM_POINTER
-    STX VMEM_POINTER+1
-    
-    end:
+    ADC ballmem
     STA ballmem
-    STX ballmem+1
+    STA VMEM_POINTER
+    ;MSB
+    LDA vball_msb,y
+    ADC ballmem+1
+    STA ballmem+1
+    STA VMEM_POINTER+1
+        
     LDA #4
     STA SQ_WIDTH
     STA SQ_HEIGHT
@@ -915,6 +908,14 @@ pong_img:
 .byt $00,$0B,$F4,$00,$04,$F0,$0B,$B0,$0F,$04,$F0,$4F,$04,$F0,$BF,$44,$FB,$4F,$04,$F0,$4F,$B4,$BB,$4F,$B4,$BB,$00,$04,$F0,$0B,$BB,$F4,
 .byt $00,$04,$F4,$12,$00,$D1,$BF,$40,$FB,$00,$BF,$40,$FB,$00,$BF,$40,$FB,$0F,$40,$BF,$FF,$B4,$F0,$0B,$B0,$0F,$04,$F0,$4F,$04,$F0,$0B,
 .byt $FF,$B0,$4F,$04,$F0,$4F,$BF,$F4,$4F,$BF,$F4,$0F,$44,$F0,$0B,$B0,$BF,$FF,$B0,$BF,$F0,$7F,$00,$7F,$00,$7F,$00,$7F,$00,$0C,$00,$00,
+
+vball_lsb:
+;LSB
+.byt $00,$02,$fe,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,
+vball_msb:
+;MSB
+.byt $00,$00,$ff,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,
+
 
 .dsb $fffa-*, $ff
 ; === END OF SECOND 8K BLOCK ===
