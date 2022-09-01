@@ -1,0 +1,127 @@
+COMPARISONS
+------------
+Compare Result          N	Z	C
+A, X, or Y < Memory 	*	0	0
+A, X, or Y = Memory 	0	1	1
+A, X, or Y > Memory 	*	0	1
+
+ADDRESSING
+------------
+Absolute, X: Mem[CONST+x]
+LDA $8000,x
+
+Absolute, Y: Mem[CONST+y]
+LDA $8000,y
+
+X, Indirect: Mem[Mem[ZP+x]]
+LDA ($05,x)
+
+Indirect, Y: Mem[Mem[ZP]+y]
+LDA ($10),y
+
+PROCCESSOR FLAGS
+----------------
+NV1BDIZC
+N - Negativo
+V - oVerflow (CLV)
+1 - CTE 1
+B - Break (Software on; hardware off)
+D - Decimal mode (CLD / SED)
+I - IRQ (1 se ignora interrupcion) (CLI / SEI)
+Z - Zero
+C - Carry (CLC / SEC)
+
+
+SALTOS CON BIT
+---------------
+bit 8º on  = BMI salta
+bit 8º off = BPL salta
+bit 7º on  = BVS salta
+bit 7º off = BVC salta
+
+
+BRANCHES
+-----------
+BPL - Branch on PLus            BIT (0*******)
+BMI - Branch on MInus           BIT (1*******)
+BVC - Branch on oVerflow Clear  BIT (*0******)
+BVS - Branch on oVerflow Set    BIT (*1******)
+BCC - Branch on Carry Clear     CMP (A/X/Y <  MEM)
+BCS - Branch on Carry Set       CMP (A/X/Y >= MEM)
+BNE - Branch on Not Equal       CMP (A/X/Y != MEM)
+BEQ - Branch on EQual           CMP (A/X/Y == MEM)
+
+
+
+OPCODES (https://feertech.com/legion/reference65c02.html)
+-----------
+ADC
+AND
+ASL
+BBR
+BBS
+BCC
+BCS
+BEQ
+BIT
+BMI
+BNE
+BPL
+BRA
+BRK
+BVC
+BVS
+CLC
+CLD
+CLI
+CLV
+CMP
+CPX
+CPY
+DEC
+DEX
+DEY
+EOR
+INC
+INX
+INY
+JMP
+JSR
+LDA
+LDX
+LDY
+LSR
+NOP
+ORA
+PHA
+PHP
+PHX
+PHY
+PLA
+PLP
+PLX
+PLY
+RMB
+ROL
+ROR
+RTI
+RTS
+SBC
+SEC
+SED
+SEI
+SMB
+STA
+STP
+STX
+STY
+STZ
+TAX
+TAY
+TRB
+TSB
+TSX
+TXA
+TXS
+TYA
+WAI
