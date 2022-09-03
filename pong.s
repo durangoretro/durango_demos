@@ -73,8 +73,8 @@ p1vertxmem = $00 ; $01
 p1vertxmem2 = $02 ; $03
 p2vertxmem = $04 ; 05
 p2vertxmem2 = $06 ; 07
-ballmem = $08
-ball_speed = $09
+ballmem = $08; 09
+ball_speed = $0a
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -111,6 +111,10 @@ gameloop:
 
 _init_game:
 .(
+; Debug hex value
+LDA #$00
+STA $df94
+
     LDA #BACKGROUND
     JSR fill_screen
     
@@ -157,7 +161,7 @@ _init_game:
     STX p2vertxmem2+1
     
     ; Init ball
-    LDA #$02
+    LDA #$03
     STA ball_speed
     
     LDA #62
