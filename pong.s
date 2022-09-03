@@ -114,7 +114,7 @@ gameloop:
 _init_game:
 .(
 ; Debug hex value
-LDA #$00
+LDA #$03
 STA $df94
 
     LDA #BACKGROUND
@@ -439,6 +439,15 @@ _move_ball:
 
 _check_collisions:
 .(
+    LDX ball_x
+    STX $df93
+    CPX #118
+    BNE next
+    LDY #$02
+    STY ball_speed
+
+    next:
+
     RTS
 .)
 
