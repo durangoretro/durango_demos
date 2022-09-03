@@ -210,6 +210,7 @@ _update_game:
     JSR _player2_down
 
     end:
+    JSR _check_collisions
     JMP _move_ball
 .)
 
@@ -408,6 +409,11 @@ _move_ball:
     LDA #AZUR
     JSR _draw_square
     
+    RTS
+.)
+
+_check_collisions:
+.(
     RTS
 .)
 
