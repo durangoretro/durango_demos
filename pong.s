@@ -74,7 +74,9 @@ p1vertxmem2 = $02 ; $03
 p2vertxmem = $04 ; 05
 p2vertxmem2 = $06 ; 07
 ballmem = $08; 09
-ball_speed = $0a
+ball_x = $0a
+ball_y = $0b
+ball_speed = $0c
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -167,6 +169,8 @@ STA $df94
     LDA #62
     STA X_COORD
     STA Y_COORD
+    STA ball_x
+    STA ball_y
     JSR _convert_coords_to_mem
     LDA VMEM_POINTER
     LDX VMEM_POINTER+1
@@ -391,6 +395,27 @@ _move_ball:
     JSR _draw_square
         
     LDY ball_speed
+    CPY #$01 ; right
+    BNE left
+    INC ball_x
+    INC ball_x
+    
+    left:
+    CPY #$02 ; left
+    BNE up_right
+    DEC ball_x
+    DEC ball_x
+    
+    up_right:
+    CPY #$03 ; up right
+    BNE end
+    INC ball_x
+    INC ball_x
+    DEC ball_y
+    DEC ball_y
+    
+    
+    end:
     ;LSB
     LDA vball_lsb,y
     CLC
