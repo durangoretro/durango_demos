@@ -517,7 +517,10 @@ _draw_square:
 ; VMEM_POINTER VMEM_POINTER+1 current video memory pointer
 _convert_coords_to_mem:
 .(
-    ; Clear VMEM_POINTER
+    LDA #$FB
+	STA $DF94
+	
+	; Clear VMEM_POINTER
     STZ VMEM_POINTER			; correcto, aunque en CMOS tenemos STZ y no necesitas usar X *** OK
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
@@ -548,6 +551,10 @@ _convert_coords_to_mem:
     BCC skip_upper
     INC VMEM_POINTER+1			; de nuevo, suele traer cuenta hacer el BCC que se salte un INC *** ahora OK
     skip_upper:
+
+	LDA #$FC
+	STA $DF94
+
     RTS
 .)
 ; --- end convert_coords_to_mem ---
