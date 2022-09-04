@@ -429,15 +429,23 @@ _move_ball:
 
 _check_collisions:
 .(
-    LDX ball_x
+    ; Check right collision
+	LDX ball_x
     STX $df93
     CPX #118
-    BNE next
+    BNE bottom
 	LDA #$fe
-	STA ball_vx    
+	STA ball_vx
 
-    next:
-
+	bottom:
+	; check bottom collision
+	LDX ball_y
+	CPX #126
+	BNE end
+	LDA #$ff
+	STA ball_vy
+    
+	end:
     RTS
 .)
 
