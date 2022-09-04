@@ -171,10 +171,19 @@ STA $df94
     STA ball_speed
     
     LDA #62
-    STA X_COORD
-    STA Y_COORD
     STA ball_x
     STA ball_y
+    
+    JMP _draw_ball
+.)
+
+_draw_ball:
+.(
+    LDA ball_x
+    LDX ball_y
+    
+    STA X_COORD
+    STX Y_COORD    
     JSR _convert_coords_to_mem
     LDA VMEM_POINTER
     LDX VMEM_POINTER+1
@@ -185,9 +194,8 @@ STA $df94
     STA SQ_HEIGHT
     LDA #AZUR
     JMP _draw_square
-    
-    
-    
+
+    RTS
 .)
 
 _update_game:
@@ -218,6 +226,7 @@ _update_game:
     JSR _player2_down
 
     end:
+    RTS
     JSR _check_collisions
     JMP _move_ball
 .)
