@@ -210,24 +210,28 @@ _update_game:
     BIT CONTROLLER_1
     BEQ down1
     JSR _player1_up
+	JSR _player1_up
 
     down1:
     LDA #BUTTON_DOWN
     BIT CONTROLLER_1
     BEQ up2
     JSR _player1_down
+	JSR _player1_down
     
     up2:
     LDA #BUTTON_UP
     BIT CONTROLLER_2
     BEQ down2
     JSR _player2_up
+	JSR _player2_up
 
     down2:
     LDA #BUTTON_DOWN
     BIT CONTROLLER_2
     BEQ end
     JSR _player2_down
+	JSR _player2_down
 
 	end:
 	JSR _check_collisions
@@ -430,8 +434,20 @@ _check_collisions:
 .(
     ; Check right collision
 	LDX ball_x
-    CPX #114
-    BNE bottom
+    CPX #124
+    BNE right_paddle
+	LDA #0
+	STA ball_vx
+	STA ball_vy
+
+	; Check right paddle
+	right_paddle:
+	LDX ball_y
+    CPX p1_vertical_y
+    BCC bottom
+	LDX p1_vertical_y
+	CPX ball_y
+	BCC bottom
 	LDA #$fe
 	STA ball_vx
 
