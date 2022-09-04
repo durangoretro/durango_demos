@@ -448,9 +448,16 @@ _check_collisions:
 	; check left collision
 	left:
 	LDX ball_x
-	BNE end
+	BNE top
 	LDA #2
 	STA ball_vx
+
+	; check top collision
+	top:
+	LDX ball_y
+	BNE end
+	LDA #1
+	STA ball_vy
     
 	end:
     RTS
