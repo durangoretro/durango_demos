@@ -230,12 +230,8 @@ _update_game:
     JSR _player2_down
 
 	end:
-
-	JMP _move_ball
-
-    RTS
-    JSR _check_collisions
-    
+	JSR _check_collisions
+	JMP _move_ball    
 .)
 
 ; Player 1 moves up
@@ -437,7 +433,9 @@ _check_collisions:
     STX $df93
     CPX #118
     BNE next
-    
+	LDA #$fe
+	STA ball_vx    
+
     next:
 
     RTS
@@ -509,10 +507,7 @@ _draw_square:
 ; VMEM_POINTER VMEM_POINTER+1 current video memory pointer
 _convert_coords_to_mem:
 .(
-    LDA #$FB
-	STA $DF94
-	
-	; Clear VMEM_POINTER
+    ; Clear VMEM_POINTER
     STZ VMEM_POINTER			; correcto, aunque en CMOS tenemos STZ y no necesitas usar X *** OK
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
@@ -544,10 +539,7 @@ _convert_coords_to_mem:
     INC VMEM_POINTER+1			; de nuevo, suele traer cuenta hacer el BCC que se salte un INC *** ahora OK
     skip_upper:
 
-	LDA #$FC
-	STA $DF94
-
-    RTS
+	RTS
 .)
 ; --- end convert_coords_to_mem ---
 
