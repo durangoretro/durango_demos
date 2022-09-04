@@ -403,17 +403,31 @@ loop2:
 
 _move_ball:
 .(
-    LDA ball_x
+	; Clean old ball
+	LDA ballmem
+    LDX ballmem+1
+	STA VMEM_POINTER
+    STX VMEM_POINTER+1
+	LDA #4
+    STA SQ_WIDTH
+    STA SQ_HEIGHT
+    LDA #BACKGROUND
+    JSR _draw_square    
+
+	; Update x coord
+	LDA ball_x
 	CLC
 	ADC ball_vx
 	STA $df93
 	STA ball_x
-    
+
+    ; Update y coord
 	LDA ball_y
 	CLC
 	ADC ball_vy
 	STA ball_y
 
+	; Draw new ball
 	JMP _draw_ball
 .)
 
