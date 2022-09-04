@@ -437,13 +437,20 @@ _check_collisions:
 	LDA #$fe
 	STA ball_vx
 
-	bottom:
 	; check bottom collision
+	bottom:
 	LDX ball_y
 	CPX #126
-	BNE end
+	BNE left
 	LDA #$ff
 	STA ball_vy
+
+	; check left collision
+	left:
+	LDX ball_x
+	BNE end
+	LDA #2
+	STA ball_vx
     
 	end:
     RTS
