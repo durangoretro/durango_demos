@@ -135,7 +135,7 @@ STA $df94
     LDA #2
     STA p1_vertical_x
     STA X_COORD
-    LDA #5
+    LDA #40
     STA p1_vertical_y 
     STA p2_vertical_y
     STA Y_COORD    
