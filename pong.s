@@ -442,11 +442,16 @@ _check_collisions:
 
 	; Check right paddle
 	right_paddle:
+	LDX ball_x
+    CPX #114
+	BNE bottom
 	LDX ball_y
     CPX p1_vertical_y
     BCC bottom
-	LDX p1_vertical_y
-	CPX ball_y
+	LDA p1_vertical_y
+	CLC
+	ADC #PADDLE_WIDTH
+	CMP ball_y
 	BCC bottom
 	LDA #$fe
 	STA ball_vx
