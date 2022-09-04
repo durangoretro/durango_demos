@@ -414,7 +414,6 @@ _move_ball:
 	LDA ball_x
 	CLC
 	ADC ball_vx
-	STA $df93
 	STA ball_x
 
     ; Update y coord
@@ -431,7 +430,6 @@ _check_collisions:
 .(
     ; Check right collision
 	LDX ball_x
-    STX $df93
     CPX #118
     BNE bottom
 	LDA #$fe
