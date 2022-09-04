@@ -76,7 +76,8 @@ p2vertxmem2 = $06 ; 07
 ballmem = $08; 09
 ball_x = $0a
 ball_y = $0b
-ball_speed = $0c
+ball_vx = $0c
+ball_vy = $0d
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -167,8 +168,11 @@ STA $df94
     STX p2vertxmem2+1
     
     ; Init ball
-    LDA #$03
-    STA ball_speed
+    LDA #2
+    LDX #1
+	STA ball_vx
+	STX ball_vy
+	
     
     LDA #62
     STA ball_x
@@ -181,14 +185,14 @@ _draw_ball:
 .(
     LDA ball_x
     LDX ball_y
-    
     STA X_COORD
     STX Y_COORD    
     JSR _convert_coords_to_mem
-    LDA VMEM_POINTER
+	LDA VMEM_POINTER
     LDX VMEM_POINTER+1
-    STA ballmem
+	STA ballmem
     STX ballmem+1
+    
     LDA #4
     STA SQ_WIDTH
     STA SQ_HEIGHT
@@ -200,7 +204,7 @@ _draw_ball:
 
 _update_game:
 .(	
-    ; Player 1
+	; Player 1
     up1:
     LDA #BUTTON_UP
     BIT CONTROLLER_1
@@ -225,10 +229,13 @@ _update_game:
     BEQ end
     JSR _player2_down
 
-    end:
+	end:
+
+	JMP _move_ball
+
     RTS
     JSR _check_collisions
-    JMP _move_ball
+    
 .)
 
 ; Player 1 moves up
@@ -396,58 +403,18 @@ loop2:
 
 _move_ball:
 .(
-    LDA ballmem
-    LDX ballmem+1
-    STA VMEM_POINTER
-    STX VMEM_POINTER+1
+    LDA ball_x
+	CLC
+	ADC ball_vx
+	STA $df93
+	STA ball_x
     
-    LDA #4
-    STA SQ_WIDTH
-    STA SQ_HEIGHT
-    LDA #BACKGROUND
-    JSR _draw_square
-        
-    LDY ball_speed
-    CPY #$01 ; right
-    BNE left
-    INC ball_x
-    INC ball_x
-    
-    left:
-    CPY #$02 ; left
-    BNE up_right
-    DEC ball_x
-    DEC ball_x
-    
-    up_right:
-    CPY #$03 ; up right
-    BNE end
-    INC ball_x
-    INC ball_x
-    DEC ball_y
-    DEC ball_y
-    
-    
-    end:
-    ;LSB
-    LDA vball_lsb,y
-    CLC
-    ADC ballmem
-    STA ballmem
-    STA VMEM_POINTER
-    ;MSB
-    LDA vball_msb,y
-    ADC ballmem+1
-    STA ballmem+1
-    STA VMEM_POINTER+1
-        
-    LDA #4
-    STA SQ_WIDTH
-    STA SQ_HEIGHT
-    LDA #AZUR
-    JSR _draw_square
-    
-    RTS
+	LDA ball_y
+	CLC
+	ADC ball_vy
+	STA ball_y
+
+	JMP _draw_ball
 .)
 
 _check_collisions:
@@ -456,9 +423,7 @@ _check_collisions:
     STX $df93
     CPX #118
     BNE next
-    LDY #$02
-    STY ball_speed
-
+    
     next:
 
     RTS
