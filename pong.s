@@ -440,7 +440,7 @@ _check_collisions:
 	; check bottom collision
 	bottom:
 	LDX ball_y
-	CPX #126
+	CPX #124
 	BNE left
 	LDA #$ff
 	STA ball_vy
