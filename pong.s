@@ -502,6 +502,7 @@ _check_collisions:
     BCC left_crash
     LDA #2
     STA ball_vx
+    BRA top
     left_crash:
     LDA #0
     STA ball_vx
