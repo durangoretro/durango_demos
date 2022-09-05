@@ -459,11 +459,11 @@ _check_collisions:
     LDX ball_y
     CPX p2_vertical_y
     BCC bottom
-;    LDA p1_vertical_y
-;    CLC
-;    ADC #PADDLE_WIDTH
-;    CMP ball_y
-;    BCC bottom
+    LDA p2_vertical_y
+    CLC
+    ADC #PADDLE_HEIGHT
+    CMP ball_y
+    BCC bottom
     LDA #$fe
     STA ball_vx
 
