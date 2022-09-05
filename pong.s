@@ -329,7 +329,12 @@ loop2:
 
 _player2_up:
 .(
-    DEC p1_vertical_y
+    LDA p2_vertical_y
+    BNE ok
+    RTS
+    ok:
+    
+    DEC p2_vertical_y
     
     SEC
     LDA p2vertxmem
@@ -365,6 +370,12 @@ loop2:
 .)
 _player2_down:
 .(
+    LDA #96
+    CMP p2_vertical_y
+    BNE ok
+    RTS
+    ok:
+    
     INC p2_vertical_y
     
     LDA #BACKGROUND
@@ -403,82 +414,82 @@ loop2:
 
 _move_ball:
 .(
-	; Clean old ball
-	LDA ballmem
+    ; Clean old ball
+    LDA ballmem
     LDX ballmem+1
-	STA VMEM_POINTER
+    STA VMEM_POINTER
     STX VMEM_POINTER+1
-	LDA #4
+    LDA #4
     STA SQ_WIDTH
     STA SQ_HEIGHT
     LDA #BACKGROUND
     JSR _draw_square    
 
-	; Update x coord
-	LDA ball_x
-	CLC
-	ADC ball_vx
-	STA ball_x
+    ; Update x coord
+    LDA ball_x
+    CLC
+    ADC ball_vx
+    STA ball_x
 
     ; Update y coord
-	LDA ball_y
-	CLC
-	ADC ball_vy
-	STA ball_y
+    LDA ball_y
+    CLC
+    ADC ball_vy
+    STA ball_y
 
-	; Draw new ball
-	JMP _draw_ball
+    ; Draw new ball
+    JMP _draw_ball
 .)
 
 _check_collisions:
 .(
     ; Check right collision
-	LDX ball_x
+    LDX ball_x
     CPX #124
     BNE right_paddle
-	LDA #0
-	STA ball_vx
-	STA ball_vy
+    LDA #0
+    STA ball_vx
+    STA ball_vy
 
-	; Check right paddle
-	right_paddle:
-	LDX ball_x
+    ; Check right paddle
+    right_paddle:
+    LDX ball_x
     CPX #114
-	BNE bottom
-	LDX ball_y
-    CPX p1_vertical_y
+    BNE bottom
+    LDX ball_y
+    CPX p2_vertical_y
     BCC bottom
-	LDA p1_vertical_y
-	CLC
-	ADC #PADDLE_WIDTH
-	CMP ball_y
-	BCC bottom
-	LDA #$fe
-	STA ball_vx
+;    LDA p1_vertical_y
+;    CLC
+;    ADC #PADDLE_WIDTH
+;    CMP ball_y
+;    BCC bottom
+    LDA #$fe
+    STA ball_vx
 
-	; check bottom collision
-	bottom:
-	LDX ball_y
-	CPX #124
-	BNE left
-	LDA #$ff
-	STA ball_vy
+    ; check bottom collision
+    bottom:
+    LDX ball_y
+    CPX #124
+    BNE left
+    LDA #$ff
+    STA ball_vy
 
-	; check left collision
-	left:
-	LDX ball_x
-	BNE top
-	LDA #2
-	STA ball_vx
+    ; check left collision
+    left:
+    LDX ball_x
+    BNE top
+    LDA #2
+    STA ball_vx
 
-	; check top collision
-	top:
-	LDX ball_y
-	BNE end
-	LDA #1
-	STA ball_vy
+    ; check top collision
+    top:
+    LDX ball_y
+    BNE end
+    LDA #1
+    STA ball_vy
     
-	end:
+    end:
     RTS
 .)
 
