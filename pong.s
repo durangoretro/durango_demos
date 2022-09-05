@@ -443,16 +443,6 @@ _move_ball:
 
 _check_collisions:
 .(
-    ; Check right collision
-    LDX ball_x
-    CPX #124
-    BNE right_paddle
-    ;LDA #0
-    ;STA ball_vx
-    ;STA ball_vy
-    LDA #$fe
-    STA ball_vx
-
     ; Check right paddle
     right_paddle:
     LDX ball_x
@@ -481,14 +471,18 @@ _check_collisions:
     BNE top
     LDX ball_y
     CPX p1_vertical_y
-    BCC top
+    BCC left_crash
     LDA p1_vertical_y
     CLC
     ADC #PADDLE_HEIGHT
     CMP ball_y
-    BCC top
+    BCC left_crash
     LDA #2
     STA ball_vx
+    left_crash:
+    LDA #0
+    STA ball_vx
+    STA ball_vy
 
     ; check top collision
     top:
