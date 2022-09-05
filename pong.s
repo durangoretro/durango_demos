@@ -241,11 +241,16 @@ _update_game:
 ; Player 1 moves up
 _player1_up:
 .(
+    ; Check not game end
+    LDA ball_vx
+    BNE ingame
+    RTS
+    ingame:
+
     LDA p1_vertical_y
     BNE ok
     RTS
-    ok:
-    
+    ok:    
     
     DEC p1_vertical_y
     
@@ -285,6 +290,12 @@ loop2:
 ; Player 1 moves down
 _player1_down:
 .(
+    ; Check not game end
+    LDA ball_vx
+    BNE ingame
+    RTS
+    ingame:
+    
     LDA #96
     CMP p1_vertical_y
     BNE ok
@@ -329,6 +340,12 @@ loop2:
 
 _player2_up:
 .(
+    ; Check not game end
+    LDA ball_vx
+    BNE ingame
+    RTS
+    ingame:
+    
     LDA p2_vertical_y
     BNE ok
     RTS
@@ -370,6 +387,12 @@ loop2:
 .)
 _player2_down:
 .(
+    ; Check not game end
+    LDA ball_vx
+    BNE ingame
+    RTS
+    ingame:
+    
     LDA #96
     CMP p2_vertical_y
     BNE ok
