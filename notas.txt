@@ -55,23 +55,23 @@ BEQ - Branch on EQual           CMP (A/X/Y == MEM)
 
 OPCODES (https://feertech.com/legion/reference65c02.html)
 -----------
-ADC
-AND
-ASL
-BBR
-BBS
-BCC
-BCS
-BEQ
-BIT
-BMI
-BNE
-BPL
-BRA
-BRK
-BVC
-BVS
-CLC
+ADC     ADd with Carry
+AND     AND
+ASL     Arithmetic Shift Left
+BBR     Branch on Bit Reset
+BBS     Branch on Bit Set
+BCC     Branch on Carry Clear
+BCS     Branch on Carry Set
+BEQ     Branch on EQual
+BIT     BIT test
+BMI     Branch on MInus
+BNE     Branch on Not Equal
+BPL     Branch on PLus value
+BRA     BRAnch
+BRK     BReaK
+BVC     Branch on oVerflow Clear
+BVS     Branch on oVerflow Set
+CLC     CLear Carry
 CLD
 CLI
 CLV
