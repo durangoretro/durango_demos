@@ -578,26 +578,20 @@ _draw_square:
 ; VMEM_POINTER VMEM_POINTER+1 current video memory pointer
 _convert_coords_to_mem:
 .(
+    ; Calculate Y coord
     ; Clear VMEM_POINTER
-    STZ VMEM_POINTER			; correcto, aunque en CMOS tenemos STZ y no necesitas usar X *** OK
+    STZ VMEM_POINTER
     ; Multiply y coord by 64 (64 bytes each row)
     LDA Y_COORD
     LSR
-                                ; empiezas bien, pero por qué lo escribes en memoria AHORA? vas a seguir desplazándolo, lo suyo para 16 bits es uno en memoria y otro en A (preferiblemente el que antes se vaya a seguir procesando)
     ROR VMEM_POINTER
-    ; Sencond shift
-    LSR			                ; lo dicho, debería seguir en A
-    ROR VMEM_POINTER			; si VMEM_POINTER se puso a 0, tras rotarlo dos veces es SEGURO que Carry es 0!
+    LSR
+    ROR VMEM_POINTER
     
     ; Add base memory address
-    							; afinando mucho, en virtud de lo anterior no es necesario
-                                ; de nuevo, este valor lo habrías tenido ya en A, no necesitarías cargarlo
     ADC DRAW_BUFFER
     STA VMEM_POINTER+1
-                                ; ERROR! El Carry va del byte bajo al alto, NUNCA al revés. En tu caso jamás se produciría C, por lo que no notarías el fallo 
-                                ;  pero precisamente por eso estas tres instrucciones sobran *** OK ahora
-    
-    
+        
     ; Calculate X coord
     ; Divide x coord by 2 (2 pixel each byte)
     LDA X_COORD
@@ -607,7 +601,7 @@ _convert_coords_to_mem:
     ADC VMEM_POINTER
     STA VMEM_POINTER
     BCC skip_upper
-    INC VMEM_POINTER+1			; de nuevo, suele traer cuenta hacer el BCC que se salte un INC *** ahora OK
+    INC VMEM_POINTER+1
     skip_upper:
 
 	RTS
