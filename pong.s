@@ -447,24 +447,42 @@ _check_collisions:
     LDX ball_x
     CPX #124
     BNE right_paddle
-    LDA #0
+    ;LDA #0
+    ;STA ball_vx
+    ;STA ball_vy
+    LDA #$fe
     STA ball_vx
-    STA ball_vy
 
     ; Check right paddle
     right_paddle:
     LDX ball_x
     CPX #114
-    BNE bottom
+    BNE left_paddle
     LDX ball_y
     CPX p2_vertical_y
-    BCC bottom
+    BCC left_paddle
     LDA p2_vertical_y
     CLC
     ADC #PADDLE_HEIGHT
     CMP ball_y
-    BCC bottom
+    BCC left_paddle
     LDA #$fe
+    STA ball_vx
+    
+    ; Check left paddle
+    left_paddle:
+    LDX ball_x
+    CPX #2+PADDLE_WIDTH
+    BNE bottom
+    LDX ball_y
+    CPX p1_vertical_y
+    BCC bottom
+    LDA p1_vertical_y
+    CLC
+    ADC #PADDLE_HEIGHT
+    CMP ball_y
+    BCC bottom
+    LDA #2
     STA ball_vx
 
     ; check bottom collision
