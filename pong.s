@@ -460,14 +460,19 @@ _check_collisions:
     BNE left_paddle
     LDX ball_y
     CPX p2_vertical_y
-    BCC left_paddle
+    BCC right_crash
     LDA p2_vertical_y
     CLC
     ADC #PADDLE_HEIGHT
     CMP ball_y
-    BCC left_paddle
+    BCC right_crash
     LDA #$fe
     STA ball_vx
+    BRA left_paddle
+    right_crash:
+    LDA #0
+    STA ball_vx
+    STA ball_vy
     
     ; Check left paddle
     left_paddle:
