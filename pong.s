@@ -60,6 +60,7 @@ PADDLE_WIDTH = 8
 PADDLE_WIDTH_HALF = PADDLE_WIDTH / 2
 PADDLE_HEIGHT =32
 BACKGROUND = ROSITA
+SCORES = MAGENTA
 ; -- Global Game vars pointers --
 p1_vertical_x = $0200
 p2_vertical_x = $0201
@@ -122,8 +123,20 @@ _init_game:
 LDA #$03
 STA $df94
 
+    ; Fill bacground
     LDA #BACKGROUND
     JSR fill_screen
+    
+    ; Scores section background
+    LDA #SCORES
+    LDY #128
+    STY SQ_WIDTH
+    LDY #16
+    STY SQ_HEIGHT
+    LDX DRAW_BUFFER
+    STX VMEM_POINTER+1
+    STZ VMEM_POINTER
+    JSR _draw_square
     
     ; Set size
     LDY #PADDLE_WIDTH
