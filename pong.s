@@ -61,6 +61,7 @@ PADDLE_WIDTH_HALF = PADDLE_WIDTH / 2
 PADDLE_HEIGHT =32
 BACKGROUND = ROSITA
 SCORES = MAGENTA
+SCORES_HEIGHT = 16
 ; -- Global Game vars pointers --
 p1_vertical_x = $0200
 p2_vertical_x = $0201
@@ -131,7 +132,7 @@ STA $df94
     LDA #SCORES
     LDY #128
     STY SQ_WIDTH
-    LDY #16
+    LDY #SCORES_HEIGHT
     STY SQ_HEIGHT
     LDX DRAW_BUFFER
     STX VMEM_POINTER+1
@@ -261,6 +262,7 @@ _player1_up:
     ingame:
 
     LDA p1_vertical_y
+    CMP #SCORES_HEIGHT
     BNE ok
     RTS
     ok:    
@@ -355,6 +357,7 @@ _player2_up:
 .(
     ; Check not game end
     LDA ball_vx
+    CMP #SCORES_HEIGHT
     BNE ingame
     RTS
     ingame:
@@ -524,6 +527,7 @@ _check_collisions:
     ; check top collision
     top:
     LDX ball_y
+    CMP #SCORES_HEIGHT
     BNE bottom
     LDA #1
     STA ball_vy
