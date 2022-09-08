@@ -471,6 +471,12 @@ _clean_ball:
     JMP _draw_square  
 .)
 
+_reset_ball:
+.(
+    JSR _clean_ball
+    JMP _init_ball
+.)
+
 _move_ball:
 .(
     ; Clean old ball
@@ -514,6 +520,8 @@ _check_collisions:
     LDA #0
     STA ball_vx
     STA ball_vy
+    JSR _wait_start
+    JSR _reset_ball
     
     ; Check left paddle
     left_paddle:
@@ -535,6 +543,8 @@ _check_collisions:
     LDA #0
     STA ball_vx
     STA ball_vy
+    JSR _wait_start
+    JSR _reset_ball
 
     ; check top collision
     top:
