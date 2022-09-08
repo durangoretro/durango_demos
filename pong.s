@@ -85,6 +85,7 @@ ball_y = $0b
 ball_vx = $0c
 ball_vy = $0d
 p1_score = $0e
+p2_score = $0f
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -187,6 +188,8 @@ _draw_scores:
     ; Init scores data
     LDA #4
     STA p1_score
+    LDA #116
+    STA p2_score
     
     ; Scores section background
     LDA #SCORES
@@ -244,8 +247,23 @@ _point1p:
     JSR _draw_point
     
     LDA p1_score
+    CLC
     ADC #8
     STA p1_score
+      
+    RTS
+.)
+
+_point2p:
+.(
+    LDX p2_score
+    LDA #ROJO
+    JSR _draw_point
+    
+    LDA p2_score
+    SEC
+    SBC #8
+    STA p2_score
       
     RTS
 .)
@@ -605,6 +623,7 @@ _check_collisions:
     LDA #0
     STA ball_vx
     STA ball_vy
+    JSR _point2p
     JSR _wait_start
     JSR _reset_ball
 
