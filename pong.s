@@ -84,6 +84,7 @@ ball_x = $0a
 ball_y = $0b
 ball_vx = $0c
 ball_vy = $0d
+p1_score = $0e
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -183,6 +184,10 @@ STA $df94
 
 _draw_scores:
 .(
+    ; Init scores data
+    LDA #4
+    STA p1_score
+    
     ; Scores section background
     LDA #SCORES
     LDY #128
@@ -214,6 +219,26 @@ loop:
     CPX #124
     BNE loop
     
+    RTS
+.)
+
+_point1p:
+.(
+    LDA p1_score
+    STA X_COORD
+    LDY #1
+    STY Y_COORD
+    JSR _convert_coords_to_mem
+    LDA #SCORES_HEIGHT-2
+    STA SQ_WIDTH
+    STA SQ_HEIGHT
+    LDA #VERDE
+    JSR _draw_square
+    
+    LDA p1_score
+    ADC #8
+    STA p1_score
+      
     RTS
 .)
 
@@ -548,6 +573,7 @@ _check_collisions:
     LDA #0
     STA ball_vx
     STA ball_vy
+    JSR _point1p
     JSR _wait_start
     JSR _reset_ball
     
