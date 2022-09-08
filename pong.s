@@ -202,7 +202,7 @@ loop:
     STA X_COORD
     STY Y_COORD    
     JSR _convert_coords_to_mem
-    LDA #6
+    LDA #SCORES_HEIGHT-2
     STA SQ_WIDTH
     STA SQ_HEIGHT
     LDA #BACKGROUND
