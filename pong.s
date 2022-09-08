@@ -189,9 +189,7 @@ STA $df94
     LDA #2
     LDX #1
 	STA ball_vx
-	STX ball_vy
-	
-    
+	STX ball_vy    
     LDA #62
     STA ball_x
     STA ball_y
@@ -455,7 +453,7 @@ loop2:
     RTS
 .)
 
-_move_ball:
+_clean_ball:
 .(
     ; Clean old ball
     LDA ballmem
@@ -466,7 +464,13 @@ _move_ball:
     STA SQ_WIDTH
     STA SQ_HEIGHT
     LDA #BACKGROUND
-    JSR _draw_square    
+    JMP _draw_square  
+.)
+
+_move_ball:
+.(
+    ; Clean old ball
+    JSR _clean_ball    
 
     ; Update x coord
     LDA ball_x
