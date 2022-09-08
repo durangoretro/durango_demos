@@ -111,12 +111,8 @@ _main:
 gameloop:
 	; Wait vsync
 	JSR _wait_vsync
-LDA #$FB
-STA $DF94
 	; Run game
 	JSR _update_game
-LDA #$FC
-STA $DF94
 	; Wait vsync end
 	JSR _wait_vsync_end
 	; loop
@@ -126,10 +122,6 @@ STA $DF94
 
 _init_game:
 .(
-; Debug hex value
-LDA #$03
-STA $df94
-
     ; Fill bacground
     LDA #BACKGROUND
     JSR fill_screen
