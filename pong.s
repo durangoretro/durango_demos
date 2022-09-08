@@ -186,14 +186,18 @@ STA $df94
     STX p2vertxmem2+1
     
     ; Init ball
+    JMP _init_ball
+.)
+
+_init_ball:
+.(
     LDA #2
     LDX #1
 	STA ball_vx
 	STX ball_vy    
     LDA #62
     STA ball_x
-    STA ball_y
-    
+    STA ball_y    
     JMP _draw_ball
 .)
 
