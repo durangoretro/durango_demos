@@ -548,7 +548,7 @@ _check_collisions:
 
     ; check top collision
     top:
-    LDX ball_y
+    LDA ball_y
     CMP #SCORES_HEIGHT
     BNE bottom
     LDA #1
