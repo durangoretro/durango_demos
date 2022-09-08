@@ -194,7 +194,7 @@ _draw_scores:
     STZ VMEM_POINTER
     JSR _draw_square
     
-    LDX #2
+    LDX #4
 loop:        
     TXA
     PHX
@@ -211,7 +211,7 @@ loop:
     PLA
     ADC #8
     TAX
-    CPX #122
+    CPX #124
     BNE loop
     
     RTS
