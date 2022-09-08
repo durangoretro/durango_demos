@@ -194,6 +194,17 @@ _draw_scores:
     STZ VMEM_POINTER
     JSR _draw_square
     
+    LDA #1
+    LDY #2
+    STA Y_COORD
+    STY X_COORD
+    JSR _convert_coords_to_mem
+    LDA #6
+    STA SQ_WIDTH
+    STA SQ_HEIGHT
+    LDA #BACKGROUND
+    JSR _draw_square
+    
     RTS
 .)
 
