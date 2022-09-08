@@ -194,16 +194,25 @@ _draw_scores:
     STZ VMEM_POINTER
     JSR _draw_square
     
-    LDA #1
-    LDY #2
-    STA Y_COORD
-    STY X_COORD
+    LDX #2
+loop:        
+    TXA
+    PHX
+    LDY #1
+    STA X_COORD
+    STY Y_COORD    
     JSR _convert_coords_to_mem
     LDA #6
     STA SQ_WIDTH
     STA SQ_HEIGHT
     LDA #BACKGROUND
     JSR _draw_square
+    
+    PLA
+    ADC #8
+    TAX
+    CPX #122
+    BNE loop
     
     RTS
 .)
