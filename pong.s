@@ -222,18 +222,26 @@ loop:
     RTS
 .)
 
-_point1p:
+_draw_point:
 .(
-    LDA p1_score
-    STA X_COORD
+    STX X_COORD
+    PHA
     LDY #1
     STY Y_COORD
     JSR _convert_coords_to_mem
     LDA #SCORES_HEIGHT-2
     STA SQ_WIDTH
     STA SQ_HEIGHT
+    PLA
+    JMP _draw_square
+    RTS
+.)
+
+_point1p:
+.(
+    LDX p1_score
     LDA #VERDE
-    JSR _draw_square
+    JSR _draw_point
     
     LDA p1_score
     ADC #8
