@@ -579,6 +579,13 @@ _move_ball:
 
 _check_collisions:
 .(
+    ; End game
+    LDA p2_score
+    CMP p1_score
+    BCS not_end
+    JMP _stop
+    not_end:
+
     ; Check right paddle
     right_paddle:
     LDX ball_x
