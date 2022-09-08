@@ -54,6 +54,10 @@ DRAW_BUFFER = $aa
 CURRENT_COLOR = $ab
 TEMP1 = $ac
 TEMP2 = $ad
+GAMEPAD_CLEAN1 = $b0
+GAMEPAD_CLEAN2 = $b1
+GAMEPAD1 = $b2
+GAMEPAD2 = $b3
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 8
@@ -221,28 +225,28 @@ _update_game:
 	; Player 1
     up1:
     LDA #BUTTON_UP
-    BIT CONTROLLER_1
+    BIT GAMEPAD1
     BEQ down1
     JSR _player1_up
 	JSR _player1_up
 
     down1:
     LDA #BUTTON_DOWN
-    BIT CONTROLLER_1
+    BIT GAMEPAD1
     BEQ up2
     JSR _player1_down
 	JSR _player1_down
     
     up2:
     LDA #BUTTON_UP
-    BIT CONTROLLER_2
+    BIT GAMEPAD2
     BEQ down2
     JSR _player2_up
 	JSR _player2_up
 
     down2:
     LDA #BUTTON_DOWN
-    BIT CONTROLLER_2
+    BIT GAMEPAD2
     BEQ end
     JSR _player2_down
 	JSR _player2_down
@@ -672,17 +676,6 @@ loop:
 ; Fetch gamepads
 _fetch_gamepads:
 .(
-    ; ---- keys ----
-    ; A      -> #$80
-    ; START  -> #$40
-    ; B      -> #$20
-    ; SELECT -> #$10
-    ; UP     -> #$08
-    ; LEFT   -> #$04
-    ; DOWN   -> #$02
-    ; RIGHT  -> #$01
-    ; --------------
-	
     ; 1. write into $DF9C
     STA CONTROLLER_1
     ; 2. write into $DF9D 8 times
@@ -690,7 +683,13 @@ _fetch_gamepads:
     loop:
     STA CONTROLLER_2			; OK, aunque creo que tampoco pasa nada por usar un bucle... preferiblemente con X, que ya ha salvado la ISR
     DEX
-    BNE loop    
+    BNE loop
+    LDA CONTROLLER_1
+    EOR GAMEPAD_CLEAN1
+    STA GAMEPAD1
+    LDA CONTROLLER_2
+    EOR GAMEPAD_CLEAN2
+    STA GAMEPAD2
     RTS
 .)
 
@@ -730,7 +729,7 @@ _wait_frames:
 _wait_start:
 .(
     wait_loop:
-    BIT CONTROLLER_1
+    BIT GAMEPAD1
     BVC wait_loop		; BRAVO! MUY FINO! ;-) ;-)
     RTS
 .)
@@ -928,13 +927,29 @@ RTS
 ; ===================
 _init:
 .(
-    SEI	      ; Disable interrupts
-    LDX #$FF  ; Initialize stack pointer to $01FF
+    ; Disable interrupts
+    SEI
+    ; Initialize stack pointer to $01FF
+    LDX #$FF
     TXS
-    CLD       ; Clear decimal mode
+    ; Clear decimal mode
+    CLD
+    ; Init gamepads
+    STA CONTROLLER_1
+    LDX #8
+    loop:
+    STA CONTROLLER_2
+    DEX
+    BNE loop
+    LDA CONTROLLER_1
+    LDX CONTROLLER_2
+    STA GAMEPAD_CLEAN1
+    STX GAMEPAD_CLEAN2
+    ; Enable Durango interrupts
     LDA #$01
     STA $DFA0
-    CLI       ; Enable interrupts	; no necesitas inicializar ninguna otra cosa para ejecutar las interrupciones, verdad?
+    ; Enable interrupts
+    CLI
     JMP $c000
 .)
 _stop:
