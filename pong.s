@@ -828,7 +828,7 @@ _wait_start:
 .(
     wait_loop:
     BIT GAMEPAD1
-    BVC wait_loop		; BRAVO! MUY FINO! ;-) ;-)
+    BVC wait_loop
     RTS
 .)
 
