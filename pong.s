@@ -262,15 +262,19 @@ _point2p:
 
 _init_ball:
 .(
-    LDA #2
-    LDX #1
+    LDX #$01
+    LDA vx_table,X
+    LDY vy_table,X
 	STA ball_vx
-	STX ball_vy    
+	STY ball_vy    
     LDA #62
     STA ball_x
     STA ball_y    
     JMP _draw_ball
 .)
+
+vx_table: .byt $02, $fe, $02, $fe
+vy_table: .byt $01, $ff, $ff, $01
 
 _draw_ball:
 .(
