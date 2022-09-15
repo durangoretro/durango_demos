@@ -58,6 +58,7 @@ GAMEPAD_CLEAN1 = $b0
 GAMEPAD_CLEAN2 = $b1
 GAMEPAD1 = $b2
 GAMEPAD2 = $b3
+RANDOM = $b4
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 8
@@ -262,7 +263,7 @@ _point2p:
 
 _init_ball:
 .(
-    LDX #$01
+    LDX RANDOM
     LDA vx_table,X
     LDY vy_table,X
 	STA ball_vx
@@ -832,6 +833,7 @@ _wait_frames:
 _wait_start:
 .(
     loop:
+    INC RANDOM
     BIT GAMEPAD1
     BMI exit_loop
     BVS exit_loop
@@ -840,6 +842,9 @@ _wait_start:
     BVS exit_loop
     BRA loop
     exit_loop:
+    LDA RANDOM
+    AND #$03
+    STA RANDOM
     RTS
 .)
 
