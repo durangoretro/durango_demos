@@ -440,9 +440,10 @@ _player2_up:
     ingame:
     
     LDA p2_vertical_y
+    CMP #SCORES_HEIGHT
     BNE ok
     RTS
-    ok:
+    ok: 
     
     DEC p2_vertical_y
     
@@ -826,9 +827,15 @@ _wait_frames:
 ; Wait START button
 _wait_start:
 .(
-    wait_loop:
+    loop:
     BIT GAMEPAD1
-    BVC wait_loop
+    BMI exit_loop
+    BVS exit_loop
+    BIT GAMEPAD2
+    BMI exit_loop
+    BVS exit_loop
+    BRA loop
+    exit_loop:
     RTS
 .)
 
