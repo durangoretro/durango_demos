@@ -27,8 +27,8 @@ geometrics.casm: geometrics.c
 	cc65 -I $(DCINC) geometrics.c -t none --cpu 65C02 -o geometrics.casm
 geometrics.o: geometrics.casm
 	ca65 -t none geometrics.casm -o geometrics.o
-geometrics.bin: geometrics.o $(DCLIB)/durango.lib $(DCLIB)/geometrics.lib
-	ld65 -C $(CFG) geometrics.o $(DCLIB)/geometrics.lib $(DCLIB)/durango.lib -o geometrics.bin	
+geometrics.bin: geometrics.o $(DCLIB)/durango.lib $(DCLIB)/geometrics.lib $(DCLIB)/psv.lib
+	ld65 -C $(CFG) geometrics.o $(DCLIB)/geometrics.lib $(DCLIB)/psv.lib $(DCLIB)/durango.lib -o geometrics.bin	
 	
 clean:
 	rm -rf *.bin *.asm *.o
