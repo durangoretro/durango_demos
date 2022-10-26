@@ -28,7 +28,7 @@ geometrics.casm: geometrics.c
 geometrics.o: geometrics.casm
 	ca65 -t none geometrics.casm -o geometrics.o
 geometrics.bin: geometrics.o $(DCLIB)/durango.lib $(DCLIB)/geometrics.lib
-	ld65 -C $(CFG) geometrics.o $(DCLIB)/durango.lib $(DCLIB)/geometrics.lib -o geometrics.bin	
+	ld65 -C $(CFG) geometrics.o $(DCLIB)/geometrics.lib $(DCLIB)/durango.lib -o geometrics.bin	
 	
 clean:
 	rm -rf *.bin *.asm *.o
