@@ -2,7 +2,7 @@ CFG=../dclib/cfg/durango16k.cfg
 DCLIB=../dclib/bin
 DCINC=../dclib/inc
 
-all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin
+all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin conio.bin
 
 hello_world.bin: hello_world.s
 	xa hello_world.s -o hello_world.bin
@@ -29,6 +29,13 @@ geometrics.o: geometrics.casm
 	ca65 -t none geometrics.casm -o geometrics.o
 geometrics.bin: geometrics.o $(DCLIB)/durango.lib $(DCLIB)/geometrics.lib $(DCLIB)/psv.lib
 	ld65 -C $(CFG) geometrics.o $(DCLIB)/geometrics.lib $(DCLIB)/psv.lib $(DCLIB)/durango.lib -o geometrics.bin	
+
+conio.casm: conio.c
+	cc65 -I $(DCINC) conio.c -t none --cpu 65C02 -o conio.casm
+conio.o: conio.casm
+	ca65 -t none conio.casm -o conio.o
+conio.bin: conio.o $(DCLIB)/durango.lib $(DCLIB)/conio.lib $(DCLIB)/psv.lib
+	ld65 -C $(CFG) conio.o $(DCLIB)/conio.lib $(DCLIB)/psv.lib $(DCLIB)/durango.lib -o conio.bin	
 	
 clean:
 	rm -rf *.bin *.asm *.o
