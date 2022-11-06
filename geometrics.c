@@ -14,7 +14,12 @@ int main(void){
     
     consoleLogStr("Draw Rect\n");
     startStopwatch();
-    drawRect(30,30, 10, 20, 0x44);
+    drawRect(45,45, 5, 10, 0x77);
+    stopStopwatch();
+    
+    consoleLogStr("Draw Fill Rect\n");
+    startStopwatch();
+    drawFillRect(30,30, 10, 20, 0x66);
     stopStopwatch();
     
     consoleLogStr("Draw Line\n");
@@ -24,7 +29,7 @@ int main(void){
     
     consoleLogStr("Draw Circle\n");
     startStopwatch();
-    drawCircle(64,64, 10, 0x55);
+    drawCircle(64,64, 10, 0x88);
     stopStopwatch();
     
     while(1);
