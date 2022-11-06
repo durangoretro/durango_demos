@@ -22,6 +22,11 @@ int main(void){
     drawLine(5,5, 100, 100, 0x55);
     stopStopwatch();
     
+    consoleLogStr("Draw Circle\n");
+    startStopwatch();
+    drawCircle(64,64, 10, 0x55);
+    stopStopwatch();
+    
     while(1);
     
     return 0;
