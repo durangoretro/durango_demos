@@ -13,7 +13,7 @@ gamepads.bin: gamepads.s
 	xa gamepads.s -o gamepads.bin
 
 serial.bin: serial.s
-	xa serial.s -o serial.bin
+	xa -w serial.s -o serial.bin
 
 pong.bin: pong.s
 	xa pong.s -o pong.bin
