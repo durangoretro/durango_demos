@@ -3,7 +3,8 @@
 
 int main(void){
     conio_init();
-    printf("Hello World!", default_font);
+    set_font(default_font);
+    printf("Hello World!");
     
     return 0;
 }
