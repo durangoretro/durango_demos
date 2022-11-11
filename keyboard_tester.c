@@ -3,13 +3,19 @@
 #include <psv.h>
 
 void drawKeyboard(void);
+unsigned char getColor(unsigned char v);
 
 
 unsigned char display_keyboard[40];
 
 int main(void){
+    unsigned char i;
     
     drawFullScreen(CIAN);
+    
+    for(i=0; i<40; i++) {
+        display_keyboard[i]=0;
+    }
     
     while(1) {
         drawKeyboard();
@@ -19,13 +25,14 @@ int main(void){
 }
 
 void drawKeyboard() {
-    unsigned char i, r, c, x, y;
-    
+    unsigned char i, r, c, x, y, color;
+    i=0;
     x=15;
     y=10;
     
     for(r=0; r<4; r++) {
         for(c=0; c<10; c++) {
+            color=getColor(display_keyboard[i++]);
             drawFillRect(x, y, 5, 5, RED);
             x+=10;
         }
@@ -33,4 +40,10 @@ void drawKeyboard() {
         y+=10;
     }
     
+}
+
+unsigned char getColor(unsigned char v) {
+    if(v==0) {
+        return RED;
+    }
 }
