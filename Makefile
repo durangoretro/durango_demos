@@ -44,8 +44,8 @@ keyboard_tester.casm: keyboard_tester.c
 	cc65 -I $(DCINC) keyboard_tester.c -t none --cpu 65C02 -o keyboard_tester.casm
 keyboard_tester.o: keyboard_tester.casm
 	ca65 -t none keyboard_tester.casm -o keyboard_tester.o
-keyboard_tester.bin: keyboard_tester.o $(DCLIB)/durango.lib $(DCLIB)/psv.lib $(DCLIB)/geometrics.lib
-	ld65 -C $(CFG) keyboard_tester.o $(DCLIB)/psv.lib $(DCLIB)/geometrics.lib $(DCLIB)/durango.lib -o keyboard_tester.bin	
-	
+keyboard_tester.bin: keyboard_tester.o $(DCLIB)/durango.lib $(DCLIB)/psv.lib $(DCLIB)/geometrics.lib $(DCLIB)/system.lib
+	ld65 -C $(CFG) keyboard_tester.o $(DCLIB)/psv.lib $(DCLIB)/geometrics.lib $(DCLIB)/system.lib $(DCLIB)/durango.lib -o keyboard_tester.bin
+
 clean:
 	rm -rf *.bin *.asm *.o
