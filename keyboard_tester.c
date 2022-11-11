@@ -17,6 +17,9 @@ int main(void){
         display_keyboard[i]=0;
     }
     
+    display_keyboard[13]=1;
+    display_keyboard[14]=2;
+    
     while(1) {
         drawKeyboard();
     }
@@ -33,7 +36,7 @@ void drawKeyboard() {
     for(r=0; r<4; r++) {
         for(c=0; c<10; c++) {
             color=getColor(display_keyboard[i++]);
-            drawFillRect(x, y, 5, 5, RED);
+            drawFillRect(x, y, 5, 5, color);
             x+=10;
         }
         x=15;
@@ -45,5 +48,11 @@ void drawKeyboard() {
 unsigned char getColor(unsigned char v) {
     if(v==0) {
         return RED;
+    }
+    if(v==1) {
+        return NAVY_BLUE;
+    }
+    if(v==2) {
+        return PHARMACY_GREEN;
     }
 }
