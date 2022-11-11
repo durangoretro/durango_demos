@@ -9,6 +9,8 @@ unsigned char display_keyboard[40];
 
 int main(void){
     
+    drawFullScreen(CIAN);
+    
     while(1) {
         drawKeyboard();
     }
