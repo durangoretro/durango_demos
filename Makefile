@@ -2,7 +2,7 @@ CFG=../dclib/cfg/durango16k.cfg
 DCLIB=../dclib/bin
 DCINC=../dclib/inc
 
-all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin conio.bin minstrel_test.bin
+all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin
 
 hello_world.bin: hello_world.s
 	xa hello_world.s -o hello_world.bin
@@ -39,6 +39,13 @@ conio.bin: conio.o $(DCLIB)/durango.lib $(DCLIB)/conio.lib $(DCLIB)/psv.lib
 	
 minstrel_test.bin: minstrel_test.s
 	xa minstrel_test.s -o minstrel_test.bin
+
+keyboard_tester.casm: keyboard_tester.c
+	cc65 -I $(DCINC) keyboard_tester.c -t none --cpu 65C02 -o keyboard_tester.casm
+keyboard_tester.o: keyboard_tester.casm
+	ca65 -t none keyboard_tester.casm -o keyboard_tester.o
+keyboard_tester.bin: keyboard_tester.o $(DCLIB)/durango.lib $(DCLIB)/psv.lib
+	ld65 -C $(CFG) keyboard_tester.o $(DCLIB)/psv.lib $(DCLIB)/durango.lib -o keyboard_tester.bin	
 	
 clean:
 	rm -rf *.bin *.asm *.o
