@@ -15,6 +15,7 @@ SERIAL_BINARY = $02
 SERIAL_DUMP = $fd
 SERIAL_STACK = $fe
 SERIAL_STAT = $ff
+KEYBOARD = $df9b
 CONTROLLER_1 = $df9c
 CONTROLLER_2 = $df9d
 BUTTON_A = $80
@@ -58,7 +59,8 @@ GAMEPAD_CLEAN1 = $b0
 GAMEPAD_CLEAN2 = $b1
 GAMEPAD1 = $b2
 GAMEPAD2 = $b3
-RANDOM = $b4
+KEYBOARD_CACHE = $b4
+RANDOM = $b5
 
 ; -- Global Game constants --
 PADDLE_WIDTH = 8
@@ -101,6 +103,10 @@ _main:
 	STA VIDEO_MODE
     LDA #$60
     STA DRAW_BUFFER
+    
+    ; Enable debug
+    LDA #$F2
+    STA $df94
 	
 	; Display title for 120 frames
     JSR _draw_title
@@ -797,6 +803,15 @@ _fetch_gamepads:
     RTS
 .)
 
+_fetch_keyboard:
+.(
+    LDA #1
+    STA KEYBOARD
+    LDA KEYBOARD
+    STA KEYBOARD_CACHE
+    RTS
+.)
+
 ; Wait for vsync.
 _wait_vsync:
 .(
@@ -840,6 +855,10 @@ _wait_start:
     BIT GAMEPAD2
     BMI exit_loop
     BVS exit_loop
+    LDA KEYBOARD_CACHE
+    LSR
+    LSR
+    BCS exit_loop
     BRA loop
     exit_loop:
     LDA RANDOM
@@ -1087,6 +1106,7 @@ _irq_int:
     
     ; Actual interrupt code
     JSR _fetch_gamepads						; correcto, pero recuerda que esa rutina no podrá afectar Y, pues no se ha salvado
+    JSR _fetch_keyboard
     
     ; Return from interrupt
     PLX                    ; Restore X register contents
