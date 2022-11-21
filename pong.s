@@ -93,6 +93,7 @@ ball_vx = $0c
 ball_vy = $0d
 p1_score = $0e
 p2_score = $0f
+level = $20
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -111,6 +112,10 @@ _main:
     ; Enable debug
     LDA #$F2
     STA $df94
+    
+    ; Initialize level
+    LDA #1
+    STA level
 	
 	; Display title for 120 frames
     JSR _draw_title
@@ -274,7 +279,13 @@ _point2p:
 _init_ball:
 .(
     LDX RANDOM
+    LDY level
+    BEQ easy
     LDA vx_table,X
+    BRA next
+    easy:
+    LDA vy_table,X
+    next:
     LDY vy_table,X
 	STA ball_vx
 	STY ball_vy    
