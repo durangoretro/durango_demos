@@ -26,6 +26,10 @@ BUTTON_UP = $08
 BUTTON_LEFT = $04
 BUTTON_DOWN = $02
 BUTTON_RIGHT = $01
+KEY_1 = $80
+KEY_Q = $40
+KEY_0 = $20
+KEY_P = $08
 NEGRO = $00
 VERDE = $11
 ROJO = $22
@@ -310,13 +314,27 @@ _update_game:
     up1:
     LDA #BUTTON_UP
     BIT GAMEPAD1
-    BEQ down1
+    BEQ kup1
     JSR _player1_up
 	JSR _player1_up
+    
+    kup1:
+    LDA #KEY_1
+    BIT KEYBOARD_CACHE
+    BEQ down1
+    JSR _player1_up
+	JSR _player1_up 
 
     down1:
     LDA #BUTTON_DOWN
     BIT GAMEPAD1
+    BEQ kdown1
+    JSR _player1_down
+	JSR _player1_down
+    
+    kdown1:
+    LDA #KEY_Q
+    BIT KEYBOARD_CACHE
     BEQ up2
     JSR _player1_down
 	JSR _player1_down
@@ -324,6 +342,13 @@ _update_game:
     up2:
     LDA #BUTTON_UP
     BIT GAMEPAD2
+    BEQ Kup2
+    JSR _player2_up
+	JSR _player2_up
+    
+    Kup2:
+    LDA #KEY_0
+    BIT KEYBOARD_CACHE
     BEQ down2
     JSR _player2_up
 	JSR _player2_up
@@ -331,6 +356,13 @@ _update_game:
     down2:
     LDA #BUTTON_DOWN
     BIT GAMEPAD2
+    BEQ Kdown2
+    JSR _player2_down
+	JSR _player2_down
+    
+    Kdown2:
+    LDA #KEY_P
+    BIT KEYBOARD_CACHE
     BEQ end
     JSR _player2_down
 	JSR _player2_down
