@@ -664,7 +664,13 @@ _check_collisions:
     ADC #PADDLE_HEIGHT
     CMP ball_y
     BCC right_crash
+    LDA level
+    BEQ easy
     LDA #$fe
+    BRA next
+    easy:
+    LDA #$ff
+    next:
     STA ball_vx
     BRA left_paddle
     right_crash:
@@ -688,7 +694,13 @@ _check_collisions:
     ADC #PADDLE_HEIGHT
     CMP ball_y
     BCC left_crash
+    LDA level
+    BEQ easy2
     LDA #2
+    BRA next2
+    easy2:
+    LDA #1    
+    next2:
     STA ball_vx
     BRA top
     left_crash:
