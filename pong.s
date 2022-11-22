@@ -129,7 +129,6 @@ gameloop:
 	JSR _wait_vsync
 	; Run game
 	JSR _update_game
-    JSR _update_level
 	; Wait vsync end
 	JSR _wait_vsync_end
 	; loop
@@ -1169,6 +1168,7 @@ _irq_int:
     ; Actual interrupt code
     JSR _fetch_gamepads						; correcto, pero recuerda que esa rutina no podrá afectar Y, pues no se ha salvado
     JSR _fetch_keyboard
+    JSR _update_level
     
     ; Return from interrupt
     PLX                    ; Restore X register contents
