@@ -93,7 +93,7 @@ ball_vx = $0c
 ball_vy = $0d
 p1_score = $0e
 p2_score = $0f
-level = $20
+level = $10
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
@@ -129,6 +129,7 @@ gameloop:
 	JSR _wait_vsync
 	; Run game
 	JSR _update_game
+    JSR _update_level
 	; Wait vsync end
 	JSR _wait_vsync_end
 	; loop
@@ -378,9 +379,27 @@ _update_game:
     JSR _player2_down
 	JSR _player2_down
 
-	end:
+	end:    
 	JSR _check_collisions
 	JMP _move_ball    
+.)
+
+_update_level:
+.(
+    LDA KEYBOARD_CACHE
+    LSR
+    BCC skip
+    LDX #1
+    STX level
+    skip:
+    
+    LSR
+    LSR
+    BCC skip2
+    STZ level
+    skip2:
+    
+    RTS
 .)
 
 ; Player 1 moves up
