@@ -10,22 +10,24 @@ void test_ifnumber(void);
 void test_do_while(void);
 void test_for(void);
 void test_while(void);
+void test_array(void);
 
 struct point {
-    unsigned char x, y;
+    unsigned char x, y,z;
 };
 
 
 unsigned char i, j;
 struct point p[10];
+unsigned char myarray[10];
 
 int main(void){    
-    p[0].x=1;
-    p[0].y=2;
-    
-    p[1].x=3;
-    p[1].y=4;
     return 0;
+}
+
+void test_array() {
+    i=0;
+    consoleLogHex(p[i].x);
 }
 
 void test_if(void) {
