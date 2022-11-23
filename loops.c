@@ -1,0 +1,55 @@
+// https://github.com/cc65/cc65/tree/master/libsrc/runtime
+
+
+#include <system.h>
+#include <psv.h>
+
+void test_if(void);
+void test_ifnot(void);
+void test_ifnumber(void);
+void test_do_while(void);
+void test_for(void);
+void test_while(void);
+
+
+unsigned char i;
+
+int main(void){    
+    return 0;
+}
+
+void test_if(void) {
+    if(i==0) {
+        consoleLogHex(i);
+    }
+}
+
+void test_ifnot(void) {
+    if(i!=0) {
+        consoleLogHex(i);
+    }
+}
+
+void test_ifnumber(void) {
+    if(i==5) {
+        consoleLogHex(i);
+    }
+}
+
+void test_do_while() {
+    do {
+        consoleLogHex(i);
+    }while(i!=0);
+}
+
+void test_for() {
+    for(i=0; i!=10; i++) {
+        consoleLogHex(i);
+    }
+}
+
+void test_while() {
+    while(i!=10) {
+        consoleLogHex(i);
+    }
+}
