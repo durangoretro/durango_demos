@@ -13,6 +13,8 @@ void test_while(void);
 void test_array(void);
 void test_pointer(void);
 void test_pointer2(void);
+void test_le(void);
+void test_less(void);
 
 struct point {
     unsigned char x, y,z;
@@ -40,7 +42,25 @@ void test_pointer() {
 void test_pointer2() {
     consoleLogDecimal(sizeof(p[0]));
     mypointer = p;
-    mypointer+=sizeof(p[0]);
+    mypointer+=1;
+}
+
+void test_le() {
+    if(i<=j) {
+        consoleLogHex(i);
+    }
+    else {
+        consoleLogDecimal(i);
+    }
+}
+
+void test_less() {
+    if(i<j) {
+        consoleLogHex(i);
+    }
+    else {
+        consoleLogDecimal(i);
+    }
 }
 
 void test_array() {
