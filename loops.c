@@ -11,6 +11,8 @@ void test_do_while(void);
 void test_for(void);
 void test_while(void);
 void test_array(void);
+void test_pointer(void);
+void test_pointer2(void);
 
 struct point {
     unsigned char x, y,z;
@@ -19,10 +21,26 @@ struct point {
 
 unsigned char i, j;
 struct point p[10];
+struct point p2;
 unsigned char myarray[10];
+struct point *mypointer;
 
 int main(void){    
     return 0;
+}
+
+void test_pointer() {
+    mypointer = p;
+    consoleLogDecimal(0x00);
+    consoleLogHex(mypointer->y);
+    consoleLogDecimal(sizeof(p2));
+    consoleLogDecimal(sizeof(p[0]));
+}
+
+void test_pointer2() {
+    consoleLogDecimal(sizeof(p[0]));
+    mypointer = p;
+    mypointer+=sizeof(p[0]);
 }
 
 void test_array() {
