@@ -49,6 +49,13 @@ keyboard_tester.bin: keyboard_tester.o $(DCLIB)/durango.lib $(DCLIB)/psv.lib $(D
 	
 loops.casm: loops.c
 	cc65 -I $(DCINC) loops.c -t none --cpu 65C02 -o loops.casm
+	
+newlib.casm: newlib.c
+	cc65 -I ../DurangoLib/inc newlib.c -t none --cpu 65C02 -o newlib.casm
+newlib.o: newlib.casm
+	ca65 -t none newlib.casm -o newlib.o
+newlib.bin: newlib.o ../DurangoLib/bin/durango.lib
+	ld65 -C ../DurangoLib/cfg/durango16k.cfg newlib.o ../DurangoLib/bin/durango.lib -o newlib.bin
 
 clean:
 	rm -rf *.bin *.asm *.o
