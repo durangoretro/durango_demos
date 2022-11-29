@@ -26,10 +26,10 @@ BUTTON_UP = $08
 BUTTON_LEFT = $04
 BUTTON_DOWN = $02
 BUTTON_RIGHT = $01
-KEY_1 = $80
-KEY_Q = $40
-KEY_0 = $20
-KEY_P = $08
+KEY_1 = $01
+KEY_Q = $02
+KEY_0 = $08
+KEY_P = $10
 NEGRO = $00
 VERDE = $11
 ROJO = $22
@@ -386,14 +386,14 @@ _update_game:
 _update_level:
 .(
     LDA KEYBOARD_CACHE
-    LSR
+    ASL
     BCC skip
     LDX #1
     STX level
     skip:
     
-    LSR
-    LSR
+    ASL
+    ASL
     BCC skip2
     STZ level
     skip2:
@@ -929,8 +929,8 @@ _wait_start:
     BMI exit_loop
     BVS exit_loop
     LDA KEYBOARD_CACHE
-    LSR
-    LSR
+    ASL
+    ASL
     BCS exit_loop
     BRA loop
     exit_loop:
