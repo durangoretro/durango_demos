@@ -15,6 +15,7 @@ void test_pointer(void);
 void test_pointer2(void);
 void test_le(void);
 void test_less(void);
+void test_stack(void);
 
 struct point {
     unsigned char x, y,z;
@@ -107,4 +108,9 @@ void test_while() {
     while(i!=10) {
         consoleLogHex(i);
     }
+}
+
+void test_stack() {
+    char local_var;
+    local_var = 15;
 }
