@@ -68,4 +68,4 @@ datatypes.casm: datatypes.c
 	cc65 -I $(DCINC) datatypes.c -t none --cpu 65C02 -o datatypes.casm
 
 clean:
-	rm -rf *.bin *.asm *.casm *.o *.txt
+	rm -rf *.bin *.asm *.casm *.o
