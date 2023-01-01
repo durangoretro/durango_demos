@@ -2,7 +2,7 @@ CFG=../dclib/cfg/durango16k.cfg
 DCLIB=../dclib/bin
 DCINC=../dclib/inc
 
-all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin loops.casm newlib.bin datatypes.casm newconio.bin
+all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin loops.casm newlib.bin datatypes.casm newconio.bin starter.bin
 
 hello_world.bin: hello_world.s
 	xa hello_world.s -o hello_world.bin
@@ -66,6 +66,9 @@ newconio.bin: newconio.o ../DurangoLib/bin/durango.lib
 
 datatypes.casm: datatypes.c
 	cc65 -I $(DCINC) datatypes.c -t none --cpu 65C02 -o datatypes.casm
+
+starter.bin: starter.s
+	xa starter.s -o starter.bin
 
 clean:
 	rm -rf *.bin *.asm *.casm *.o
