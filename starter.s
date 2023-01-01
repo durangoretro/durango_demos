@@ -17,16 +17,22 @@ INY
 BNE wait_loop
 EOR #$04
 STA $df80
-BCC wait_loop
+BRA wait_loop
+CLC
 .)
 
 end: JMP end
 
+nmi:
+.(
+	SEC
+	RTI
+.)
 
 ; === FILLING ===
 .dsb    $fffa-*, $ff
 * = $fffa
 ; === VECTORS ===
-.word $0000 ; NMI vector
+.word nmi ; NMI vector
 .word begin ; Reset vector
 .word $0000 ; IRQ/BRK vector
