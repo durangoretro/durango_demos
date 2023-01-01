@@ -7,8 +7,25 @@ begin:
 LDA #%10001100
 STA $df80
 
+; Wait some time
+.(
+LDA #$00
+LDX #$00
+LDY #$00
+wait_loop:
+INX
+BNE wait_loop
+INY
+BNE wait_loop
+INA
+BNE wait_loop
+.)
+
 ; Quick led flash
 .(
+LDA $df80
+LDX #$00
+LDY #$00
 wait_loop:
 INX
 BNE wait_loop
