@@ -2,6 +2,14 @@
 
 begin:
 
+; Initialize regs
+.(
+SEI
+CLD
+LDX #$FF
+TXS
+.)
+
 ; Set video mode
 ; [HiRes Invert S1 S0    RGB LED NC NC]
 LDA #%10001100
@@ -17,7 +25,7 @@ INY
 BNE wait_loop
 EOR #$04
 STA $df80
-BRA wait_loop
+BCC wait_loop
 CLC
 .)
 
@@ -25,7 +33,15 @@ end: JMP end
 
 nmi:
 .(
-	SEC
+	PHA
+	PHX
+	TSX
+	LDA $103,X
+	ORA #$01
+	STA $103,X
+
+	PLX
+	PLA	
 	RTI
 .)
 
