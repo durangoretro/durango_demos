@@ -21,9 +21,26 @@ INA
 BNE wait_loop
 .)
 
+LDA #%10001000
+STA $df80
+
+; Wait some time
+.(
+LDA #$00
+LDX #$00
+LDY #$00
+wait_loop:
+INX
+BNE wait_loop
+INY
+BNE wait_loop
+INA
+BNE wait_loop
+.)
+
 ; Quick led flash
 .(
-LDA $df80
+LDA #%10001100
 LDX #$00
 LDY #$00
 wait_loop:
