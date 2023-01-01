@@ -18,9 +18,11 @@ BRA wait_loop
 
 end: JMP end
 
-.dsb    $fffa-*, $ff    ; filling
 
+; === FILLING ===
+.dsb    $fffa-*, $ff
 * = $fffa
-    .word begin
-    .word begin
-    .word begin
+; === VECTORS ===
+.word $0000 ; NMI vector
+.word begin ; Reset vector
+.word $0000 ; IRQ/BRK vector
