@@ -7,42 +7,9 @@ begin:
 LDA #%10001100
 STA $df80
 
-; Wait some time
-.(
-LDA #$00
-LDX #$00
-LDY #$00
-wait_loop:
-INX
-BNE wait_loop
-INY
-BNE wait_loop
-INA
-BNE wait_loop
-.)
-
-LDA #%10001000
-STA $df80
-
-; Wait some time
-.(
-LDA #$00
-LDX #$00
-LDY #$00
-wait_loop:
-INX
-BNE wait_loop
-INY
-BNE wait_loop
-INA
-BNE wait_loop
-.)
-
 ; Quick led flash
 .(
-LDA #%10001100
-LDX #$00
-LDY #$00
+CLC
 wait_loop:
 INX
 BNE wait_loop
@@ -50,7 +17,7 @@ INY
 BNE wait_loop
 EOR #$04
 STA $df80
-BRA wait_loop
+BCC wait_loop
 .)
 
 end: JMP end
