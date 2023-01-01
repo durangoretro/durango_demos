@@ -7,6 +7,8 @@ begin:
 LDA #%10001100
 STA $df80
 
+; Quick led flash
+.(
 wait_loop:
 INX
 BNE wait_loop
@@ -15,6 +17,7 @@ BNE wait_loop
 EOR #$04
 STA $df80
 BRA wait_loop
+.)
 
 end: JMP end
 
