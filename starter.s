@@ -28,8 +28,6 @@ STA $df80
 BCC wait_loop
 .)
 
-; 2. Play tone
-
 ; 3. Fill up screen 0
 .(
 LDA #$FF
@@ -130,6 +128,13 @@ CLC
 wait: BCC wait
 .)
 
+; 2. Play tone
+
+; Test IRQ
+
+
+
+
 forever: JMP forever
 
 nmi:
@@ -149,6 +154,9 @@ nmi:
 .)
 
 ; === FILLING ===
+#echo done!
+used_space = *-begin
+#print used_space
 .dsb    $fffa-*, $ff
 * = $fffa
 ; === VECTORS ===
