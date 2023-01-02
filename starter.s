@@ -129,6 +129,15 @@ wait: BCC wait
 .)
 
 ; 2. Play tone
+LDX #$ff     ; Duration
+dur_loop:
+STX $dfb0
+LDY #63    ; Frequency
+loop:
+DEY
+BNE loop
+DEX
+BPL dur_loop
 
 ; Test IRQ
 
