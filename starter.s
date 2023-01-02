@@ -88,6 +88,48 @@ CLC
 wait: BCC wait
 .)
 
+; 4. Fill up screen 2
+.(
+LDA #%00101000
+STA $df80
+LDA #$22
+LDY #$00
+STY $01
+LDX #$02
+STX $00
+loop:
+STA ($00),Y
+INY
+BNE loop
+INC $01
+BPL loop
+STA $00
+STA $01
+CLC
+wait: BCC wait
+.)
+
+; 4. Fill up screen 3
+.(
+LDA #%00111000
+STA $df80
+LDA #$33
+LDY #$00
+STY $01
+LDX #$02
+STX $00
+loop:
+STA ($00),Y
+INY
+BNE loop
+INC $01
+BPL loop
+STA $00
+STA $01
+CLC
+wait: BCC wait
+.)
+
 forever: JMP forever
 
 nmi:
