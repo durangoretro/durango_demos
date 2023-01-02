@@ -145,10 +145,10 @@ BPL dur_loop
 .(
 LDA #%00111100
 STA $df80
-LDY #$60
-STY $01
-LDX #$00
-STX $00 
+LDX #$60
+STX $01
+LDY #$00
+STY $00 
 LDA #$44
 CLI
 LDY #$01
@@ -156,6 +156,9 @@ STY $dfa0
 wait:
 LDX $01
 BPL wait
+SEI
+LDY #$00
+STY $dfa0
 .)
 
 
@@ -178,15 +181,15 @@ nmi:
 	RTI
 .)
 
-int:
+irq:
 .(
-
 loop:
-STA ($00),Y
-INY
-BNE loop
+STA ($00)
+INC $00
+BNE end
 INC $01
-BPL loop
+end:
+RTI
 .)
 
 ; === FILLING ===
@@ -198,4 +201,4 @@ used_space = *-begin
 ; === VECTORS ===
 .word nmi ; NMI vector
 .word begin ; Reset vector
-.word $0000 ; IRQ/BRK vector
+.word irq ; IRQ/BRK vector
