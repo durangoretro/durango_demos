@@ -26,14 +26,14 @@ BNE wait_loop
 EOR #$04
 STA $df80
 BCC wait_loop
-CLC
 .)
 
-end: JMP end
+forever: JMP forever
 
 nmi:
 .(
-	PHA
+	BCS end
+        PHA
 	PHX
 	TSX
 	LDA $103,X
@@ -41,7 +41,8 @@ nmi:
 	STA $103,X
 
 	PLX
-	PLA	
+	PLA
+        end:
 	RTI
 .)
 
