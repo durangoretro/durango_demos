@@ -32,7 +32,6 @@ BCC wait_loop
 
 ; 3. Fill up screen 0
 .(
-VMEM_POINTER = $00
 LDA #$FF
 LDY #$00
 STY $01
@@ -51,19 +50,19 @@ wait: BCC wait
 .)
 
 .(
-VMEM_POINTER = $00
-SCREEN_START = $0002
 LDA #$00
-LDX #>SCREEN_START
-STX VMEM_POINTER+1
-LDY #<SCREEN_START
-STY VMEM_POINTER
+LDY #$00
+STY $01
+LDX #$02
+STX $00
 loop:
-STA (VMEM_POINTER),Y
+STA ($00),Y
 INY
 BNE loop
-INC VMEM_POINTER+1
+INC $01
 BPL loop
+STA $00
+STA $01
 CLC
 wait: BCC wait
 .)
