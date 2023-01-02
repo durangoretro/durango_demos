@@ -15,7 +15,7 @@ TXS
 LDA #%10001100
 STA $df80
 
-; Quick led flash
+; 1. Quick led flash
 .(
 CLC
 wait_loop:
@@ -26,6 +26,45 @@ BNE wait_loop
 EOR #$04
 STA $df80
 BCC wait_loop
+.)
+
+; 2. Play tone
+
+; 3. Fill up screen 0
+.(
+VMEM_POINTER = $00
+SCREEN_START = $0002
+LDA #$FF
+LDX #>SCREEN_START
+STX VMEM_POINTER+1
+LDY #<SCREEN_START
+STY VMEM_POINTER
+loop:
+STA (VMEM_POINTER),Y
+INY
+BNE loop
+INC VMEM_POINTER+1
+BPL loop
+CLC
+wait: BCC wait
+.)
+
+.(
+VMEM_POINTER = $00
+SCREEN_START = $0002
+LDA #$00
+LDX #>SCREEN_START
+STX VMEM_POINTER+1
+LDY #<SCREEN_START
+STY VMEM_POINTER
+loop:
+STA (VMEM_POINTER),Y
+INY
+BNE loop
+INC VMEM_POINTER+1
+BPL loop
+CLC
+wait: BCC wait
 .)
 
 forever: JMP forever
