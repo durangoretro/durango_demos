@@ -203,38 +203,7 @@ LDX #$60
 STX $01
 LDY #$00
 STY $00
-LDA #$00
-JSR draw_segment
-LDA #$11
-JSR draw_segment
-LDA #$22
-JSR draw_segment
-LDA #$33
-JSR draw_segment
-LDA #$44
-JSR draw_segment
-LDA #$55
-JSR draw_segment
-LDA #$66
-JSR draw_segment
-LDA #$77
-JSR draw_segment
-LDA #$88
-JSR draw_segment
-LDA #$99
-JSR draw_segment
-LDA #$AA
-JSR draw_segment
-LDA #$BB
-JSR draw_segment
-LDA #$CC
-JSR draw_segment
-LDA #$DD
-JSR draw_segment
-LDA #$EE
-JSR draw_segment
-LDA #$FF
-JSR draw_segment
+JSR draw_colors_line
 .)
 
 
@@ -279,6 +248,43 @@ draw_segment:
 	INC $01
 	skip:
 	RTS
+.)
+
+draw_colors_line:
+.(
+LDA #$00
+JSR draw_segment
+LDA #$11
+JSR draw_segment
+LDA #$22
+JSR draw_segment
+LDA #$33
+JSR draw_segment
+LDA #$44
+JSR draw_segment
+LDA #$55
+JSR draw_segment
+LDA #$66
+JSR draw_segment
+LDA #$77
+JSR draw_segment
+LDA #$88
+JSR draw_segment
+LDA #$99
+JSR draw_segment
+LDA #$AA
+JSR draw_segment
+LDA #$BB
+JSR draw_segment
+LDA #$CC
+JSR draw_segment
+LDA #$DD
+JSR draw_segment
+LDA #$EE
+JSR draw_segment
+LDA #$FF
+JSR draw_segment
+RTS
 .)
 
 nmi:
