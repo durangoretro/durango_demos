@@ -155,6 +155,8 @@ BPL wait
 SEI
 LDY #$00
 STY $dfa0
+CLC
+waitnmi: BCC waitnmi
 .)
 
 ; Test HSync
@@ -171,6 +173,8 @@ INY
 BNE loop
 INC $01
 BPL loop
+CLC
+wait: BCC wait
 .)
 
 ; Test VSync
@@ -187,6 +191,8 @@ INY
 BNE loop
 INC $01
 BPL loop
+CLC
+wait: BCC wait
 .)
 
 
