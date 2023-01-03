@@ -195,6 +195,16 @@ CLC
 wait: BCC wait
 .)
 
+; Test video modes
+.(
+LDX #$60
+STX $01
+LDY #$00
+STY $00
+LDA #$00
+JSR draw_segment
+.)
+
 
 forever: JMP forever
 
@@ -219,6 +229,24 @@ wait_hsync:
     BIT $DF88
     BPL vend
     RTS
+.)
+
+draw_segment:
+.(
+	LDY #4
+	loop:
+	STA ($00),Y
+	DEY
+	BPL loop
+	TAX
+	LDA $00
+	CLC
+	ADC #4
+	STA $00
+	BCC skip
+	INC $01
+	skip:
+	RTS
 .)
 
 nmi:
