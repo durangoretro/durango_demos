@@ -137,8 +137,6 @@ DEX
 BPL dur_loop
 .)
 
-JMP ZZZ
-
 ; Test IRQ
 .(
 LDA #%00111100
@@ -196,14 +194,18 @@ BPL loop
 CLC
 wait: BCC wait
 .)
-ZZZ:
+
 ; Test video modes
 .(
 LDX #$60
 STX $01
 LDY #$00
 STY $00
+LDX #128
+loop:
 JSR draw_colors_line
+DEX
+BNE loop
 .)
 
 
@@ -239,7 +241,6 @@ draw_segment:
 	STA ($00),Y
 	DEY
 	BPL loop
-	TAX
 	LDA $00
 	CLC
 	ADC #4
