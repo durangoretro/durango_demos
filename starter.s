@@ -326,7 +326,7 @@ nmi:
 
 irq:
 .(
-JSR draw_segment
+JSR draw_line
 RTI
 .)
 
