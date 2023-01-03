@@ -241,6 +241,7 @@ draw_segment:
 	STA ($00),Y
 	DEY
 	BPL loop
+	PHA
 	LDA $00
 	CLC
 	ADC #4
@@ -248,6 +249,7 @@ draw_segment:
 	BCC skip
 	INC $01
 	skip:
+	PLA
 	RTS
 .)
 
@@ -306,12 +308,7 @@ nmi:
 
 irq:
 .(
-loop:
-STA ($00)
-INC $00
-BNE end
-INC $01
-end:
+JSR draw_segment
 RTI
 .)
 
