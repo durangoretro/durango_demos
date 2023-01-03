@@ -184,12 +184,11 @@ LDX #$60
 STX $01
 LDY #$00
 STY $00
+LDX #127
 loop:
-STA ($00),Y
+jSR draw_line
 JSR wait_vsync
-INY
-BNE loop
-INC $01
+DEX
 BPL loop
 CLC
 wait: BCC wait
@@ -245,6 +244,25 @@ draw_segment:
 	LDA $00
 	CLC
 	ADC #4
+	STA $00
+	BCC skip
+	INC $01
+	skip:
+	PLA
+	RTS
+.)
+
+draw_line:
+.(
+	LDY #63
+	loop:
+	STA ($00),Y
+	DEY
+	BPL loop
+	PHA
+	LDA $00
+	CLC
+	ADC #64
 	STA $00
 	BCC skip
 	INC $01
