@@ -101,8 +101,6 @@ INY
 BNE loop
 INC $01
 BPL loop
-STA $00
-STA $01
 CLC
 wait: BCC wait
 .)
@@ -122,8 +120,6 @@ INY
 BNE loop
 INC $01
 BPL loop
-STA $00
-STA $01
 CLC
 wait: BCC wait
 .)
@@ -161,9 +157,63 @@ LDY #$00
 STY $dfa0
 .)
 
+; Test HSync
+.(
+LDA #$55
+LDX #$60
+STX $01
+LDY #$00
+STY $00
+loop:
+STA ($00),Y
+JSR wait_hsync
+INY
+BNE loop
+INC $01
+BPL loop
+.)
+
+; Test VSync
+.(
+LDA #$66
+LDX #$60
+STX $01
+LDY #$00
+STY $00
+loop:
+STA ($00),Y
+JSR wait_vsync
+INY
+BNE loop
+INC $01
+BPL loop
+.)
 
 
 forever: JMP forever
+
+
+wait_vsync:
+.(
+    vstart:
+    BIT $DF88
+    BVS vstart
+    vend:
+    BIT $DF88
+    BVC vend
+    RTS
+.)
+
+wait_hsync:
+.(
+    vstart:
+    BIT $DF88
+    BMI vstart
+    vend:
+    BIT $DF88
+    BPL vend
+    RTS
+.)
 
 nmi:
 .(
