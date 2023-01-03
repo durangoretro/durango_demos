@@ -194,7 +194,20 @@ CLC
 wait: BCC wait
 .)
 
-; Test video modes
+; Draw bn palette
+.(
+
+LDX #$40
+STX $01
+LDY #$00
+STY $00
+LDX #128
+loop:
+JSR draw_bn_line
+DEX
+BNE loop
+.)
+; Draw palette
 .(
 LDX #$60
 STX $01
@@ -205,6 +218,36 @@ loop:
 JSR draw_colors_line
 DEX
 BNE loop
+
+CLC
+wait: BCC wait
+.)
+
+; Invert
+.(
+; [HiRes Invert S1 S0    RGB LED NC NC]
+LDA #%01111000
+STA $df80
+CLC
+wait: BCC wait
+.)
+
+; black & white
+.(
+; [HiRes Invert S1 S0    RGB LED NC NC]
+LDA #%00100100
+STA $df80
+CLC
+wait: BCC wait
+.)
+
+; BN Invert
+.(
+; [HiRes Invert S1 S0    RGB LED NC NC]
+LDA #%01100000
+STA $df80
+CLC
+wait: BCC wait
 .)
 
 
@@ -302,6 +345,43 @@ JSR draw_segment
 LDA #$DD
 JSR draw_segment
 LDA #$EE
+JSR draw_segment
+LDA #$FF
+JSR draw_segment
+RTS
+.)
+
+draw_bn_line:
+.(
+LDA #$00
+JSR draw_segment
+LDA #$88
+JSR draw_segment
+LDA #$44
+JSR draw_segment
+LDA #$CC
+JSR draw_segment
+LDA #$22
+JSR draw_segment
+LDA #$AA
+JSR draw_segment
+LDA #$66
+JSR draw_segment
+LDA #$EE
+JSR draw_segment
+LDA #$11
+JSR draw_segment
+LDA #$99
+JSR draw_segment
+LDA #$55
+JSR draw_segment
+LDA #$DD
+JSR draw_segment
+LDA #$33
+JSR draw_segment
+LDA #$BB
+JSR draw_segment
+LDA #$77
 JSR draw_segment
 LDA #$FF
 JSR draw_segment
