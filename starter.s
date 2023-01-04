@@ -200,6 +200,22 @@ wait: BCC wait
 ; Draw bn palette
 .(
 
+LDX #$20
+STX $01
+LDY #$00
+STY $00
+LDX #64
+loop:
+LDA #%10101010
+JSR draw_line
+LDA #%01010101
+JSR draw_line
+DEX
+BNE loop
+.)
+; Draw grayscale palette
+.(
+
 LDX #$40
 STX $01
 LDY #$00
@@ -210,7 +226,7 @@ JSR draw_bn_line
 DEX
 BNE loop
 .)
-; Draw palette
+; Draw color palette
 .(
 LDX #$60
 STX $01
@@ -235,7 +251,7 @@ CLC
 wait: BCC wait
 .)
 
-; black & white
+; Grayscale
 .(
 ; [HiRes Invert S1 S0    RGB LED NC NC]
 LDA #%00100100
@@ -244,10 +260,28 @@ CLC
 wait: BCC wait
 .)
 
-; BN Invert
+; Grayscale Invert
 .(
 ; [HiRes Invert S1 S0    RGB LED NC NC]
 LDA #%01100000
+STA $df80
+CLC
+wait: BCC wait
+.)
+
+; Black White
+.(
+; [HiRes Invert S1 S0    RGB LED NC NC]
+LDA #%10010100
+STA $df80
+CLC
+wait: BCC wait
+.)
+
+; Black White Invert
+.(
+; [HiRes Invert S1 S0    RGB LED NC NC]
+LDA #%11010000
 STA $df80
 CLC
 wait: BCC wait
