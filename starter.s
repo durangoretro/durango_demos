@@ -511,16 +511,6 @@ STX $DF9D
 STX $DF9D
 STX $DF9D
 STX $DF9D
-; ---- keys ----
-; A      -> #$80
-; START  -> #$40
-; B      -> #$20
-; SELECT -> #$10
-; UP     -> #$08
-; LEFT   -> #$04
-; DOWN   -> #$02
-; RIGHT  -> #$01
-; --------------
 ; 3. read first controller in $DF9C
 LDX $DF9C
 STX CONTROLLER_1
@@ -534,45 +524,56 @@ draw_gamepads:
 .(
 LDA CONTROLLER_1
 
-LSR
-JSR load_carry_color
-STA $6000
-STA $6040
+; ---- keys ----
+; A      -> #$80
+; START  -> #$40
+; B      -> #$20
+; SELECT -> #$10
+; UP     -> #$08
+; LEFT   -> #$04
+; DOWN   -> #$02
+; RIGHT  -> #$01
+; --------------
 
 LSR
 JSR load_carry_color
-STA $6001
-STA $6041
+STX $6000
+STX $6040
 
 LSR
 JSR load_carry_color
-STA $6002
-STA $6042
+STX $6001
+STX $6041
 
 LSR
 JSR load_carry_color
-STA $6003
-STA $6043
+STX $6002
+STX $6042
 
 LSR
 JSR load_carry_color
-STA $6004
-STA $6044
+STX $6003
+STX $6043
 
 LSR
 JSR load_carry_color
-STA $6005
-STA $6045
+STX $6004
+STX $6044
 
 LSR
 JSR load_carry_color
-STA $6006
-STA $6046
+STX $6005
+STX $6045
 
 LSR
 JSR load_carry_color
-STA $6007
-STA $6047
+STX $6006
+STX $6046
+
+LSR
+JSR load_carry_color
+STX $6007
+STX $6047
 
 RTS
 .)
@@ -580,10 +581,10 @@ RTS
 load_carry_color:
 .(
 BCC key_down
-LDA #DARK_GREEN
+LDX #DARK_GREEN
 BRA end
 key_down:
-LDA #RED
+LDX #RED
 end:
 RTS
 .)
