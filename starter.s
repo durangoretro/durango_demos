@@ -25,7 +25,7 @@ STA $dfa0
 LDA #%10001100
 STA $df80
 
-; 1. Quick led flash
+; Quick led flash
 .(
 CLC
 wait_loop:
@@ -38,7 +38,20 @@ STA $df80
 BCC wait_loop
 .)
 
-; 3. Fill up screen 0
+; Play tone
+.(
+LDX #$ff     ; Duration
+dur_loop:
+STX $dfb0
+LDY #63    ; Frequency
+loop:
+DEY
+BNE loop
+DEX
+BPL dur_loop
+.)
+
+; Fill up screen 0
 .(
 LDA #$FF
 LDY #$00
@@ -75,7 +88,7 @@ CLC
 wait: BCC wait
 .)
 
-; 4. Fill up screen 1
+; Fill up screen 1
 .(
 LDA #%00011000
 STA $df80
@@ -94,7 +107,7 @@ CLC
 wait: BCC wait
 .)
 
-; 4. Fill up screen 2
+; Fill up screen 2
 .(
 LDA #%00101000
 STA $df80
@@ -113,7 +126,7 @@ CLC
 wait: BCC wait
 .)
 
-; 4. Fill up screen 3
+; Fill up screen 3
 .(
 LDA #%00111000
 STA $df80
@@ -130,19 +143,6 @@ INC $01
 BPL loop
 CLC
 wait: BCC wait
-.)
-
-; 2. Play tone
-.(
-LDX #$ff     ; Duration
-dur_loop:
-STX $dfb0
-LDY #63    ; Frequency
-loop:
-DEY
-BNE loop
-DEX
-BPL dur_loop
 .)
 
 ; Test IRQ
@@ -534,16 +534,17 @@ LDA CONTROLLER_1
 ; DOWN   -> #$02
 ; RIGHT  -> #$01
 ; --------------
+; hex(0x6000+(y*64+x/2))
 
 LSR
 JSR load_carry_color
-STX $6000
-STX $6040
+STX $654F
+STX $658F
 
 LSR
 JSR load_carry_color
-STX $6001
-STX $6041
+STX $678C
+STX $67CC
 
 LSR
 JSR load_carry_color
