@@ -544,8 +544,8 @@ STX 24576+(23*64+32/2)
 ; P1 DOWN
 LSR
 JSR load_carry_color
-STX $678C
-STX $67CC
+STX 24576+(30*64+22/2)
+STX 24576+(31*64+22/2)
 ; P1 LEFT
 LSR
 JSR load_carry_color
@@ -554,8 +554,8 @@ STX 24576+(23*64+14/2)
 ; P1 UP
 LSR
 JSR load_carry_color
-STX $6003
-STX $6043
+STX 24576+(12*64+22/2)
+STX 24576+(13*64+22/2)
 ; P1 SELECT
 LSR
 JSR load_carry_color
