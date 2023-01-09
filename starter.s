@@ -536,41 +536,42 @@ LDA CONTROLLER_1
 ; --------------
 ; hex(0x6000+(y*64+x/2))
 
+; P1 RIGHT
 LSR
 JSR load_carry_color
-STX $654F
-STX $658F
-
+STX 24576+(22*64+32/2)
+STX 24576+(23*64+32/2)
+; P1 DOWN
 LSR
 JSR load_carry_color
 STX $678C
 STX $67CC
-
+; P1 LEFT
 LSR
 JSR load_carry_color
-STX $6002
-STX $6042
-
+STX 24576+(22*64+14/2)
+STX 24576+(23*64+14/2)
+; P1 UP
 LSR
 JSR load_carry_color
 STX $6003
 STX $6043
-
+; P1 SELECT
 LSR
 JSR load_carry_color
 STX $6004
 STX $6044
-
+; P1 B
 LSR
 JSR load_carry_color
 STX $6005
 STX $6045
-
+; P1 START
 LSR
 JSR load_carry_color
 STX $6006
 STX $6046
-
+; A
 LSR
 JSR load_carry_color
 STX $6007
