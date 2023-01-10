@@ -2,6 +2,11 @@ MAP_TO_DRAW=$10
 VMEM_POINTER=$00
 CONTROLLER_1 = $20
 CONTROLLER_2 = $21
+KEYBOARD_1 = $22
+KEYBOARD_2 = $23
+KEYBOARD_3 = $24
+KEYBOARD_4 = $25
+KEYBOARD_5 = $26
 RED = $22
 DARK_GREEN = $44
 
@@ -305,7 +310,9 @@ JSR draw_background
 
 loop:
 JSR read_gamepads
+JSR read_keyboard
 JSR draw_gamepads
+JSR draw_keyboard
 BRA loop
 .)
 
@@ -520,7 +527,43 @@ STX CONTROLLER_2
 RTS
 .)
 
+read_keyboard:
+.(
+LDA #1
+STA $DF9B
+LDX $DF9B
+STX KEYBOARD_1
+
+ASL
+STA $DF9B
+LDX $DF9B
+STX KEYBOARD_2
+
+ASL
+STA $DF9B
+LDX $DF9B
+STX KEYBOARD_3
+
+ASL
+STA $DF9B
+LDX $DF9B
+STX KEYBOARD_4
+
+ASL
+STA $DF9B
+LDX $DF9B
+STX KEYBOARD_5
+
+RTS
+.)
+
 draw_gamepads:
+.(
+JSR draw_gamepad1
+JMP draw_gamepad2
+.)
+
+draw_gamepad1:
 .(
 LDA CONTROLLER_1
 
@@ -581,6 +624,123 @@ STX 24576+(29*64+104/2)
 RTS
 .)
 
+draw_gamepad2:
+.(
+LDA CONTROLLER_2
+; 24576+(y*64+x/2)
+
+; P2 RIGHT
+LSR
+JSR load_carry_color
+STX 24576+(66*64+32/2)
+STX 24576+(67*64+32/2)
+; P2 DOWN
+LSR
+JSR load_carry_color
+STX 24576+(76*64+22/2)
+STX 24576+(77*64+22/2)
+; P2 LEFT
+LSR
+JSR load_carry_color
+STX 24576+(67*64+14/2)
+STX 24576+(68*64+14/2)
+; P2 UP
+LSR
+JSR load_carry_color
+STX 24576+(57*64+22/2)
+STX 24576+(58*64+22/2)
+; P2 SELECT
+LSR
+JSR load_carry_color
+STX 24576+(73*64+50/2)
+STX 24576+(74*64+50/2)
+; P2 B
+LSR
+JSR load_carry_color
+STX 24576+(72*64+88/2)
+STX 24576+(73*64+88/2)
+; P2 START
+LSR
+JSR load_carry_color
+STX 24576+(73*64+66/2)
+STX 24576+(74*64+66/2)
+; P2 A
+LSR
+JSR load_carry_color
+STX 24576+(72*64+104/2)
+STX 24576+(73*64+104/2)
+
+RTS
+.)
+
+draw_keyboard:
+.(
+JSR draw_keyboard1
+JSR draw_keyboard2
+JSR draw_keyboard3
+JSR draw_keyboard4
+JMP draw_keyboard5
+.)
+
+draw_keyboard1:
+.(
+LDA KEYBOARD_1
+; 24576+(y*64+x/2)
+
+; 1
+LSR
+JSR load_carry_color_kb
+STX 24576+(93*64+22/2)
+STX 24576+(94*64+22/2)
+; Q
+LSR
+JSR load_carry_color_kb
+STX 24576+(103*64+22/2)
+STX 24576+(104*64+22/2)
+; A
+LSR
+JSR load_carry_color_kb
+STX 24576+(112*64+22/2)
+STX 24576+(113*64+22/2)
+; 0
+LSR
+JSR load_carry_color_kb
+STX 24576+(93*64+104/2)
+STX 24576+(94*64+104/2)
+; P
+LSR
+JSR load_carry_color_kb
+STX 24576+(103*64+104/2)
+STX 24576+(104*64+104/2)
+; SHIFT
+LSR
+JSR load_carry_color_kb
+STX 24576+(121*64+22/2)
+STX 24576+(122*64+22/2)
+; INTRO
+LSR
+JSR load_carry_color_kb
+STX 24576+(112*64+104/2)
+STX 24576+(113*64+104/2)
+; SPACE
+LSR
+JSR load_carry_color_kb
+STX 24576+(120*64+104/2)
+STX 24576+(121*64+104/2)
+
+
+RTS
+.)
+
+draw_keyboard2:
+RTS
+draw_keyboard3:
+RTS
+draw_keyboard4:
+RTS
+draw_keyboard5:
+RTS
+
 load_carry_color:
 .(
 BCC key_down
@@ -588,6 +748,16 @@ LDX #DARK_GREEN
 BRA end
 key_down:
 LDX #RED
+end:
+RTS
+.)
+load_carry_color_kb:
+.(
+BCC key_down
+LDX #RED
+BRA end
+key_down:
+LDX #DARK_GREEN
 end:
 RTS
 .)
