@@ -535,6 +535,7 @@ LDA CONTROLLER_1
 ; RIGHT  -> #$01
 ; --------------
 ; hex(0x6000+(y*64+x/2))
+; 24576+(y*64+x/2)
 
 ; P1 RIGHT
 LSR
@@ -559,23 +560,23 @@ STX 24576+(13*64+22/2)
 ; P1 SELECT
 LSR
 JSR load_carry_color
-STX $6004
-STX $6044
+STX 24576+(28*64+50/2)
+STX 24576+(29*64+50/2)
 ; P1 B
 LSR
 JSR load_carry_color
-STX $6005
-STX $6045
+STX 24576+(28*64+88/2)
+STX 24576+(29*64+88/2)
 ; P1 START
 LSR
 JSR load_carry_color
-STX $6006
-STX $6046
+STX 24576+(28*64+66/2)
+STX 24576+(29*64+66/2)
 ; A
 LSR
 JSR load_carry_color
-STX $6007
-STX $6047
+STX 24576+(28*64+104/2)
+STX 24576+(29*64+104/2)
 
 RTS
 .)
