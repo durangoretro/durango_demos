@@ -752,7 +752,6 @@ JMP draw_keyboard5
 draw_keyboard1:
 .(
 LDA KEYBOARD_1
-
 ; 1
 LSR
 JSR load_carry_color_kb
@@ -800,7 +799,6 @@ RTS
 draw_keyboard2:
 .(
 LDA KEYBOARD_2
-
 ; 2
 LSR
 JSR load_carry_color_kb
@@ -841,12 +839,54 @@ LSR
 JSR load_carry_color_kb
 STX KEY_ALT
 STX KEY_ALT+64
-
 RTS
 .)
 
 draw_keyboard3:
+.(
+LDA KEYBOARD_3
+; 3
+LSR
+JSR load_carry_color_kb
+STX KEY_3
+STX KEY_3+64
+; E
+LSR
+JSR load_carry_color_kb
+STX KEY_E
+STX KEY_E+64
+; D
+LSR
+JSR load_carry_color_kb
+STX KEY_D
+STX KEY_D+64
+; 8
+LSR
+JSR load_carry_color_kb
+STX KEY_8
+STX KEY_8+64
+; I
+LSR
+JSR load_carry_color_kb
+STX KEY_I
+STX KEY_I+64
+; X
+LSR
+JSR load_carry_color_kb
+STX KEY_X
+STX KEY_X+64
+; K
+LSR
+JSR load_carry_color_kb
+STX KEY_K
+STX KEY_K+64
+; M
+LSR
+JSR load_carry_color_kb
+STX KEY_M
+STX KEY_M+64
 RTS
+.)
 draw_keyboard4:
 RTS
 draw_keyboard5:
