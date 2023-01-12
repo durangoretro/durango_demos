@@ -784,8 +784,15 @@ RTS
 
 draw_keyboard:
 .(
-;LDA #%00101100
-;STA $df80
+LDA #32
+STA $DF9B
+LDA $DF9B
+CMP #$2C
+BEQ keyboard_present
+LDA #%00101100
+STA $df80
+RTS
+keyboard_present:
 LDA #%00111100
 STA $df80
 JSR draw_keyboard1
