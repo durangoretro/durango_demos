@@ -12,7 +12,6 @@ DARK_GREEN = $44
 
 #define mempos(x,y) 24576+(y*64+x/2)
 
-; 24576+(y*64+x/2)
 P1_RIGHT=mempos(32,22)
 P1_DOWN=mempos(22, 30)
 P1_LEFT=mempos(14, 22)
@@ -30,14 +29,14 @@ P2_B=mempos(88, 72)
 P2_START=mempos(66, 73)
 P2_A=mempos(104, 72)
 
-KEY_1=24576+(93*64+22/2)
-KEY_Q=24576+(103*64+22/2)
-KEY_A=24576+(112*64+22/2)
-KEY_0=24576+(93*64+104/2)
-KEY_P=24576+(103*64+104/2)
-KEY_SHIFT=24576+(121*64+22/2)
-KEY_INTRO=24576+(112*64+104/2)
-KEY_SPACE=24576+(120*64+104/2)
+KEY_1=mempos(22, 93)
+KEY_Q=mempos(22, 103)
+KEY_A=mempos(22, 112)
+KEY_0=mempos(104, 93)
+KEY_P=mempos(104, 103)
+KEY_SHIFT=mempos(22, 121)
+KEY_INTRO=mempos(104, 112)
+KEY_SPACE=mempos(104, 120)
 
 *=$c000
 
