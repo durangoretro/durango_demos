@@ -1,5 +1,6 @@
 MAP_TO_DRAW=$10
 VMEM_POINTER=$00
+VMEM_POINTER2=$02
 CONTROLLER_1 = $20
 CONTROLLER_2 = $21
 KEYBOARD_1 = $22
@@ -374,6 +375,7 @@ STA MAP_TO_DRAW+1
 LDA #<background
 STA MAP_TO_DRAW
 JSR draw_background
+JSR draw_keyless_background
 
 loop:
 JSR read_gamepads
@@ -572,6 +574,46 @@ rle_exit:
 RTS
 .)
 
+draw_keyless_background:
+.(
+LDA #$60
+STA VMEM_POINTER+1
+STZ VMEM_POINTER
+LDA #$40
+STA VMEM_POINTER2+1
+STZ VMEM_POINTER2
+
+loop:
+LDA (VMEM_POINTER)
+STA (VMEM_POINTER2)
+
+INC VMEM_POINTER
+INC VMEM_POINTER2
+BNE skip
+INC VMEM_POINTER2+1
+INC VMEM_POINTER+1
+BMI end
+skip:
+BRA loop
+end:
+
+LDA #$56
+STA VMEM_POINTER2+1
+STZ VMEM_POINTER2
+LDY #0
+loop2:
+LDA #$77
+STA (VMEM_POINTER2),Y
+INY
+BNE loop2
+INC VMEM_POINTER2+1
+LDA #$60
+CMP VMEM_POINTER2+1
+BNE loop2
+
+RTS
+.)
+
 read_gamepads:
 .(
 ; 1. write into $DF9C
@@ -742,6 +784,10 @@ RTS
 
 draw_keyboard:
 .(
+;LDA #%00101100
+;STA $df80
+LDA #%00111100
+STA $df80
 JSR draw_keyboard1
 JSR draw_keyboard2
 JSR draw_keyboard3
