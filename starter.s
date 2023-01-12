@@ -41,6 +41,43 @@ KEY_P=mempos(104, 103)
 KEY_INTRO=mempos(104, 112)
 KEY_SPACE=mempos(104, 120)
 
+KEY_2=mempos(32, 93)
+KEY_W=mempos(32, 103)
+KEY_S=mempos(32, 112)
+KEY_Z=mempos(32, 121)
+KEY_9=mempos(94, 93)
+KEY_O=mempos(94, 103)
+KEY_L=mempos(94, 112)
+KEY_ALT=mempos(94, 120)
+
+KEY_3=mempos(40, 93)
+KEY_E=mempos(40, 103)
+KEY_D=mempos(40, 112)
+KEY_X=mempos(40, 121)
+KEY_8=mempos(86, 93)
+KEY_I=mempos(86, 103)
+KEY_K=mempos(86, 112)
+KEY_M=mempos(86, 120)
+
+KEY_4=mempos(50, 93)
+KEY_R=mempos(50, 103)
+KEY_F=mempos(50, 112)
+KEY_C=mempos(50, 121)
+KEY_7=mempos(76, 93)
+KEY_U=mempos(76, 103)
+KEY_J=mempos(76, 112)
+KEY_N=mempos(76, 120)
+
+KEY_5=mempos(58, 93)
+KEY_T=mempos(58, 103)
+KEY_G=mempos(58, 112)
+KEY_V=mempos(58, 121)
+KEY_6=mempos(68, 93)
+KEY_Y=mempos(68, 103)
+KEY_H=mempos(68, 112)
+KEY_B=mempos(68, 120)
+
+
 *=$c000
 
 begin:
@@ -761,7 +798,53 @@ RTS
 .)
 
 draw_keyboard2:
+.(
+LDA KEYBOARD_2
+
+; 2
+LSR
+JSR load_carry_color_kb
+STX KEY_2
+STX KEY_2+64
+; W
+LSR
+JSR load_carry_color_kb
+STX KEY_W
+STX KEY_W+64
+; S
+LSR
+JSR load_carry_color_kb
+STX KEY_S
+STX KEY_S+64
+; 9
+LSR
+JSR load_carry_color_kb
+STX KEY_9
+STX KEY_9+64
+; O
+LSR
+JSR load_carry_color_kb
+STX KEY_O
+STX KEY_O+64
+; Z
+LSR
+JSR load_carry_color_kb
+STX KEY_Z
+STX KEY_Z+64
+; L
+LSR
+JSR load_carry_color_kb
+STX KEY_L
+STX KEY_L+64
+; ALT
+LSR
+JSR load_carry_color_kb
+STX KEY_ALT
+STX KEY_ALT+64
+
 RTS
+.)
+
 draw_keyboard3:
 RTS
 draw_keyboard4:
