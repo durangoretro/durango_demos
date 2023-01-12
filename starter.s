@@ -109,6 +109,8 @@ BNE wait_loop
 EOR #$04
 STA $df80
 BCC wait_loop
+LDA #%10001100
+STA $df80
 .)
 
 ; Play tone
