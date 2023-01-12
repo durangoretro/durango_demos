@@ -888,9 +888,95 @@ STX KEY_M+64
 RTS
 .)
 draw_keyboard4:
+.(
+LDA KEYBOARD_4
+; 4
+LSR
+JSR load_carry_color_kb
+STX KEY_4
+STX KEY_4+64
+; R
+LSR
+JSR load_carry_color_kb
+STX KEY_R
+STX KEY_R+64
+; F
+LSR
+JSR load_carry_color_kb
+STX KEY_F
+STX KEY_F+64
+; 7
+LSR
+JSR load_carry_color_kb
+STX KEY_7
+STX KEY_7+64
+; U
+LSR
+JSR load_carry_color_kb
+STX KEY_U
+STX KEY_U+64
+; C
+LSR
+JSR load_carry_color_kb
+STX KEY_C
+STX KEY_C+64
+; J
+LSR
+JSR load_carry_color_kb
+STX KEY_J
+STX KEY_J+64
+; N
+LSR
+JSR load_carry_color_kb
+STX KEY_N
+STX KEY_N+64
 RTS
+.)
 draw_keyboard5:
+.(
+LDA KEYBOARD_5
+; 5
+LSR
+JSR load_carry_color_kb
+STX KEY_5
+STX KEY_5+64
+; T
+LSR
+JSR load_carry_color_kb
+STX KEY_T
+STX KEY_T+64
+; G
+LSR
+JSR load_carry_color_kb
+STX KEY_G
+STX KEY_G+64
+; 6
+LSR
+JSR load_carry_color_kb
+STX KEY_6
+STX KEY_6+64
+; Y
+LSR
+JSR load_carry_color_kb
+STX KEY_Y
+STX KEY_Y+64
+; V
+LSR
+JSR load_carry_color_kb
+STX KEY_V
+STX KEY_V+64
+; H
+LSR
+JSR load_carry_color_kb
+STX KEY_H
+STX KEY_H+64
+; B
+LSR
+JSR load_carry_color_kb
+STX KEY_B
+STX KEY_B+64
 RTS
+.)
 
 load_carry_color:
 .(
