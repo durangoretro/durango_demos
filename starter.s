@@ -144,7 +144,7 @@ STA $01
 CLC
 wait: BCC wait
 .)
-
+; Clear screen 0
 .(
 LDA #$00
 LDY #$00
@@ -162,6 +162,28 @@ STA $01
 CLC
 wait: BCC wait
 .)
+; Draw version
+.(
+; Draw version
+LDA #<version
+STA MAP_TO_DRAW
+LDA #>version
+STA MAP_TO_DRAW+1
+LDA #$00
+STA VMEM_POINTER
+LDA #$10
+STA VMEM_POINTER+1
+LDY #0
+loop2:
+LDA (MAP_TO_DRAW),Y
+STA (VMEM_POINTER),Y
+INY
+BNE loop2
+; Wait NMI
+CLC
+wait: BCC wait
+.)
+
 
 ; Fill up screen 1
 .(
@@ -379,23 +401,6 @@ LDA #<background
 STA MAP_TO_DRAW
 JSR draw_background
 JSR draw_keyless_background
-
-; Draw version
-LDA #<version
-STA MAP_TO_DRAW
-LDA #>version
-STA MAP_TO_DRAW+1
-LDA #$00
-STA VMEM_POINTER
-LDA #$10
-STA VMEM_POINTER+1
-LDY #0
-loop2:
-LDA (MAP_TO_DRAW),Y
-STA (VMEM_POINTER),Y
-INY
-BNE loop2
-
 
 loop:
 JSR read_gamepads
