@@ -461,9 +461,6 @@ wait: BCC wait
 
 ; Input
 .(
-; [HiRes Invert S1 S0    RGB LED NC NC]
-LDA #%00111100
-STA $df80
 ; Draw inputs background
 LDA #>background
 STA MAP_TO_DRAW+1
@@ -471,6 +468,10 @@ LDA #<background
 STA MAP_TO_DRAW
 JSR draw_background
 JSR draw_keyless_background
+
+; [HiRes Invert S1 S0    RGB LED NC NC]
+LDA #%00111100
+STA $df80
 
 loop:
 JSR read_gamepads
