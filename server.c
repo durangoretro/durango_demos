@@ -7,13 +7,13 @@
 #include <wiringPi.h>
 /* *** needs -lwiringPi option *** */
 
-/* pin definitions, 36-38-40 at header, BCM 16-20-21 */
+/* pin definitions, 22-24-26 at header, BCM 25-8-7 */
 /* CB1 is clock, CB2 data, can use pin 34 as GND */
 /* THIS VERSION NEEDS OPEN COLLECTOR (INVERTING) DRIVERS */
 /* STB pin isn't currently used, just a placeholder for SS22 */
-#define	CB1		16
-#define	CB2		20
-#define	STB		21
+#define	CB1		25
+#define	CB2		8
+#define	STB		7
 
 /* prototypes */
 void cabe(int x);	/* send header byte in a slow way */
@@ -27,7 +27,7 @@ int main(void) {
 	char	nombre[80];
 
 	printf("*** nanoBoot server (OC) ***\n\n");
-	printf("pin 34=GND, 36=CLK, 38=DAT\n\n");
+	printf("pin 20=GND, 22=CLK, 24=DAT\n\n");
 /* GPIO setup */
 	wiringPiSetupGpio();	/* using BCM numbering! */
 	digitalWrite(CB1, 0);	/* clock initially disabled, note OC */
