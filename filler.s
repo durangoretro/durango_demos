@@ -63,9 +63,8 @@ wait_vsync_begin:
 
     JMP loop3
 
-    .dsb    $fffa-*, $ff    ; filling
+.dsb    $fffa-*, $ff    ; filling
 
-* = $fffa
     .word begin
     .word begin
     .word begin
