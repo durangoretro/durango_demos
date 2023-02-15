@@ -63,10 +63,13 @@ wait_vsync_begin:
 
     JMP loop3
 
+noint:
+RTI
+
 .dsb $ffe1-*, $ff
 JMP ($FFFC)
 
 .dsb $fffa-*, $ff
-.word begin ; NMI vector
+.word noint ; NMI vector
 .word begin ; Reset vector
-.word begin ; IRQ/BRK vector
+.word noint ; IRQ/BRK vector
