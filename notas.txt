@@ -125,3 +125,6 @@ TXA
 TXS
 TYA
 WAI
+
+
+xa ehbasic_sa.s -I ../../OS/firmware -o ehbasic.bin
