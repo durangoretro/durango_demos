@@ -9,7 +9,6 @@ int my_int;
 long my_long;
 
 int main(void){
-    my_long = get_stamp();    
     return 0;
 }
 

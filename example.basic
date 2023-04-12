@@ -1,0 +1,13 @@
+REM Cambiar el modo de video a color
+10 poke $df80, $38
+
+REM pintar pixeles (2 por byte)
+20 poke $6000, $12
+30 poke $6001, $34
+40 poke $6002, $56
+REM esperar pulsar una tecla
+50 input var
+
+REM return to hires video mode
+60 poke $df80, $b8
+

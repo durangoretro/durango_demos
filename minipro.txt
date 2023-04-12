@@ -1,0 +1,2 @@
+minipro -p am27c128@dip28 -w arkanoid.dux
+
