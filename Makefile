@@ -1,8 +1,9 @@
 CFG=../dclib/cfg/durango16k.cfg
 DCLIB=../dclib/bin
 DCINC=../dclib/inc
+RESCOMP ?= ../rescomp/target/rescomp.jar
 
-all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin loops.casm newlib.bin datatypes.casm newconio.bin starter.bin
+all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin loops.casm newlib.bin datatypes.dux newconio.bin starter.bin
 
 hello_world.bin: hello_world.s
 	xa hello_world.s -o hello_world.bin
@@ -66,6 +67,12 @@ newconio.bin: newconio.o ../DurangoLib/bin/durango.lib
 
 datatypes.casm: datatypes.c
 	cc65 -I $(DCINC) datatypes.c -t none --cpu 65C02 -o datatypes.casm
+datatypes.o: datatypes.casm
+	ca65 -t none datatypes.casm -o datatypes.o
+datatypes.bin: datatypes.o
+	ld65 -C $(CFG) datatypes.o $(DCLIB)/psv.lib $(DCLIB)/durango.lib -o datatypes.bin
+datatypes.dux: datatypes.bin $(BUILD_DIR)
+	java -jar ${RESCOMP} -m SIGNER -n $$(git log -1 | head -1 | sed 's/commit //' | cut -c1-8) -i datatypes.bin -o datatypes.dux
 
 starter.bin: starter.s
 	xa starter.s -o starter.bin
