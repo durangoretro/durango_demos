@@ -3,7 +3,7 @@ DCLIB=../dclib/bin
 DCINC=../dclib/inc
 RESCOMP ?= ../rescomp/target/rescomp.jar
 
-all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin loops.casm newlib.bin datatypes.dux newconio.bin starter.bin
+all: hello_world.bin filler.bin boat.bin gamepads.bin serial.bin serial2.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin loops.casm newlib.bin datatypes.dux newconio.bin starter.bin
 
 hello_world.bin: hello_world.s
 	xa hello_world.s -o hello_world.bin
@@ -19,6 +19,9 @@ gamepads.bin: gamepads.s
 
 serial.bin: serial.s
 	xa -w serial.s -o serial.bin
+
+serial2.bin: serial2.s
+	xa -w serial2.s -o serial2.bin
 
 pong.bin: pong.s
 	xa pong.s -o pong.bin

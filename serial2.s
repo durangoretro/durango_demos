@@ -1,0 +1,105 @@
+PSV_FOPEN = $11
+PSV_FREAD = $12
+PSV_FWRITE = $13
+PSV_FCLOSE = $1F
+PSV_RAW_INIT  = $20
+PSV_RAW_SEEK  = $21
+PSV_RAW_READ  = $22
+PSV_RAW_WRITE = $23
+PSV_RAW_CLOSE = $24
+PSV_HEX = $F0
+PSV_ASCII = $F1
+PSV = $df93
+PSV_CONFIG = $df94
+BUFFER = $0200
+BUFFER2 = $0600
+DATA_POINTER = $02; $03
+
+*=$c000
+
+begin:
+
+; Set video mode
+; [HiRes Invert S1 S0    RGB LED NC NC]
+LDA #%10000100
+STA $df80
+
+; PSV raw file Init
+LDY #PSV_RAW_INIT
+STY PSV_CONFIG
+
+; Initialize buffer
+.(
+LDA #<BUFFER
+STA DATA_POINTER
+LDA #>BUFFER
+STA DATA_POINTER+1
+LDA #$11
+LDY #0
+loop:
+STA (DATA_POINTER), Y
+INY
+BNE loop
+.)
+INC DATA_POINTER+1
+.(
+LDA #$22
+LDY #0
+loop:
+STA (DATA_POINTER), Y
+INY
+BNE loop
+.)
+
+; Raw seek
+LDA #PSV_RAW_SEEK
+STA PSV_CONFIG
+;BUFFER
+LDA #<BUFFER
+STA PSV
+LDA #>BUFFER
+STA PSV
+;BLOCK
+LDA #0
+STA PSV
+STA PSV
+STA PSV
+STA PSV
+
+; WRITE
+LDA #PSV_RAW_WRITE
+STA PSV_CONFIG
+
+
+; Read
+; Raw seek
+LDA #PSV_RAW_SEEK
+STA PSV_CONFIG
+;BUFFER
+LDA #<BUFFER2
+STA PSV
+LDA #>BUFFER2
+STA PSV
+;BLOCK
+LDA #0
+STA PSV
+STA PSV
+STA PSV
+STA PSV
+; Run read
+LDA #PSV_RAW_READ
+STA PSV_CONFIG
+
+
+; PSV raw file Close
+LDY #PSV_RAW_CLOSE
+STY PSV_CONFIG
+
+STP
+
+.dsb    $fffa-*, $ff    ; filling
+
+* = $fffa
+    .word begin
+    .word begin
+    .word begin
