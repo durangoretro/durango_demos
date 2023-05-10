@@ -50,6 +50,8 @@ keyboard_tester.o: keyboard_tester.casm
 	ca65 -t none keyboard_tester.casm -o keyboard_tester.o
 keyboard_tester.bin: keyboard_tester.o $(DCLIB)/durango.lib $(DCLIB)/psv.lib $(DCLIB)/geometrics.lib $(DCLIB)/system.lib
 	ld65 -C $(CFG) keyboard_tester.o $(DCLIB)/psv.lib $(DCLIB)/geometrics.lib $(DCLIB)/system.lib $(DCLIB)/durango.lib -o keyboard_tester.bin
+keyboard_tester.dux: keyboard_tester.bin $(BUILD_DIR)
+	java -jar ${RESCOMP} -m SIGNER -n $$(git log -1 | head -1 | sed 's/commit //' | cut -c1-8) -t "KEYBOARD TESTER" -d "Simple keybaord tester" -i keyboard_tester.bin -o keyboard_tester.dux
 	
 loops.casm: loops.c
 	cc65 -I $(DCINC) loops.c -t none --cpu 65C02 -o loops.casm
