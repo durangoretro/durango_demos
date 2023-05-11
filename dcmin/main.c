@@ -12,9 +12,16 @@ perdita main.rom
 #include "inc/qgraph.h"
 
 int main() {
+    rectangle myrect;
     
     fillScreen(GREEN);
-    while(1);
+    
+    myrect.x=10;
+    myrect.y=20;
+    myrect.color=RED;
+    myrect.width=30;
+    myrect.height=10;
+    drawRect(&myrect);
     
     return 0;
 }
