@@ -2,7 +2,7 @@
 #define _QGRAPHH
 
 
-// Colours
+// Paleta de colores de Durango-X (modo color)
 #define BLACK 0x00
 #define GREEN 0x11
 #define RED 0x22
@@ -21,10 +21,7 @@
 #define WHITE 0xff
 
 
-/* type definitions */
-typedef unsigned char byte;
-typedef unsigned short word;
-
+// Estructura rectangulo
 typedef struct{
     char x, y;
     short mem;
@@ -33,8 +30,9 @@ typedef struct{
 } rectangle;
 
 
-/* Draw procedures */
-extern void __fastcall__ fillScreen(byte color);
-extern void __fastcall__ drawRect(void*);
+// Pinta la pantalla completa de un color
+extern void __fastcall__ fillScreen(char color);
+// Pinta en pantalla un rectangulo
+extern void __fastcall__ drawRect(rectangle*);
 
 #endif
