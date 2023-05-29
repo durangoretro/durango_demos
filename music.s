@@ -129,14 +129,10 @@ end: BRA end
 ; Y Indice nota
 ; X Duracion nota
 tocar_nota:
+    STX temp; (param A)
     LDA periodo,Y; (param Y)
-    PHA; (param Y)
-    LDA cic,Y; (Param X)
-    PHX; (param A)
-    TAX; (Param X)
-    PLA; (param A)
-    PLY; (param Y)
-    JMP tocar
+    LDX cic,Y; (Param X)
+    TAY; (param Y)
 
 ; A -> Duracion nota en potencias de 2 (tabla duracion notas)
 ; Y -> Duracion del semiperiodo obtenido de la tabla periodos
@@ -145,7 +141,6 @@ tocar_nota:
 ; Factor conversion t->n: X
 ; Duracion (en ondas) = a*x
 tocar:
-	STA temp
 	SEI
 	TYA
 long:
