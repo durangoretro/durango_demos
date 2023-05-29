@@ -3,7 +3,7 @@ DCLIB=../dclib/bin
 DCINC=../dclib/inc
 RESCOMP ?= ../rescomp/target/rescomp.jar
 
-all: hello_world.bin hello_world_dk.dux filler.bin boat.bin gamepads.bin serial.bin serial2.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin loops.casm newlib.bin datatypes.dux newconio.bin starter.bin
+all: hello_world.bin hello_world_dk.dux filler.bin boat.bin gamepads.bin serial.bin serial2.bin pong.bin geometrics.bin conio.bin minstrel_test.bin keyboard_tester.bin loops.casm newlib.bin datatypes.dux newconio.bin starter.bin music.dux
 
 hello_world.bin: hello_world.s
 	xa hello_world.s -o hello_world.bin
@@ -84,6 +84,10 @@ datatypes.dux: datatypes.bin $(BUILD_DIR)
 
 starter.bin: starter.s
 	xa starter.s -o starter.bin
+
+music.dux: music.s
+	xa music.s -o music.dux
+
 
 clean:
 	rm -rf *.bin *.asm *.casm *.o
