@@ -69,8 +69,14 @@ BPL loopcs
 ; We are ready for actual work -----------------------------------
 
 nota=0
-duracion=32
+duracion=8
 temp=$05
+
+; redonda	= 32
+; blanca	= 16
+; negra		= 8
+; corchea	= 4
+; semicor	= 2
 
 
 ; Music lib by Carlos J. Santisteban
@@ -110,6 +116,10 @@ temp=$05
     JSR tocar_nota
     
     LDY #11
+	LDX #duracion
+    JSR tocar_nota
+    
+    LDY #12
 	LDX #duracion
     JSR tocar_nota
 
