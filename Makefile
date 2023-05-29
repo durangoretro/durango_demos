@@ -86,8 +86,8 @@ starter.bin: starter.s
 	xa starter.s -o starter.bin
 
 music.dux: music.s
-	xa music.s -o music.dux
+	xa -w music.s -o music.dux
 
 
 clean:
-	rm -rf *.bin *.asm *.casm *.o
+	rm -rf *.bin *.asm *.casm *.o *.dux
