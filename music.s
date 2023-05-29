@@ -68,7 +68,7 @@ BPL loopcs
 
 ; We are ready for actual work -----------------------------------
 
-nota=1
+nota=0
 duracion=32
 temp=$05
 
@@ -85,17 +85,48 @@ temp=$05
 ; semifusa	= 2
 
 ; ejemplo de uso:
-	LDY #nota				; índice de escala cromática
-	LDA periodo, Y				; período base de esa nota
-	LDX cic, Y				; número de ciclos para duración constante
-	TAY
-	LDA #duracion			; normalmente potencias de dos
-    ; tocar(A=veces, X=ciclos, Y=periodo/2)
-	JSR tocar
+	LDY #0				; índice de escala cromática
+	LDX #duracion			; normalmente potencias de dos
+    JSR tocar_nota
+    
+    LDY #2
+	LDX #duracion
+    JSR tocar_nota
+    
+    LDY #4
+	LDX #duracion
+    JSR tocar_nota
+    
+    LDY #5
+	LDX #duracion
+    JSR tocar_nota
+    
+    LDY #7
+	LDX #duracion
+    JSR tocar_nota
+    
+    LDY #9
+	LDX #duracion
+    JSR tocar_nota
+    
+    LDY #11
+	LDX #duracion
+    JSR tocar_nota
 
 
 end: BRA end
 
+; Y Indice nota
+; X Duracion nota
+tocar_nota:
+    LDA periodo,Y; (param Y)
+    PHA; (param Y)
+    LDA cic,Y; (Param X)
+    PHX; (param A)
+    TAX; (Param X)
+    PLA; (param A)
+    PLY; (param Y)
+    JMP tocar
 
 ; A -> Duracion nota en potencias de 2 (tabla duracion notas)
 ; Y -> Duracion del semiperiodo obtenido de la tabla periodos
