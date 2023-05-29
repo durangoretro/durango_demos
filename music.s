@@ -90,14 +90,19 @@ temp=$05
 	LDX cic, Y				; número de ciclos para duración constante
 	TAY
 	LDA #duracion			; normalmente potencias de dos
-    ; tocar(A=veces, X=ciclos, Y=periodo)
+    ; tocar(A=veces, X=ciclos, Y=periodo/2)
 	JSR tocar
 
 
 end: BRA end
 
 
-; A=veces, X=ciclos (idealmente par, X*Y ~constante), Y=período (mejor no demasiado pequeño)
+; A -> Duracion nota en potencias de 2 (tabla duracion notas)
+; Y -> Duracion del semiperiodo obtenido de la tabla periodos
+; X -> factor de ajuste de duracion obtenido de la tabla cic
+; Duracion (en tiempo) = A
+; Factor conversion t->n: X
+; Duracion (en ondas) = a*x
 tocar:
 	STA temp
 	SEI
