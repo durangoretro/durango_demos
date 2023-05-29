@@ -68,16 +68,16 @@ BPL loopcs
 
 ; We are ready for actual work -----------------------------------
 
-nota = 1
-duracion = 32
-
+nota=1
+duracion=32
+temp=$05
 
 
 ; Music lib by Carlos J. Santisteban
 
 ; ejemplo de uso:
 	LDY #nota				; índice de escala cromática
-	LDA per, Y				; período base de esa nota
+	LDA periodo, Y				; período base de esa nota
 	LDX cic, Y				; número de ciclos para duración constante
 	TAY
 	LDA #duracion			; normalmente potencias de dos
@@ -105,9 +105,9 @@ ciclo:
 		BNE long			; el tiempo de arriba será ~ constante, multiplicado por el valor original de A
 	CLI
 	RTS
-
-; *** tablas de notas ***
-per:
+    
+; ** tablas de notas **
+periodo:
 ;			C	C#	D	D#	E	F	F#	G	G#	A	A#	B
 	.byt	147,139,131,123,116,110,104, 98, 92, 87, 82, 78; octava 6
 	.byt	 73, 69, 65, 62, 58, 55, 52, 49, 46, 44, 41, 39; octava 7
