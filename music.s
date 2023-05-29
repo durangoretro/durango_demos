@@ -75,12 +75,22 @@ temp=$05
 
 ; Music lib by Carlos J. Santisteban
 
+; duración notas (para negra~120/minuto)
+; redonda	= 128
+; blanca	= 64
+; negra		= 32
+; corchea	= 16
+; semicor.	= 8
+; fusa		= 4
+; semifusa	= 2
+
 ; ejemplo de uso:
 	LDY #nota				; índice de escala cromática
 	LDA periodo, Y				; período base de esa nota
 	LDX cic, Y				; número de ciclos para duración constante
 	TAY
 	LDA #duracion			; normalmente potencias de dos
+    ; tocar(A=veces, X=ciclos, Y=periodo)
 	JSR tocar
 
 
@@ -119,15 +129,6 @@ cic:
 	.byt	 33, 35, 37, 39, 41, 44, 46, 49, 52, 55, 58, 62; octava 6
 	.byt	 65, 69, 73, 78, 82, 87, 92, 98,104,110,116,123; octava 7
 	.byt	131,139,147,155,165,175,185,196,208,220,223,247; octava 8
-
-; duración notas (para negra~120/minuto)
-; redonda	= 128
-; blanca	= 64
-; negra		= 32
-; corchea	= 16
-; semicor.	= 8
-; fusa		= 4
-; semifusa	= 2
 
 
 
