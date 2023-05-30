@@ -77,42 +77,52 @@ X_COORD=$04; duracion
 X2_COORD=$05
 Y_COORD=$06; nota
 
+FA3=0
+FAS3=1
+SOL3=2
+SOLS3=3
+LA3=4
+LAS3=5
+SI3=6
 
-DO0=0
-DOS0=1
-RE0=2
-RES0=3
-MI0=4
-FA0=5
-FAS0=6
-SOL0=7
-SOLS0=8
-LA0=9
-SI0=10
+DO4=7
+DOS4=8
+RE4=9
+RES4=10
+MI4=11
+FA4=12
+FAS4=13
+SOL4=14
+SOLS4=15
+LA4=16
+LAS4=17
+SI4=18
 
-DO1=11
-DOS1=12
-RE1=13
-RES1=14
-MI1=15
-FA1=16
-FAS1=17
-SOL1=18
-SOLS1=19
-LA1=20
-SI1=21
+DO5=19
+DOS5=20
+RE5=21
+RES5=22
+MI5=23
+FA5=24
+FAS5=25
+SOL5=26
+SOLS5=27
+LA5=28
+LAS5=29
+SI5=30
 
-DO2=22
-DOS2=23
-RE2=24
-RES2=25
-MI2=26
-FA2=27
-FAS2=28
-SOL2=29
-SOLS2=30
-LA2=31
-SI2=32
+DO6=31
+DOS6=32
+RE6=33
+RES6=34
+MI6=35
+FA6=36
+FAS6=37
+SOL6=38
+SOLS6=39
+LA6=40
+LAS6=41
+SI6=42
 
 
 ; MAIN -----
@@ -206,12 +216,14 @@ LAB_BDLY:
 ; *** Durango-X BEEP specific, table of notes and cycles ***
 fr_Tab:
 ;			C	C#	D	D#	E	F	F#	G	G#	A	A#	B
+	.byt						232,219,206,195,184,173,164		; octave 3
 	.byt	155,146,138,130,123,116,109,103, 97, 92, 87, 82		; octave 4
 	.byt	 77, 73, 69, 65, 61, 58, 55, 52, 49, 46, 43, 41		; octave 5
 	.byt	 39, 36, 34, 32, 31, 29, 27, 26, 24, 23, 22, 20		; octave 6
 	
 cy_Tab:
 ;			C	C#	D	D#	E	F	F#	G	G#	A	A#	B		repetitions for a normalised 20 ms length
+	.byt						  6,  8,  8,  8,  8, 10, 10		; octave 3
 	.byt	 10, 12, 12, 12, 14, 14, 14, 16, 16, 18, 18, 20		; octave 4
 	.byt	 20, 22, 24, 24, 26, 28, 30, 30, 32, 34, 38, 38		; octave 5
 	.byt	 40, 44, 46, 50, 52, 56, 58, 60, 66, 68, 72, 78		; octave 6
@@ -220,9 +232,9 @@ cy_Tab:
 
 
 melodia:
-.byt DO0, 32, RE0, 32, MI0, 32, FA0, 32, SOL0, 32, LA0, 32, SI0, 32
-.byt DO1, 32, RE1, 32, MI1, 32, FA1, 32, SOL1, 32, LA1, 32, SI1, 32
-.byt DO2, 32, RE2, 32, MI2, 32, FA2, 32, SOL2, 32, LA2, 32, SI2, 32 
+.byt DO4, 32, RE4, 32, MI4, 32, FA4, 32, SOL4, 32, LA4, 32, SI4, 32
+.byt DO5, 32, RE5, 32, MI5, 32, FA5, 32, SOL5, 32, LA5, 32, SI5, 32
+.byt DO6, 32, RE6, 32, MI6, 32, FA6, 32, SOL6, 32, LA6, 32, SI6, 32 
 .byt $FF, $FF
 
 
