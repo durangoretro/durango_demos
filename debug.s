@@ -10,7 +10,7 @@ STA $df80
 
 
 ; Debug hex value
-LDA #$00
+LDA #$F0
 STA $df94
 LDX #$11
 STX $df93
