@@ -72,8 +72,14 @@ nota=0
 duracion=32
 TEMP1=$05
 TEMP2=$06
+X_COORD=$03; duracion
+Y_COORD=$04; nota
 
 .(
+LDA #duracion
+STA X_COORD
+LDA #nota
+STA Y_COORD
 JSR LAB_BEEP
 end: BRA end
 .)
@@ -82,7 +88,7 @@ end: BRA end
 LAB_BEEP:
 	;JSR LAB_GTBY		; length
     ; Duracion (multiplos de 2) en X
-    LDX #duracion
+    LDX X_COORD
 	STX TEMP1			; outside any register
 	;JSR LAB_SCGB		; note
 	; Nota en X
