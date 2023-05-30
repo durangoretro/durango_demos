@@ -70,8 +70,8 @@ BPL loopcs
 IOBeep=$DFB0
 nota=0
 duracion=32
-temp=$05
-gr_tmp=$06; $07
+TEMP1=$05
+TEMP2=$06
 
 .(
 JSR LAB_BEEP
@@ -83,7 +83,7 @@ LAB_BEEP:
 	;JSR LAB_GTBY		; length
     ; Duracion (multiplos de 2) en X
     LDX #duracion
-	STX gr_tmp			; outside any register
+	STX TEMP1			; outside any register
 	;JSR LAB_SCGB		; note
 	; Nota en X
     LDX #nota
@@ -91,13 +91,13 @@ LAB_BEEP:
     LDY fr_Tab, X		; period
 	; Factor ajuste
     LDA cy_Tab, X		; base cycles
-	STA gr_tmp+1		; eeek
+	STA TEMP2		; eeek
 	; Periodo en A
     TYA
 	; Deshabilitar interrupcion
     SEI
 LAB_BRPT:
-	LDX gr_tmp+1		; retrieve repetitions...
+	LDX TEMP2		; retrieve repetitions...
 LAB_BLNG:
 	TAY					; ...and period
 LAB_BCYC:
@@ -108,7 +108,7 @@ LAB_BCYC:
 	DEX
 	STX IOBeep			; toggle speaker
 	BNE LAB_BLNG
-	DEC gr_tmp			; repeat until desired length
+	DEC TEMP1			; repeat until desired length
 	BNE LAB_BRPT
 	CLI					; restore interrupts!
 LAB_BDLY:
@@ -185,7 +185,7 @@ tocar_nota:
 ; Factor conversion t->n: X
 ; Duracion (en ondas) = a*x
 tocar:
-	STA temp
+	STA TEMP1
 	SEI
 	TYA
 long:
@@ -197,7 +197,7 @@ ciclo:
 			DEX				; (2)
 			STX $DFB0		; (4)
 			BNE long		; (3) total bucle exterior, (11+i)*X-1
-		DEC temp
+		DEC TEMP1
 		BNE long			; el tiempo de arriba será ~ constante, multiplicado por el valor original de A
 	;CLI
 	RTS
