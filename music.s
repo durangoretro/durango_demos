@@ -153,7 +153,6 @@ SEI
 loop:
 LDY #0
 LDA (DATA_POINTER),Y
-STA $df93
 BMI end
 STA Y_COORD
 INY
@@ -185,7 +184,6 @@ RTS
 
 ; perform BEEP d,n (len/25, note 0=F3 ~ 42=B6 (ZX Spectrum value+7))
 LAB_BEEP:
-.(
 	; Nota en X
     LDX Y_COORD
     ; Periodo onda
@@ -212,28 +210,24 @@ LAB_BCYC:
 	BNE LAB_BRPT
 LAB_BDLY:
 	RTS
-.)
-
 silence:
-.(
 LDA #77
-LAB_BRPT:
+LAB_BRPTS:
 	LDX X2_COORD		; retrieve repetitions...
-LAB_BLNG:
+LAB_BLNGS:
 	TAY					; ...and period
-LAB_BCYC:
-	JSR LAB_BDLY		; waste 12 cyles...
+LAB_BCYCS:
+	JSR LAB_BDLYS		; waste 12 cyles...
 	NOP					; ...and another 2
 	DEY
-	BNE LAB_BCYC		; total 19t per iteration
+	BNE LAB_BCYCS		; total 19t per iteration
 	DEX
 	STZ IOBeep			; toggle speaker
-	BNE LAB_BLNG
+	BNE LAB_BLNGS
 	DEC X_COORD			; repeat until desired length
-	BNE LAB_BRPT
-LAB_BDLY:
+	BNE LAB_BRPTS
+LAB_BDLYS:
 	RTS
-.)
 
 
 
