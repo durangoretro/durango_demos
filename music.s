@@ -124,6 +124,8 @@ LA6=40
 LAS6=41
 SI6=42
 
+SILENCE=43
+
 
 ; MAIN -----
 LDA #$F3
@@ -147,6 +149,7 @@ end: BRA end
 
 
 tocar_melodia:
+SEI
 loop:
 LDY #0
 LDA (DATA_POINTER),Y
@@ -166,6 +169,7 @@ INC DATA_POINTER+1
 skip:
 BRA loop
 end:
+CLI
 RTS
 
 ; Music lib by Carlos J. Santisteban
@@ -181,6 +185,7 @@ RTS
 
 ; perform BEEP d,n (len/25, note 0=F3 ~ 42=B6 (ZX Spectrum value+7))
 LAB_BEEP:
+.(
 	; Nota en X
     LDX Y_COORD
     ; Periodo onda
@@ -190,8 +195,7 @@ LAB_BEEP:
 	STA X2_COORD		; eeek
 	; Periodo en A
     TYA
-	; Deshabilitar interrupcion
-    SEI
+    BEQ silence
 LAB_BRPT:
 	LDX X2_COORD		; retrieve repetitions...
 LAB_BLNG:
@@ -206,10 +210,30 @@ LAB_BCYC:
 	BNE LAB_BLNG
 	DEC X_COORD			; repeat until desired length
 	BNE LAB_BRPT
-	CLI					; restore interrupts!
 LAB_BDLY:
 	RTS
+.)
 
+silence:
+.(
+LDA #77
+LAB_BRPT:
+	LDX X2_COORD		; retrieve repetitions...
+LAB_BLNG:
+	TAY					; ...and period
+LAB_BCYC:
+	JSR LAB_BDLY		; waste 12 cyles...
+	NOP					; ...and another 2
+	DEY
+	BNE LAB_BCYC		; total 19t per iteration
+	DEX
+	STZ IOBeep			; toggle speaker
+	BNE LAB_BLNG
+	DEC X_COORD			; repeat until desired length
+	BNE LAB_BRPT
+LAB_BDLY:
+	RTS
+.)
 
 
 
@@ -220,6 +244,7 @@ fr_Tab:
 	.byt	155,146,138,130,123,116,109,103, 97, 92, 87, 82		; octave 4
 	.byt	 77, 73, 69, 65, 61, 58, 55, 52, 49, 46, 43, 41		; octave 5
 	.byt	 39, 36, 34, 32, 31, 29, 27, 26, 24, 23, 22, 20		; octave 6
+    .byt     0
 	
 cy_Tab:
 ;			C	C#	D	D#	E	F	F#	G	G#	A	A#	B		repetitions for a normalised 20 ms length
@@ -227,14 +252,15 @@ cy_Tab:
 	.byt	 10, 12, 12, 12, 14, 14, 14, 16, 16, 18, 18, 20		; octave 4
 	.byt	 20, 22, 24, 24, 26, 28, 30, 30, 32, 34, 38, 38		; octave 5
 	.byt	 40, 44, 46, 50, 52, 56, 58, 60, 66, 68, 72, 78		; octave 6
+    .byt     20
 
 
 
 
 melodia:
-.byt DO4, 32, RE4, 32, MI4, 32, FA4, 32, SOL4, 32, LA4, 32, SI4, 32
-.byt DO5, 32, RE5, 32, MI5, 32, FA5, 32, SOL5, 32, LA5, 32, SI5, 32
-.byt DO6, 32, RE6, 32, MI6, 32, FA6, 32, SOL6, 32, LA6, 32, SI6, 32 
+.byt DO4, 32, RE4, 32, MI4, 32, FA4, 32, SOL4, 32, LA4, 32, SI4, 32, SILENCE ,32
+.byt DO5, 32, RE5, 32, MI5, 32, FA5, 32, SOL5, 32, LA5, 32, SI5, 32, SILENCE ,32
+.byt DO6, 32, RE6, 32, MI6, 32, FA6, 32, SOL6, 32, LA6, 32, SI6, 32, SILENCE ,32
 .byt $FF, $FF
 
 
