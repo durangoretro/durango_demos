@@ -67,10 +67,77 @@ INC $01
 BPL loopcs
 
 ; We are ready for actual work -----------------------------------
-
+IOBeep=$DFB0
 nota=0
-duracion=8
+duracion=32
 temp=$05
+gr_tmp=$06; $07
+
+.(
+JSR LAB_BEEP
+end: BRA end
+.)
+
+; perform BEEP d,n (len/25, note 0=F3 ~ 42=B6 (ZX Spectrum value+7))
+LAB_BEEP:
+	;JSR LAB_GTBY		; length
+    ; Duracion (multiplos de 2) en X
+    LDX #duracion
+	STX gr_tmp			; outside any register
+	;JSR LAB_SCGB		; note
+	; Nota en X
+    LDX #nota
+    ; Periodo onda
+    LDY fr_Tab, X		; period
+	; Factor ajuste
+    LDA cy_Tab, X		; base cycles
+	STA gr_tmp+1		; eeek
+	; Periodo en A
+    TYA
+	; Deshabilitar interrupcion
+    SEI
+LAB_BRPT:
+	LDX gr_tmp+1		; retrieve repetitions...
+LAB_BLNG:
+	TAY					; ...and period
+LAB_BCYC:
+	JSR LAB_BDLY		; waste 12 cyles...
+	NOP					; ...and another 2
+	DEY
+	BNE LAB_BCYC		; total 19t per iteration
+	DEX
+	STX IOBeep			; toggle speaker
+	BNE LAB_BLNG
+	DEC gr_tmp			; repeat until desired length
+	BNE LAB_BRPT
+	CLI					; restore interrupts!
+LAB_BDLY:
+	RTS
+
+
+
+
+; *** Durango-X BEEP specific, table of notes and cycles ***
+fr_Tab:
+;			C	C#	D	D#	E	F	F#	G	G#	A	A#	B
+	.byt						232,219,206,195,184,173,164		; octave 3
+	.byt	155,146,138,130,123,116,109,103, 97, 92, 87, 82		; octave 4
+	.byt	 77, 73, 69, 65, 61, 58, 55, 52, 49, 46, 43, 41		; octave 5
+	.byt	 39, 36, 34, 32, 31, 29, 27, 26, 24, 23, 22, 20		; octave 6
+	
+cy_Tab:
+;			C	C#	D	D#	E	F	F#	G	G#	A	A#	B		repetitions for a normalised 20 ms length
+	.byt						  6,  8,  8,  8,  8, 10, 10		; octave 3
+	.byt	 10, 12, 12, 12, 14, 14, 14, 16, 16, 18, 18, 20		; octave 4
+	.byt	 20, 22, 24, 24, 26, 28, 30, 30, 32, 34, 38, 38		; octave 5
+	.byt	 40, 44, 46, 50, 52, 56, 58, 60, 66, 68, 72, 78		; octave 6
+
+
+
+
+; ----------------------------------------
+
+
 
 ; redonda	= 32
 ; blanca	= 16
@@ -90,38 +157,11 @@ temp=$05
 ; fusa		= 4
 ; semifusa	= 2
 
-; ejemplo de uso:
-	LDY #0				; índice de escala cromática
-	LDX #duracion			; normalmente potencias de dos
-    JSR tocar_nota
-    
-    LDY #2
-	LDX #duracion
-    JSR tocar_nota
-    
-    LDY #4
-	LDX #duracion
-    JSR tocar_nota
-    
-    LDY #5
-	LDX #duracion
-    JSR tocar_nota
-    
-    LDY #7
-	LDX #duracion
-    JSR tocar_nota
-    
-    LDY #9
-	LDX #duracion
-    JSR tocar_nota
-    
-    LDY #11
-	LDX #duracion
-    JSR tocar_nota
-    
-    LDY #12
-	LDX #duracion
-    JSR tocar_nota
+
+	LDY #78
+    LDA #4
+    LDX #4
+    JMP tocar
 
 
 end: BRA end
@@ -129,10 +169,14 @@ end: BRA end
 ; Y Indice nota
 ; X Duracion nota
 tocar_nota:
-    STX temp; (param A)
     LDA periodo,Y; (param Y)
-    LDX cic,Y; (Param X)
-    TAY; (param Y)
+    PHA; (param Y)
+    LDA cic,Y; (Param X)
+    PHX; (param A)
+    TAX; (Param X)
+    PLA; (param A)
+    PLY; (param Y)
+    JMP tocar
 
 ; A -> Duracion nota en potencias de 2 (tabla duracion notas)
 ; Y -> Duracion del semiperiodo obtenido de la tabla periodos
@@ -141,6 +185,7 @@ tocar_nota:
 ; Factor conversion t->n: X
 ; Duracion (en ondas) = a*x
 tocar:
+	STA temp
 	SEI
 	TYA
 long:
@@ -154,7 +199,7 @@ ciclo:
 			BNE long		; (3) total bucle exterior, (11+i)*X-1
 		DEC temp
 		BNE long			; el tiempo de arriba será ~ constante, multiplicado por el valor original de A
-	CLI
+	;CLI
 	RTS
     
 ; ** tablas de notas **
@@ -166,8 +211,8 @@ periodo:
 
 ; *** compensación de duraciones *** producto ~4800, cada nota dura ~16 ms
 cic:
-;			C	C#	D	D#	E	F	F#	G	G#	A	A#	B
-	.byt	 33, 35, 37, 39, 41, 44, 46, 49, 52, 55, 58, 62; octava 6
+;			C	C#	D	D#	E	F	F#	 G	G#	A	A#	B
+	.byt	 1, 1, 1, 1, 1, 1, 1, 254,   100, 100, 100, 100; octava 6
 	.byt	 65, 69, 73, 78, 82, 87, 92, 98,104,110,116,123; octava 7
 	.byt	131,139,147,155,165,175,185,196,208,220,223,247; octava 8
 
