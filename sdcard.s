@@ -104,6 +104,8 @@ TEMP8 = $2F
 ; ---- MAIN ----
 JSR sd_idle
 BNE nosd
+JSR sd_setup_interface
+BNE nosd
 LDA #$11
 BRA paint
 nosd:
@@ -129,12 +131,12 @@ miso=TEMP6
 crc=TEMP7
 tmpba=TEMP8
 res=X_COORD
-
+sd_ver=Y_COORD
 
 
 
 ; ***********************************
-; *** hardware-specific SD driver ***
+; *** hardware-specific SD driver by Carlos Santiesteban (MODIFIED to be used with c65) ***
 ; ***********************************
 ; SD interface definitions
 #define	SD_CLK		%00000001
@@ -144,6 +146,19 @@ res=X_COORD
 #define	IOCart		$DFC0
 #define	CMD0		0
 #define	CMD0_CRC	$94
+#define	CMD8		8
+#define	CMD8_ARG	$01AA
+#define	CMD8_CRC	$86
+#define	SDIF_ERR	1
+#define	ECHO_ERR	2
+#define	CMD55		55
+#define	ACMD41		41
+#define	ACMD41_ARG	$40
+#define	INIT_ERR	3
+#define	CMD58		58
+#define	READY_ERR	4
+#define	CMD16		16
+#define	CMD16_ARG	$0200
 
 ; *** send data in A, return received data in A *** nominally ~4.4 kiB/s
 sd_spi_tr:
@@ -320,6 +335,161 @@ sd_idle:
     LDA #0
     RTS
 
+
+sd_setup_interface:
+    JSR sd_cs_enable			; assert chip select
+    ; send CMD8
+	STZ arg
+	STZ arg+1				; CMD8_ARG upper 16 bits are zero
+	LDA #>CMD8_ARG
+	STA arg+2
+	LDA #<CMD8_ARG
+	STA arg+3
+	LDA #CMD8_CRC
+	STA crc
+	LDA #CMD8
+	JSR sd_cmd				; SD_command(CMD8, CMD8_ARG, CMD8_CRC);
+    ; read response
+	JSR sd_rd_r7
+	JSR sd_cs_disable			; deassert chip select
+
+	STZ sd_ver				; ### default (0) is modern SD card ###
+	LDA res
+	LDX #SDIF_ERR			; moved here
+	CMP #1					; check valid response
+	BEQ sdic_ok
+    ; ### if error, might be 1.x card, notify and skip to CMD58 or ACMD41 ###
+    ;		LDX #OLD_SD			; ### message for older cards ###
+		STX sd_ver			; ### store as flag ### (non-zero)
+    ;		JSR disp_code
+    ;		LDY #13
+    ;		JSR conio
+		BRA not_cmd8
+    sdptec:
+		; Fail, return value in X
+        TXA
+        RTS
+    sdic_ok:
+    ;	JSR pass_x				; *** PASS 1 in white ***
+    ; check pattern echo
+	LDX #ECHO_ERR			; *** ERROR 2 in red ***
+	LDA res+4
+	CMP #$AA
+		BNE sdptec			; SD_ERROR;
+    ;	JSR pass_x				; *** PASS 2 in white ***
+    ; ### jump here for 1.x cards ###
+    not_cmd8:
+    ; attempt to initialize card *** could add CMD58 for voltage check
+	LDX #101				; cmdAttempts = 0;
+    sd_ia:
+    ; send app cmd
+    ; ** res[0] = SD_sendApp() inlined here **
+		JSR sd_cs_enable		; assert chip select
+    ; send CMD55
+		STZ arg
+		STZ arg+1
+		STZ arg+2
+		STZ arg+3
+		STZ crc				; ** assume CMD55_ARG and CMD55_CRC are 0 **
+		LDA #CMD55
+		JSR sd_cmd			; SD_command(CMD55, CMD55_ARG, CMD55_CRC);
+    ; read response
+		JSR sd_rd_r1
+		JSR sd_cs_disable		; deassert chip select
+		LDA res				; return res1;
+
+    ; if no error in response
+		CMP #2
+		BCS sa_err
+    ; ** res[0] = SD_sendOpCond() inlined here **
+			JSR sd_cs_enable	; assert chip select
+    ; send CMD55
+			LDA #ACMD41_ARG	; only MSB is not zero
+			STA arg
+			STZ arg+1
+			STZ arg+2
+			STZ arg+3
+			STZ crc			; ** assume rest of ACMD41_ARG and ACMD41_CRC are 0 **
+			LDA #ACMD41
+			JSR sd_cmd		; SD_command(ACMD41, ACMD41_ARG, ACMD41_CRC);
+    ; read response
+			JSR sd_rd_r1
+			JSR sd_cs_disable	; deassert chip select
+    sa_err:
+		LDA res				; return res1; (needed here in case of error)
+	BEQ apc_rdy				; while(res[0] != SD_READY);
+    ; wait 10 ms
+		LDA #12
+    d10m:
+				INY
+				BNE d10m
+			DEC
+			BNE d10m		; 10 ms delay;
+		DEX					; up to 100 times
+		BNE sd_ia
+	LDX #INIT_ERR			; *** ERROR 3 in red ***
+	TXA
+    RTS
+    apc_rdy:
+    ;	LDX #INIT_ERR
+    ;	JSR pass_x				; *** PASS 3 in white ***
+    ; ### old SD cards are always SC ###
+	LDA sd_ver
+		BNE sd_sc
+    ; read OCR
+    ; ** SD_readOCR(res) is inlined here **
+	JSR sd_cs_enable			; assert chip select
+    ; send CMD58
+	STZ arg
+	STZ arg+1
+	STZ arg+2
+	STZ arg+3
+	STZ crc					; ** assume CMD58_ARG and CMD58_CRC are 0 **
+	LDA #CMD58
+	JSR sd_cmd				; SD_command(CMD58, CMD58_ARG, CMD58_CRC);
+    ; read response
+	JSR sd_rd_r7
+	JSR sd_cs_disable			; deassert chip select
+
+    ; check whether card is ready
+	LDX #READY_ERR			; *** ERROR 4 in red ***
+	BIT res+1				; eeeeeeeeek ### will check CCS as well ###
+	BMI card_rdy			; eeeeeeeeek
+	TXA         			; if(!(res[1] & 0x80)) return SD_ERROR;
+    RTS
+    card_rdy:					; * SD_init OK! *
+    ; ### but check whether standard or HC/XC, as the former needs asserting 512-byte block size ###
+    ; ### if V is set then notify and skip CMD16 ###
+	BVS hcxc
+    ; ### set 512-byte block size ###
+    sd_sc:
+		SEC
+		ROR sd_ver			; *** attempt of marking D7 for SDSC cards, byte-addressed!
+		JSR sd_cs_enable		; assert chip select ### eeeeeeeeek
+		STZ arg
+		STZ arg+1			; assume CMD16_ARG upper 16 bits are zero
+		LDA #>CMD16_ARG		; actually 2 for 512 bytes per sector
+		STA arg+2
+		STZ arg+3			; assume CMD16_ARG LSB is zero (512 mod 256)
+		LDA #$FF
+		STA crc				; assume CMD16_CRC is zero... or not? ***
+		LDA #CMD16
+		JSR sd_cmd
+    ; should I check errors?
+		JSR sd_rd_r1
+		JSR sd_cs_disable		; deassert chip select ###
+    ;		LDA res				; *** wait for zero response
+    ;	BNE sd_sc				; *** maybe a timeout would be desired too
+
+    ;		LDX #READY_ERR		; ### display standard capacity message and finish ###
+    ;		BRA card_ok
+    hcxc:
+    ;	LDX #HC_XC				; ### notify this instead ###
+    card_ok:
+    ;	JMP pass_x				; *** PASS 4 in white ***
+    ; *** card properly inited***
+    LDA #0
+	RTS
 
 ; ****************************************************************
 ; End of actual work -------------------------------------
