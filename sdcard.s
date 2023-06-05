@@ -101,6 +101,28 @@ TEMP8 = $2F
 ; ****************************************************************
 ; We are ready for actual work -----------------------------------
 
+; ---- MAIN ----
+JSR sd_idle
+BNE nosd
+LDA #$11
+BRA paint
+nosd:
+LDA #$22
+paint:
+STA $6000
+STA $6001
+STA $6002
+STA $6003
+STA $6004
+
+
+end: bra end
+;---------------
+
+
+
+
+
 mosi=TEMP1
 arg=TEMP2; - TEMP5
 miso=TEMP6
@@ -120,6 +142,8 @@ res=X_COORD
 #define	SD_CS		%00000100
 #define	SD_MISO		%10000000
 #define	IOCart		$DFC0
+#define	CMD0		0
+#define	CMD0_CRC	$94
 
 ; *** send data in A, return received data in A *** nominally ~4.4 kiB/s
 spi_tr:
@@ -250,7 +274,51 @@ rd_r7:
 	RTS
 
 
+sd_idle:
+    ; ** SD_powerUpSeq is inlined here **
+	JSR cs_disable			; for compatibility
+	LDX #220				; 1 ms delay
+    sdpu_dl:
+		NOP
+		DEX
+		BNE sdpu_dl
+    ; continue with powerup sequence
+	LDX #9					; one less as cs_disable sends another byte
+    sd80c:
+		LDA #$FF
+		JSR spi_tr
+		DEX
+		BNE sd80c			; this sends 80 clocks to synchronise
+	JSR cs_disable
+    ; command card to idle
+	LDX #10
+    set_idle:
+    ; ** SD_goIdleState is inlined here **
+		JSR cs_enable		; assert chip select
+    ; send CMD0
+		STZ arg
+		STZ arg+1
+		STZ arg+2
+		STZ arg+3			; ** assume CMD0_ARG is 0 *
+		LDA #CMD0_CRC
+		STA crc
+		LDA #CMD0
+		JSR sd_cmd			; SD_command(CMD0, CMD0_ARG, CMD0_CRC);
+    ; read response
+		JSR rd_r1
+		JSR cs_disable
 
+    ; continue set_idle loop
+		LDA res
+		CMP #1
+	BEQ is_idle				; already idle...
+		DEX					; ...or continue until timeout
+		BNE set_idle
+	LDA #1			; *** ERROR 0 in red ***
+	RTS				; failed to set idle
+    is_idle:
+    LDA #0
+    RTS
 
 
 ; ****************************************************************
