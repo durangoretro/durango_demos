@@ -106,7 +106,7 @@ arg=TEMP2; - TEMP5
 miso=TEMP6
 crc=TEMP7
 tmpba=TEMP8
-
+res=X_COORD
 
 
 
@@ -169,10 +169,10 @@ cs_disable:
 
 ; *** send command in A to card *** arg.l, crc.b
 sd_cmd:
-; send command header
+    ; send command header
 	ORA #$40
 	JSR spi_tr				; SPI_transfer(cmd|0x40);
-; send argument
+    ; send argument
 	LDA arg
 	JSR spi_tr				; SPI_transfer((u_int8_t)(arg >> 24));
 	LDA arg+1
@@ -181,17 +181,17 @@ sd_cmd:
 	JSR spi_tr				; SPI_transfer((u_int8_t)(arg >> 8));
 	LDA arg+3
 	JSR spi_tr				; SPI_transfer((u_int8_t)(arg));
-; send CRC
+    ; send CRC
 	LDA crc
 	ORA #1
 	JMP spi_tr				; SPI_transfer(crc|0x01); ...and return
 
 ; *** *** special version of the above, in case SDSC is byte-addressed, CMD17 and CMD24 only *** ***
 ba_cmd:
-; send command header
+    ; send command header
 	ORA #$40
 	JSR spi_tr				; SPI_transfer(cmd|0x40);
-; precompute byte-addressed sector
+    ; precompute byte-addressed sector
 	LDA arg+3
 	ASL
 	STA tmpba+1
@@ -200,7 +200,7 @@ ba_cmd:
 	STA tmpba
 	LDA arg+1
 	ROL						; A holds MSB
-; send argument
+    ; send argument
 	JSR spi_tr
 	LDA tmpba
 	JSR spi_tr
@@ -208,12 +208,46 @@ ba_cmd:
 	JSR spi_tr
 	LDA #0					; always zero as 512 bytes/sector
 	JSR spi_tr
-; send CRC
+    ; send CRC
 	LDA crc
 	ORA #1
 	JMP spi_tr				; SPI_transfer(crc|0x01); ...and return
 
 
+; *** read R1 response *** return result in res and A
+rd_r1:
+	PHX						; eeeeeeeek
+	LDX #8					; u_int8_t i = 0, res1;
+    ; keep polling until actual data received
+    r1_l:
+		LDA #$FF
+		JSR spi_tr
+		CMP #$FF
+	BNE r1_got				; while((res1 = SPI_transfer(0xFF)) == 0xFF)
+		DEX					; i++;
+		BNE r1_l			; if(i > 8) break;
+    r1_got:
+	STA res					; return res1; (also in A)
+	PLX
+	RTS
+
+
+; *** read R7 response *** return result in res[]
+rd_r7:
+	JSR rd_r1				; res[0] = SD_readRes1();
+	CMP #2
+	BCS r7end				; if(res[0] > 1) return; {in case of error}
+    ; read remaining bytes
+		LDX #1
+    r7loop:
+			LDA #$FF
+			JSR spi_tr
+			STA res, X		; res[ X ] = SPI_transfer(0xFF);
+			INX
+			CPX #5
+			BNE r7loop
+    r7end:
+	RTS
 
 
 
