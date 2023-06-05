@@ -146,7 +146,7 @@ res=X_COORD
 #define	CMD0_CRC	$94
 
 ; *** send data in A, return received data in A *** nominally ~4.4 kiB/s
-spi_tr:
+sd_spi_tr:
 	STA mosi
 	LDY #8					; x = 8;
 	LDA #SD_CLK
@@ -170,22 +170,22 @@ spi_tr:
 
 
 ; *** enable card transfer ***
-cs_enable:
+sd_cs_enable:
 	LDA #$FF
-	JSR spi_tr				; SPI_transfer(0xFF);
+	JSR sd_spi_tr				; sd_spi_transfer(0xFF);
 	LDA #SD_CS
-	TRB IOCart				; CS_ENABLE();
+	TRB IOCart				; sd_cs_enable();
 	LDA #$FF
-	JMP spi_tr				; SPI_transfer(0xFF); ...and return
+	JMP sd_spi_tr				; sd_spi_transfer(0xFF); ...and return
 
 ; *** disable card transfer ***
-cs_disable:
+sd_cs_disable:
 	LDA #$FF
-	JSR spi_tr				; SPI_transfer(0xFF);
+	JSR sd_spi_tr				; sd_spi_transfer(0xFF);
 	LDA #SD_CS
-	TSB IOCart				; CS_DISABLE();
+	TSB IOCart				; sd_cs_disable();
 	LDA #$FF
-	JMP spi_tr				; SPI_transfer(0xFF); ...and return
+	JMP sd_spi_tr				; sd_spi_transfer(0xFF); ...and return
 
 ; ***************************
 ; *** standard SD library ***
@@ -195,26 +195,26 @@ cs_disable:
 sd_cmd:
     ; send command header
 	ORA #$40
-	JSR spi_tr				; SPI_transfer(cmd|0x40);
+	JSR sd_spi_tr				; sd_spi_transfer(cmd|0x40);
     ; send argument
 	LDA arg
-	JSR spi_tr				; SPI_transfer((u_int8_t)(arg >> 24));
+	JSR sd_spi_tr				; sd_spi_transfer((u_int8_t)(arg >> 24));
 	LDA arg+1
-	JSR spi_tr				; SPI_transfer((u_int8_t)(arg >> 16));
+	JSR sd_spi_tr				; sd_spi_transfer((u_int8_t)(arg >> 16));
 	LDA arg+2
-	JSR spi_tr				; SPI_transfer((u_int8_t)(arg >> 8));
+	JSR sd_spi_tr				; sd_spi_transfer((u_int8_t)(arg >> 8));
 	LDA arg+3
-	JSR spi_tr				; SPI_transfer((u_int8_t)(arg));
+	JSR sd_spi_tr				; sd_spi_transfer((u_int8_t)(arg));
     ; send CRC
 	LDA crc
 	ORA #1
-	JMP spi_tr				; SPI_transfer(crc|0x01); ...and return
+	JMP sd_spi_tr				; sd_spi_transfer(crc|0x01); ...and return
 
 ; *** *** special version of the above, in case SDSC is byte-addressed, CMD17 and CMD24 only *** ***
-ba_cmd:
+sd_ba_cmd:
     ; send command header
 	ORA #$40
-	JSR spi_tr				; SPI_transfer(cmd|0x40);
+	JSR sd_spi_tr				; sd_spi_transfer(cmd|0x40);
     ; precompute byte-addressed sector
 	LDA arg+3
 	ASL
@@ -225,29 +225,29 @@ ba_cmd:
 	LDA arg+1
 	ROL						; A holds MSB
     ; send argument
-	JSR spi_tr
+	JSR sd_spi_tr
 	LDA tmpba
-	JSR spi_tr
+	JSR sd_spi_tr
 	LDA tmpba+1
-	JSR spi_tr
+	JSR sd_spi_tr
 	LDA #0					; always zero as 512 bytes/sector
-	JSR spi_tr
+	JSR sd_spi_tr
     ; send CRC
 	LDA crc
 	ORA #1
-	JMP spi_tr				; SPI_transfer(crc|0x01); ...and return
+	JMP sd_spi_tr				; sd_spi_transfer(crc|0x01); ...and return
 
 
 ; *** read R1 response *** return result in res and A
-rd_r1:
+sd_rd_r1:
 	PHX						; eeeeeeeek
 	LDX #8					; u_int8_t i = 0, res1;
     ; keep polling until actual data received
     r1_l:
 		LDA #$FF
-		JSR spi_tr
+		JSR sd_spi_tr
 		CMP #$FF
-	BNE r1_got				; while((res1 = SPI_transfer(0xFF)) == 0xFF)
+	BNE r1_got				; while((res1 = sd_spi_transfer(0xFF)) == 0xFF)
 		DEX					; i++;
 		BNE r1_l			; if(i > 8) break;
     r1_got:
@@ -257,16 +257,16 @@ rd_r1:
 
 
 ; *** read R7 response *** return result in res[]
-rd_r7:
-	JSR rd_r1				; res[0] = SD_readRes1();
+sd_rd_r7:
+	JSR sd_rd_r1				; res[0] = SD_readRes1();
 	CMP #2
 	BCS r7end				; if(res[0] > 1) return; {in case of error}
     ; read remaining bytes
 		LDX #1
     r7loop:
 			LDA #$FF
-			JSR spi_tr
-			STA res, X		; res[ X ] = SPI_transfer(0xFF);
+			JSR sd_spi_tr
+			STA res, X		; res[ X ] = sd_spi_transfer(0xFF);
 			INX
 			CPX #5
 			BNE r7loop
@@ -276,25 +276,25 @@ rd_r7:
 
 sd_idle:
     ; ** SD_powerUpSeq is inlined here **
-	JSR cs_disable			; for compatibility
+	JSR sd_cs_disable			; for compatibility
 	LDX #220				; 1 ms delay
     sdpu_dl:
 		NOP
 		DEX
 		BNE sdpu_dl
     ; continue with powerup sequence
-	LDX #9					; one less as cs_disable sends another byte
+	LDX #9					; one less as sd_cs_disable sends another byte
     sd80c:
 		LDA #$FF
-		JSR spi_tr
+		JSR sd_spi_tr
 		DEX
 		BNE sd80c			; this sends 80 clocks to synchronise
-	JSR cs_disable
+	JSR sd_cs_disable
     ; command card to idle
 	LDX #10
     set_idle:
     ; ** SD_goIdleState is inlined here **
-		JSR cs_enable		; assert chip select
+		JSR sd_cs_enable		; assert chip select
     ; send CMD0
 		STZ arg
 		STZ arg+1
@@ -305,8 +305,8 @@ sd_idle:
 		LDA #CMD0
 		JSR sd_cmd			; SD_command(CMD0, CMD0_ARG, CMD0_CRC);
     ; read response
-		JSR rd_r1
-		JSR cs_disable
+		JSR sd_rd_r1
+		JSR sd_cs_disable
 
     ; continue set_idle loop
 		LDA res
@@ -314,7 +314,7 @@ sd_idle:
 	BEQ is_idle				; already idle...
 		DEX					; ...or continue until timeout
 		BNE set_idle
-	LDA #1			; *** ERROR 0 in red ***
+	LDA #1			; *** ERROR 1 ***
 	RTS				; failed to set idle
     is_idle:
     LDA #0
