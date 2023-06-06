@@ -596,7 +596,8 @@ sd_ssec_rd:
 			JSR sd_spi_tr
 			LDA #$FF
 			JSR sd_spi_tr
-			LDA res
+			;LDA res
+            LDA #0
     set_tk:
     ; set token to card response
 		STA token
@@ -604,9 +605,6 @@ sd_ssec_rd:
 	JSR sd_cs_disable			; deassert chip select
     LDA token
 	RTS
-
-
-
 
 ; ****************************************************************
 ; End of actual work -------------------------------------
