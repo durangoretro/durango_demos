@@ -110,6 +110,8 @@ VSP_RAW_CLOSE = $24
 
 
 ; ---- MAIN ----
+
+;Read
 ; Buffer
 LDA #$60
 STA RESOURCE_POINTER+1
@@ -121,10 +123,51 @@ STA Y_COORD
 STA X2_COORD
 STA Y2_COORD
 JSR read_block
+; Flush screen in perdita
+LDA $7000
+STA $7000
+
+
+; Update
+LDA $6000
+CMP #$FF
+BEQ restart
+CLC
+ADC #$11
+BRA paint
+restart:
+LDA #$00
+paint:
+STA $6000
+STA $6001
+STA $6002
+STA $6003
+STA $6004
+STA $6005
+STA $6006
+STA $6007
+STA $6008
+STA $6009
+STA $600A
+
+
+; Write
+; Buffer
+LDA #$60
+STA RESOURCE_POINTER+1
+STZ RESOURCE_POINTER
+; Block
+LDA #0
+STA X_COORD
+STA Y_COORD
+STA X2_COORD
+STA Y2_COORD
+JSR write_block
 
 
 end: bra end
 ;---------------
+
 
 read_block:
     JSR sd_idle
@@ -143,8 +186,28 @@ read_block:
     JSR psv_idle
     BEQ read_error
     JSR psv_rawseek    
-    JSR psv_rawread
-    STA $7000
+    JSR psv_rawread    
+    RTS
+
+
+write_block:
+    JSR sd_idle
+    BNE nosdw
+    JSR sd_setup_interface
+    BNE write_error
+    JSR sd_flush_sd
+    BNE write_error
+    LDA #0
+    RTS
+    write_error:
+    LDA #1
+    RTS
+    
+    nosdw:
+    JSR psv_idle
+    BEQ write_error
+    JSR psv_rawseek    
+    JSR psv_rawwrite
     RTS
     
 
@@ -178,6 +241,12 @@ psv_rawseek:
 psv_rawread:
     ; Run read
     LDA #VSP_RAW_READ
+    STA VSP_CONFIG
+    RTS
+    
+psv_rawwrite:
+    ; Run read
+    LDA #VSP_RAW_WRITE
     STA VSP_CONFIG
     RTS
 
