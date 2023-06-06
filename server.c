@@ -1,53 +1,81 @@
 /* nanoBoot server for Raspberry Pi!   *
- * (c) 2020-2021 Carlos J. Santisteban *
- * last modified 20210223-2328         */
+ * (c) 2020-2023 Carlos J. Santisteban *
+ * last modified 20230308-1824         */
+
+ // gcc tcpserver.c -lwiringPi -o tcpserver
+// https://beej.us/guide/bgnet/html//index.html#client-server-background
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <wiringPi.h>
 /* *** needs -lwiringPi option *** */
 
-/* pin definitions, 22-24-26 at header, BCM 25-8-7 */
+/* pin definitions, 36-38-40 at header, BCM 16-20-21 */
 /* CB1 is clock, CB2 data, can use pin 34 as GND */
 /* THIS VERSION NEEDS OPEN COLLECTOR (INVERTING) DRIVERS */
 /* STB pin isn't currently used, just a placeholder for SS22 */
-#define	CB1		25
-#define	CB2		8
-#define	STB		7
+#define	CB1		16
+#define	CB2		20
+#define	STB		21
 
 /* prototypes */
 void cabe(int x);	/* send header byte in a slow way */
 void dato(int x);	/* send data byte at full speed! */
 void useg(int x);	/* delay for specified microseconds */
+void sendRom(char *rom, int size);
+
 
 /* *** main code *** */
 int main(void) {
-	FILE*	f;
-	int		i, c, fin, ini;
-	char	nombre[80];
+    FILE*	f;
+	int		i, size;
+    char rom[32768];
+    
+    
+    /* open source file */
+	if ((f = fopen("./rom.dux", "rb")) == NULL) {
+		printf("*** NO SUCH FILE ***\n");
+	}
+    
+/* compute header parameters */
+	fseek(f, 0, SEEK_END);
+	size = ftell(f);
+	printf("It's %d bytes long ($%04X)\n\n", size, size);
+    
+    rewind(f);
+    for (i=0; i<size; i++) {
+        rom[i] = fgetc(f);
+    }
+    fclose(f);
+        
+    
+    sendRom(rom, size);
+    
+    return 0;
+}
 
+void sendRom(char *rom, int size) {
+	int		i, c, fin, ini;
+    
 	printf("*** nanoBoot server (OC) ***\n\n");
-	printf("pin 20=GND, 22=CLK, 24=DAT\n\n");
+	printf("pin 34=GND, 36=CLK, 38=DAT\n\n");
 /* GPIO setup */
 	wiringPiSetupGpio();	/* using BCM numbering! */
 	digitalWrite(CB1, 0);	/* clock initially disabled, note OC */
 	pinMode(CB1, OUTPUT);
 	pinMode(CB2, OUTPUT);
 	pinMode(STB, OUTPUT);	/* not actually used */
-/* open source file */
-	printf("File: ");
-	scanf("%s", nombre);
-	if ((f = fopen(nombre, "rb")) == NULL) {
-		printf("*** NO SUCH FILE ***\n");
-		return -1;
-	}
-/* compute header parameters */
-	fseek(f, 0, SEEK_END);
-	fin = ftell(f);
-	printf("It's %d bytes long ($%04X)\n\n", fin, fin);
+
+    
+    
+    
+    
+    
 	printf("Address (HEX): ");
-	scanf("%x", &ini);
-	fin += ini;				/* nanoBoot mandatory format */
+	ini=65536-size;
+    printf("$%02X...\n", ini);
+	fin = ini+size;				/* nanoBoot mandatory format */
 /* send header */
 	cabe(0x4B);
 	cabe(fin>>8);
@@ -55,20 +83,20 @@ int main(void) {
 	cabe(ini>>8);
 	cabe(ini&255);
 /* send binary */
-	rewind(f);
+	
 	printf("*** GO!!! ***\n");
-	for (i=ini; i<fin; i++) {
+	for (i=0; i<size; i++) {
 		if ((i&255) == 0) {
 			delay(2);		/* page crossing may need some time */
-			printf("$%02X...\n", i>>8);
+			printf("$%02X...\n", (ini+i)>>8);
 		}
-		c = fgetc(f);
-		dato(c);
+		c = rom[i];
+		if ((ini+i)>>8 != 0xDF)	dato(c);
 	}
 	printf("\nEnded at $%04X\n", fin);
-	fclose(f);
+	
 
-	return 0;
+	
 }
 
 /* *** function definitions *** */
@@ -78,7 +106,7 @@ void cabe(int x) {			/* just like dato() but with longer bit delay, whole header
 
 	while(i>0) {
 		bit = x & 1;
-		digitalWrite(CB2, bit^1);		/* send bit for OC *** ^1 is needed *** */
+		digitalWrite(CB2, bit);		/* send bit for OC *** ^1 is NO LONGER needed *** */
 		digitalWrite(CB1, 1);
 		useg(15);			/* eeeeeek */
 		digitalWrite(CB1, 0);
@@ -95,7 +123,7 @@ void dato(int x) {			/* send a byte at 'top' speed */
 
 	while(i>0) {
 		bit = x & 1;
-		digitalWrite(CB2, bit^1);		/* note OC *** ^1 is needed *** */
+		digitalWrite(CB2, bit);		/* note OC *** ^1 is NO LONGER needed *** */
 		digitalWrite(CB1, 1);
 		useg(15);			/* eeeeeeek */
 		digitalWrite(CB1, 0);
