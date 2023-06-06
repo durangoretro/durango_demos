@@ -125,6 +125,11 @@ STA $6009
 LDA #$60
 STA RESOURCE_POINTER+1
 STZ RESOURCE_POINTER
+LDA #0
+STA X_COORD
+STA Y_COORD
+STA X2_COORD
+STA Y2_COORD
 JSR sd_ssec_rd
 BNE nosd
 LDA #$11
@@ -144,6 +149,11 @@ STA $6003
 LDA #$60
 STA RESOURCE_POINTER+1
 STZ RESOURCE_POINTER
+LDA #0
+STA X_COORD
+STA Y_COORD
+STA X2_COORD
+STA Y2_COORD
 JSR sd_flush_sd
 BNE nosd
 
@@ -165,17 +175,14 @@ end: bra end
 ;---------------
 
 
-
-
-
+arg=X_COORD; Y_COORD, X2_COORD, Y2_COORD
 mosi=TEMP1
-arg=TEMP2; - TEMP5
-miso=TEMP6
-crc=TEMP7
-tmpba=TEMP8
-res=X_COORD
-sd_ver=Y_COORD
-token=X2_COORD
+miso=TEMP2
+crc=TEMP3
+tmpba=TEMP4
+res=TEMP5
+sd_ver=TEMP6
+token=TEMP7
 
 
 
@@ -546,11 +553,6 @@ sd_setup_interface:
 ; **************************
 ; *** read single sector ***
 sd_ssec_rd:
-    ; should look for 'durango.av' file but, this far, from the very first sector of card instead
-	STZ arg
-	STZ arg+1
-	STZ arg+2
-	STZ arg+3				; assume reading from the very first sector
     ; * Page aligned *
 	STZ RESOURCE_POINTER
     ; * standard sector read, assume arg set with sector number *
@@ -629,6 +631,7 @@ sd_ssec_rd:
 ; *********************************
 ; *** save current sector to SD ***
 sd_flush_sd:
+    ; * Page aligned *
     STZ RESOURCE_POINTER
     ; * standard sector write, assume arg set with sector number *
     ; set token to none
@@ -720,13 +723,6 @@ sd_flush_sd:
 	JSR sd_cs_disable			; deassert chip select
 	LDA res
 	RTS
-
-
-
-    
-    
-    
-    
     
     
     
