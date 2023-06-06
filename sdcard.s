@@ -119,7 +119,7 @@ STA $6007
 STA $6008
 STA $6009
 
-LDA #60
+LDA #$60
 STA RESOURCE_POINTER+1
 STZ RESOURCE_POINTER
 JSR sd_ssec_rd
@@ -553,15 +553,7 @@ sd_ssec_rd:
 	JSR sd_rd_r1
 	CMP #$FF
 	BEQ no_res
-    ;-----
-    PHA
-    LDA #$33
-    STA $6012
-    STA $6013
-    STA $6014
-    STA $6015
-    PLA
-    ;-----
+    
     ; if response received from card wait for a response token (timeout = 100ms)
 		LDX #SD_MAX_READ_ATTEMPTS
     rd_wtok:
@@ -579,6 +571,15 @@ sd_ssec_rd:
 		STA res
 		CMP #$FE
 		BNE set_tk
+        ;-----
+    PHA
+    LDA #$33
+    STA $6012
+    STA $6013
+    STA $6014
+    STA $6015
+    PLA
+    ;-----
         
         
     
@@ -612,6 +613,7 @@ sd_ssec_rd:
 		STA token
     no_res:
 	JSR sd_cs_disable			; deassert chip select
+    LDA token
 	RTS
 
 
