@@ -101,21 +101,47 @@ TEMP8 = $2F
 ; ****************************************************************
 ; We are ready for actual work -----------------------------------
 
+
 ; ---- MAIN ----
 JSR sd_idle
 BNE nosd
-JSR sd_setup_interface
-BNE nosd
 LDA #$11
-BRA paint
-nosd:
-LDA #$22
-paint:
 STA $6000
 STA $6001
 STA $6002
 STA $6003
-STA $6004
+
+JSR sd_setup_interface
+BNE nosd
+LDA #$11
+STA $6006
+STA $6007
+STA $6008
+STA $6009
+
+LDA #60
+STA RESOURCE_POINTER+1
+STZ RESOURCE_POINTER
+JSR sd_ssec_rd
+BNE nosd
+LDA #$11
+STA $600C
+STA $600D
+STA $600E
+STA $600F
+
+wait: BRA wait
+
+
+nosd:
+STA $7000
+LDA #$22
+paint:
+
+STA $6030
+STA $6031
+STA $6032
+STA $6033
 
 
 end: bra end
@@ -132,6 +158,7 @@ crc=TEMP7
 tmpba=TEMP8
 res=X_COORD
 sd_ver=Y_COORD
+token=X2_COORD
 
 
 
@@ -159,6 +186,8 @@ sd_ver=Y_COORD
 #define	READY_ERR	4
 #define	CMD16		16
 #define	CMD16_ARG	$0200
+#define	CMD17		17
+#define	SD_MAX_READ_ATTEMPTS	203
 
 ; *** send data in A, return received data in A *** nominally ~4.4 kiB/s
 sd_spi_tr:
@@ -490,6 +519,103 @@ sd_setup_interface:
     ; *** card properly inited***
     LDA #0
 	RTS
+
+
+
+
+
+; **************************
+; *** read single sector ***
+sd_ssec_rd:
+    ; should look for 'durango.av' file but, this far, from the very first sector of card instead
+	STZ arg
+	STZ arg+1
+	STZ arg+2
+	STZ arg+3				; assume reading from the very first sector
+    ; * intended to read at $0300 *
+	STZ RESOURCE_POINTER
+    ; * standard sector read, assume arg set with sector number *
+    ; set token to none
+	LDA #$FF
+	STA token
+	JSR sd_cs_enable			; assert chip select
+    ; send CMD17 (sector already at arg.l)
+	STZ crc					; ** assume CMD17_CRC is 0 **
+	LDA #CMD17
+	BIT sd_ver				; *** check whether SC or HC/XC
+	BPL is_hcxc
+		JSR sd_ba_cmd			; SD_command(CMD17, sector, CMD17_CRC); *** a special version for SDSC cards is needed
+		BRA cmd_ok
+    is_hcxc:
+	JSR sd_cmd				; SD_command(CMD17, sector, CMD17_CRC); *** regular block-addressed version
+    cmd_ok:
+    ; read response
+	JSR sd_rd_r1
+	CMP #$FF
+	BEQ no_res
+    ;-----
+    PHA
+    LDA #$33
+    STA $6012
+    STA $6013
+    STA $6014
+    STA $6015
+    PLA
+    ;-----
+    ; if response received from card wait for a response token (timeout = 100ms)
+		LDX #SD_MAX_READ_ATTEMPTS
+    rd_wtok:
+			DEX
+		BEQ chk_tok			; this is done twice for a single-byte timeout loop
+			LDA #$FF
+			JSR sd_spi_tr
+			CMP #$FF
+		BNE chk_tok
+			LDA #$FF
+			JSR sd_spi_tr
+			CMP #$FF
+			BEQ rd_wtok		; if((read = SPI_transfer(0xFF)) != 0xFF)		break; (759t ~494µs)
+    chk_tok:
+		STA res
+		CMP #$FE
+		BNE set_tk
+        
+        
+    
+    ; read 512 byte block
+    block:
+			LDX #0			; 256-times loop reading 2-byte words => 512 bytes/sector
+    byte_rd:
+				LDA #$FF
+				JSR sd_spi_tr
+				STA (RESOURCE_POINTER)	; get one byte
+				INC RESOURCE_POINTER		; won't do any page crossing here, as long as the base address is EVEN
+				LDA #$FF
+				JSR sd_spi_tr
+				STA (RESOURCE_POINTER)	; get a second byte
+				INC RESOURCE_POINTER
+				BNE brd_nw
+					INC RESOURCE_POINTER+1
+    ; cannot reach I/O page as this loads to RAM only
+    brd_nw:
+				INX
+				BNE byte_rd
+    ; discard 16-bit CRC
+    rd_crc:
+			LDA #$FF
+			JSR sd_spi_tr
+			LDA #$FF
+			JSR sd_spi_tr
+			LDA res
+    set_tk:
+    ; set token to card response
+		STA token
+    no_res:
+	JSR sd_cs_disable			; deassert chip select
+	RTS
+
+
+
 
 ; ****************************************************************
 ; End of actual work -------------------------------------
