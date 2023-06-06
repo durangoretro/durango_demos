@@ -103,6 +103,7 @@ TEMP8 = $2F
 
 
 ; ---- MAIN ----
+;Idle
 JSR sd_idle
 BNE nosd
 LDA #$11
@@ -111,6 +112,7 @@ STA $6001
 STA $6002
 STA $6003
 
+; Setup interface
 JSR sd_setup_interface
 BNE nosd
 LDA #$11
@@ -119,6 +121,7 @@ STA $6007
 STA $6008
 STA $6009
 
+; Read sector
 LDA #$60
 STA RESOURCE_POINTER+1
 STZ RESOURCE_POINTER
@@ -129,6 +132,20 @@ STA $600C
 STA $600D
 STA $600E
 STA $600F
+
+; Save sector
+LDA $6000
+CLC
+ADC #$11
+STA $6000
+STA $6001
+STA $6002
+STA $6003
+LDA #$60
+STA RESOURCE_POINTER+1
+STZ RESOURCE_POINTER
+JSR sd_flush_sd
+BNE nosd
 
 wait: BRA wait
 
@@ -188,6 +205,8 @@ token=X2_COORD
 #define	CMD16_ARG	$0200
 #define	CMD17		17
 #define	SD_MAX_READ_ATTEMPTS	203
+#define	CMD24		24
+#define	SD_MAX_WRITE_ATTEMPTS	254
 
 ; *** send data in A, return received data in A *** nominally ~4.4 kiB/s
 sd_spi_tr:
@@ -532,7 +551,7 @@ sd_ssec_rd:
 	STZ arg+1
 	STZ arg+2
 	STZ arg+3				; assume reading from the very first sector
-    ; * intended to read at $0300 *
+    ; * Page aligned *
 	STZ RESOURCE_POINTER
     ; * standard sector read, assume arg set with sector number *
     ; set token to none
@@ -605,6 +624,112 @@ sd_ssec_rd:
 	JSR sd_cs_disable			; deassert chip select
     LDA token
 	RTS
+    
+    
+; *********************************
+; *** save current sector to SD ***
+sd_flush_sd:
+    STZ RESOURCE_POINTER
+    ; * standard sector write, assume arg set with sector number *
+    ; set token to none
+	LDA #$FF
+	STA token
+	JSR sd_cs_enable			; assert chip select
+    ; send CMD24 (sector already at arg.l)
+	STZ crc					; ** assume CMD24_CRC is 0 **
+	LDA #CMD24
+	BIT sd_ver				; *** check whether SC or HC/XC
+	BPL sv_hcxc
+		JSR sd_ba_cmd			; SD_command(CMD24, sector, CMD24_CRC); *** a special version for SDSC cards is needed
+		BRA svcmd_ok
+    sv_hcxc:
+	JSR sd_cmd				; SD_command(CMD24, sector, CMD24_CRC); *** regular block-addressed version
+    svcmd_ok:
+    ; read response
+	JSR sd_rd_r1
+	LDA res					; EEEEEEEEEEEK
+	BNE no_wres				; if(res[0]==SD_READY) {
+    ; send start token
+		LDA #$FE
+		JSR sd_spi_tr			; SPI_transfer(SD_START_TOKEN);
+    ; write buffer to card		; for(uint16_t i = 0; i < SD_BLOCK_LEN; i++) SPI_transfer(buf[i]);
+    wblock:
+			LDX #0			; 256-times loop reading 2-byte words => 512 bytes/sector
+    byte_wr:
+				LDA (RESOURCE_POINTER)	; get one byte
+				JSR sd_spi_tr
+				INC RESOURCE_POINTER		; won't do any page crossing here, as long as the base address is EVEN
+				LDA (RESOURCE_POINTER)	; get a second byte
+				JSR sd_spi_tr
+				INC RESOURCE_POINTER
+				BNE bwr_nw
+					INC RESOURCE_POINTER+1
+    bwr_nw:
+				INX
+				BNE byte_wr
+    ; wait for a response token (timeout = 250ms)
+    wr_done:
+		LDX #SD_MAX_WRITE_ATTEMPTS
+    wr_tok:
+			DEX
+		BEQ chk_wtok		; this is done FOUR times for a single-byte timeout loop, each iteration ~1 ms
+			LDA #$FF
+			JSR sd_spi_tr
+			CMP #$FF
+		BNE brk_wtok
+			LDA #$FF
+			JSR sd_spi_tr
+			CMP #$FF
+		BNE brk_wtok
+			LDA #$FF
+			JSR sd_spi_tr
+			CMP #$FF
+		BNE brk_wtok
+			LDA #$FF
+			JSR sd_spi_tr
+			CMP #$FF
+			BEQ wr_tok		; if((read = SPI_transfer(0xFF)) != 0xFF)
+    brk_wtok:
+		LDY #$FF
+		STY token			; { *token = 0xFF; break; }
+    chk_wtok:
+		AND #$1F
+		CMP #5				; if((read & 0x1F) == 0x05)
+		BNE no_wres
+			STA token		; *token = 0x05
+    ; wait for write to finish (timeout = 250ms)
+			LDX #SD_MAX_WRITE_ATTEMPTS
+    wr_end:
+				LDA #$FF
+				JSR sd_spi_tr	; again, this is done FOUR times for ~1 ms iteration time
+			BNE no_wres
+				LDA #$FF
+				JSR sd_spi_tr
+			BNE no_wres
+				LDA #$FF
+				JSR sd_spi_tr
+			BNE no_wres
+				LDA #$FF
+				JSR sd_spi_tr
+			BNE no_wres
+				DEX
+				BNE wr_end
+			LDA #0
+            RTS
+    no_wres:
+	JSR sd_cs_disable			; deassert chip select
+	LDA res
+	RTS
+
+
+
+    
+    
+    
+    
+    
+    
+    
 
 ; ****************************************************************
 ; End of actual work -------------------------------------
