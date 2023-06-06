@@ -571,17 +571,6 @@ sd_ssec_rd:
 		STA res
 		CMP #$FE
 		BNE set_tk
-        ;-----
-    PHA
-    LDA #$33
-    STA $6012
-    STA $6013
-    STA $6014
-    STA $6015
-    PLA
-    ;-----
-        
-        
     
     ; read 512 byte block
     block:
