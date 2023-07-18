@@ -111,13 +111,28 @@ PSV_RAW_CLOSE = $24
 ;---------------------------------------------------------
 
 ;------------- LOADER ------------------------------------
+; Load binary at $2000
 LOAD_ADDR = $2000
+; Set up Load Address variable
 LDA #<LOAD_ADDR
 STA DATA_POINTER
 LDA #>LOAD_ADDR
 STA DATA_POINTER+1
+; Set up file block number variable
 STZ X_COORD
+
+; Load 48 blocks (24K)
+loop:
 JSR read_block
+INC DATA_POINTER+1
+INC DATA_POINTER+1
+INC X_COORD
+LDA X_COORD
+CMP #49
+BNE loop
+
+; Run loaded code
+JMP $2100
 
 end: BRA end
 
@@ -135,11 +150,11 @@ STA PSV
 LDA DATA_POINTER+1
 STA PSV
 ;BLOCK
-LDA X_COORD
-STA PSV
 LDA #0
 STA PSV
 STA PSV
+STA PSV
+LDA X_COORD
 STA PSV
 ; Run read
 LDA #PSV_RAW_READ
