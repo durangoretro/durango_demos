@@ -168,6 +168,20 @@ RTS
 ;---------------------------------------------------------
 
 
+; -------- RESERVED IO SPACE ($df00 - $dfff) -------------
+#if(*>$df00)
+#echo First segment is too big!
+#endif
+.dsb $e000-*, $ff
+
+; -- Some empty space, maybe for contants or tables ($e000 - $fc00) ----
+
+
+; ------- Function calls --------------------------------
+#if(*>$fc00)
+#echo Previous segment is too big fc00
+#endif
+.dsb $fc00-*, $ff
 
 ; ------------- Vectors ----------------------------------
 irq_int:
