@@ -176,7 +176,8 @@ RTS
 ;Melody data must be on DATA_POINTER
 _play_melody:
 .(
-    SEI
+    PHP
+	SEI
     loop:
     LDY #0
     LDA (DATA_POINTER),Y
@@ -195,7 +196,7 @@ _play_melody:
     skip:
     BRA loop
     end:
-    CLI
+    PLP
     RTS
 .)
 
@@ -210,7 +211,7 @@ _play_melody:
 ; fusa		= 4
 ; semifusa	= 2
 
-; perform BEEP d,n (len/25, note 0=F3 ~ 42=B6 (ZX Spectrum value+7))
+; perform BEEP d,n (len/50, note 0=F3 ~ 42=B6 (ZX Spectrum value+7))
 LAB_BEEP:
 .(
 	; Nota en X
@@ -230,8 +231,11 @@ LAB_BEEP:
     LAB_BCYC:
 	JSR LAB_BDLY		; waste 12 cyles...
 	NOP					; ...and another 2
+	NOP					; ...and another 2
+	NOP					; ...and another 2
+	NOP					; ...and another 2
 	DEY
-	BNE LAB_BCYC		; total 19t per iteration
+	BNE LAB_BCYC		; total 25t per iteration
 	DEX
 	STX IOBEEP			; toggle speaker
 	BNE LAB_BLNG
@@ -304,9 +308,9 @@ JMP _play_melody
 
 ; ============= Vectors ================================================
 irq_int:
-RTS
+RTI
 nmi_int:
-RTS
+RTI
 nmi:
 JMP (NMI_ADDR)
 irq:
