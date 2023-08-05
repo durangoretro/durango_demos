@@ -173,23 +173,17 @@ BPL loopcs
 
 ; ============= ACTUAL CODE TO BE RAN ON MEMORY ========================
 ; Some dummy code, fill screen
-LDX #$60
-STX VMEM_POINTER+1
-LDY #$00
-STY VMEM_POINTER
 LDA #GREEN
-fill_loop:
-STA (VMEM_POINTER), Y
-INY
-BNE fill_loop
-INC VMEM_POINTER+1
-BPL fill_loop
+STA COLOUR
+JSR _fillScreen
+
 forever:
 bra forever
 
 ; ======================================================================
 
 ; === PROCEDURES FROM DCLIB ============================================
+; --- common.s ----
 coords2mem:
 .(
     ; Calculate Y coord
@@ -258,6 +252,9 @@ readchar:
 	;      B,   H,   V,   Y,   6,   G,   T,   5
 	.byte $42, $48, $56, $59, $36, $47, $54, $35
 .)
+
+; ---glyph.s -----
+
 ; X_COORD
 ; Y_COORD
 ; COLOUR
@@ -549,8 +546,27 @@ type:
 	end:
 	RTS
 .)
+; -- qgraph.s
+; COLOUR
+_fillScreen:
+.(
+    ; Init video pointer
+    LDX #$60
+    STX VMEM_POINTER+1
+    LDY #$00
+    STY VMEM_POINTER
+    ; Load current color
+	LDA COLOUR
+loop:
+    STA (VMEM_POINTER), Y
+    INY
+    BNE loop
+	INC VMEM_POINTER+1
+    BPL loop
+    RTS
+.)
 
-
+;-- Font --
 default_font:
 .byt $FF,$81,$BD,$BD,$BD,$BD,$81,$FF,$00,$00,$24,$48,$FE,$48,$24,$00,$00,$08,$1E,$3E,$7E,$3E,$1E,$08,$00,$10,$54,$92,$92,$44,$38,$00,
 .byt $81,$41,$25,$15,$0D,$3D,$01,$FF,$00,$00,$24,$12,$FF,$12,$24,$00,$00,$10,$78,$7C,$7E,$7C,$78,$10,$00,$10,$7C,$7C,$7C,$FE,$30,$20,
