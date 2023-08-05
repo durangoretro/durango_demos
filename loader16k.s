@@ -33,11 +33,13 @@ INC DATA_POINTER+1
 INC RESOURCE_POINTER+1
 BNE loop
 
-; Run loaded code from RAM
-JMP $2020
+zforever: bra zforever
 
-; Padding to 256 bytes
-;.dsb $C030-*, $ff
+; Run loaded code from RAM
+JMP $2080
+; Padding
+.dsb $C080-*, $ee
+*=$2080
 ;=======================================================================
 
 ;========= INITIALIZATION ==============================================
@@ -102,7 +104,7 @@ nmi:
 JMP (NMI_ADDR)
 irq:
 JMP (IRQ_ADDR)
-.dsb    $ffea-*, $ff    ; filling
+.dsb    $5ffa-*, $ff    ; filling
 .word nmi
 .word reset
 .word irq
