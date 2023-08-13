@@ -1,5 +1,43 @@
 *=$C000
 
+;====== DXHEAD =========================================================
+; 8 bytes
+.byt $00
+.byt "dX"
+.byt "****"
+.byt $0d
+; 222 bytes
+; TITLE_COMMENT[
+.byt "LOADER 16K"
+.byt $00, $00
+.byt "######################################"
+.byt "##################################################"
+.byt "##################################################"
+.byt "##################################################"
+.byt "######################";]
+; 18 bytes
+;DCLIB_COMMIT[
+.byt "LLLLLLLL"
+;]
+;MAIN_COMMIT[
+.byt "MMMMMMMM"
+;]
+;VERSION[
+.byt "VV"
+;]
+; 8 bytes
+;TIME[
+.byt "TT"
+;]
+;DATE[
+.byt "DD"
+;]
+;FILEZISE[
+.byt $00,$80,$00,$00
+;]
+;=======================================================================
+
+
 ; ===== DCLIB CONSTANTS ================================================
 VIDEO_MODE = $DF80
 INT_ENABLE = $DFA0
@@ -193,6 +231,9 @@ JSR _printStr
 
 forever:
 bra forever
+
+LDA #1
+STA $DFFF
 
 hello_world:
 .asc "Hello World"
