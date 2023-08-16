@@ -169,10 +169,10 @@ BNE loop
 .)
 
 ; Run loaded code from RAM
-JMP $2080
+JMP $2200
 ; Padding
-.dsb $C080-*, $ff
-*=$2080
+.dsb $C200-*, $ff
+*=$2200
 ;=======================================================================
 
 ;========= INITIALIZATION ==============================================
@@ -210,24 +210,25 @@ BPL loopcs
 ;=======================================================================
 
 ; ============= ACTUAL CODE TO BE RAN ON MEMORY ========================
-; Some dummy code, fill screen
-LDA #GREEN
+LDA #BLACK
 STA COLOUR
 JSR _fillScreen
+LDA #BLACK
+STA PAPER
+LDA #WHITE
+STA COLOUR
 
 LDA #10
 STA X_COORD
 LDA #10
 STA Y_COORD
-LDA #GREEN
-STA PAPER
-LDA #WHITE
-STA COLOUR
-LDA #<hello_world
+LDA #<uno
 STA DATA_POINTER
-LDA #>hello_world
+LDA #>uno
 STA DATA_POINTER+1
 JSR _printStr
+
+
 
 forever:
 bra forever
@@ -237,6 +238,10 @@ STA $DFFF
 
 hello_world:
 .asc "Hello World"
+.byt $00
+
+uno:
+.asc "1."
 .byt $00
 
 ; ======================================================================
