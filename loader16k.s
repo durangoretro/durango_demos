@@ -222,9 +222,9 @@ STA COLOUR
 .(
 LDY #10
 STY Y_COORD
-LDA #<uno
+LDA #<menu
 STA DATA_POINTER
-LDA #>uno
+LDA #>menu
 STA DATA_POINTER+1
 
 loop:
@@ -270,26 +270,62 @@ CPY #8
 BCC loop
 .)
 
+; Read option
+.(
+loop:
+JSR readchar
+LDX #1
+CMP #1
+BEQ loadrun
+
+LDX #3
+CMP #2
+BEQ loadrun
+
+LDX #5
+CMP #3
+BEQ loadrun
+
+LDX #7
+CMP #4
+BEQ loadrun
+
+LDX #9
+CMP #5
+BEQ loadrun
+
+LDX #11
+CMP #6
+BEQ loadrun
+
+LDX #13
+CMP #7
+BEQ loadrun
+
+BRA loop:
+.)
+
+.(
 forever:
 bra forever
+.)
 
-LDA #1
-STA $DFFF
+loadrun:
+STX $DFFF
+JMP($FFFC)
+
 
 hello_world:
 .asc "Hello World"
 .byt $00
 
-uno:
+menu:
 .asc "1."
 .byt $00
-dos:
 .asc "2."
 .byt $00
-tres:
 .asc "3."
 .byt $00
-cuatro:
 .asc "4."
 .byt $00
 .asc "5."
