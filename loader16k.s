@@ -242,18 +242,33 @@ CMP #115
 BCC loop
 .)
 
-; Name 1
-LDA #1
-STA $DFFF
-LDA #25
-STA X_COORD
+; Print names
+.(
 LDA #10
 STA Y_COORD
+LDY #1
+loop:
+STY $DFFF
+LDA #25
+STA X_COORD
 LDA #<$C008
 STA DATA_POINTER
 LDA #>$C008
 STA DATA_POINTER+1
+; Print string keeping Y
+PHY
 JSR _printStr
+PLY
+; Increment screen y coord
+LDA Y_COORD
+CLC
+ADC #15
+STA Y_COORD
+; Increment loop counter
+INY
+CPY #8
+BCC loop
+.)
 
 forever:
 bra forever
