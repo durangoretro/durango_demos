@@ -218,16 +218,30 @@ STA PAPER
 LDA #WHITE
 STA COLOUR
 
-; Label 1
-LDA #10
-STA X_COORD
-LDA #10
-STA Y_COORD
+; Print labels
+.(
+LDY #10
+STY Y_COORD
 LDA #<uno
 STA DATA_POINTER
 LDA #>uno
 STA DATA_POINTER+1
+
+loop:
+LDA #10
+STA X_COORD
 JSR _printStr
+INC DATA_POINTER
+INC DATA_POINTER
+INC DATA_POINTER
+LDA Y_COORD
+CLC
+ADC #10
+STA Y_COORD
+CMP #80
+BCC loop
+.)
+
 ; Name 1
 LDA #1
 STA $DFFF
@@ -253,6 +267,21 @@ hello_world:
 
 uno:
 .asc "1."
+.byt $00
+dos:
+.asc "2."
+.byt $00
+tres:
+.asc "3."
+.byt $00
+cuatro:
+.asc "4."
+.byt $00
+.asc "5."
+.byt $00
+.asc "6."
+.byt $00
+.asc "7."
 .byt $00
 
 ; ======================================================================
