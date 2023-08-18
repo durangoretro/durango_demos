@@ -275,49 +275,40 @@ BCC loop
 loop:
 JSR readchar
 LDX #1
-CMP #1
+CMP #49
+BEQ loadrun
+
+LDX #2
+CMP #50
 BEQ loadrun
 
 LDX #3
-CMP #2
+CMP #51
+BEQ loadrun
+
+LDX #4
+CMP #52
 BEQ loadrun
 
 LDX #5
-CMP #3
+CMP #53
+BEQ loadrun
+
+LDX #6
+CMP #54
 BEQ loadrun
 
 LDX #7
-CMP #4
-BEQ loadrun
-
-LDX #9
-CMP #5
-BEQ loadrun
-
-LDX #11
-CMP #6
-BEQ loadrun
-
-LDX #13
-CMP #7
+CMP #55
 BEQ loadrun
 
 BRA loop:
-.)
-
-.(
-forever:
-bra forever
 .)
 
 loadrun:
 STX $DFFF
 JMP($FFFC)
 
-
-hello_world:
-.asc "Hello World"
-.byt $00
 
 menu:
 .asc "1."
