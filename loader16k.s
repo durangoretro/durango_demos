@@ -273,6 +273,7 @@ BCC loop
 ; Read option
 .(
 loop:
+JSR read_keyboard
 JSR readchar
 LDX #1
 CMP #49
@@ -309,6 +310,22 @@ loadrun:
 STX $DFFF
 JMP($FFFC)
 
+; Read keyboard
+read_keyboard:
+.(
+    LDX #4
+    LDA #%00010000
+    keyboard_loop:
+    STA KEYBOARD
+    PHA
+    LDA KEYBOARD
+    STA KEYBOARD_CACHE,X
+    PLA
+    LSR
+    DEX
+    BPL keyboard_loop
+	RTS
+.)
 
 menu:
 .asc "1."
