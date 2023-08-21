@@ -30,7 +30,7 @@ DARK_GREEN = $44
 .byt $0d
 ; 222 bytes
 ; TITLE_COMMENT[
-.byt "FILLER"
+.byt "GAMEPAD TESTER"
 .byt $00, $00
 .dsb $c0e6-*, $23
 ;]
