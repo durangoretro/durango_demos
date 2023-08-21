@@ -1,5 +1,39 @@
 *=$c000
 
+;====== DXHEAD =========================================================
+; 8 bytes
+.byt $00
+.byt "dX"
+.byt "****"
+.byt $0d
+; 222 bytes
+; TITLE_COMMENT[
+.byt "FILLER"
+.byt $00, $00
+.dsb $c0e6-*, $23
+;]
+; 18 bytes
+;DCLIB_COMMIT[
+.byt "LLLLLLLL"
+;]
+;MAIN_COMMIT[
+.byt "MMMMMMMM"
+;]
+;VERSION[
+.byt "VV"
+;]
+; 8 bytes
+;TIME[
+.byt "TT"
+;]
+;DATE[
+.byt "DD"
+;]
+;FILEZISE[
+.byt $00,$80,$00,$00
+;]
+;=======================================================================
+
 begin:
     ; Set video mode
     ; [HiRes Invert S1 S0    RGB LED NC NC]
