@@ -1,8 +1,8 @@
 ; OPCODES: http://www.6502.org/tutorials/6502opcodes.html
 ;----------------------------
 ROM_START = $c000
-TILESET_START = ROM_START
-TILEMAP_START = TILESET_START + $2000
+TILESET_START = $c100
+TILEMAP_START = $e000
 CONTROLLER_1 = $df9c
 CONTROLLER_2 = $df9d
 CONTROLLER1_INIT = $20
@@ -19,9 +19,45 @@ BUTTON_RIGHT = $01
 RED = $22
 DARK_GREEN = $44
 
-; Tiles position (0xc000 - 0xdfff)
+
 *=ROM_START
+
+;====== DXHEAD =========================================================
+; 8 bytes
+.byt $00
+.byt "dX"
+.byt "****"
+.byt $0d
+; 222 bytes
+; TITLE_COMMENT[
+.byt "FILLER"
+.byt $00, $00
+.dsb $c0e6-*, $23
+;]
+; 18 bytes
+;DCLIB_COMMIT[
+.byt "LLLLLLLL"
+;]
+;MAIN_COMMIT[
+.byt "MMMMMMMM"
+;]
+;VERSION[
+.byt "VV"
+;]
+; 8 bytes
+;TIME[
+.byt "TT"
+;]
+;DATE[
+.byt "DD"
+;]
+;FILEZISE[
+.byt $00,$80,$00,$00
+;]
+;=======================================================================
+
 ; ----- TILES ------
+; Tiles position (0xc100 - 0xdfff)
 tiles:
 .byt $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00, ; Tile $00
 .byt $00,$00,$88,$88,$00,$00,$88,$88,$00,$00,$88,$88,$00,$00,$88,$88,$00,$00,$88,$88,$00,$00,$88,$88,$00,$00,$88,$88,$00,$00,$88,$88, ; Tile $01
