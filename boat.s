@@ -1,7 +1,43 @@
-; Tiles position (0xC000 - 0xDfff)
+; Tiles position (0xC100 - 0xE0ff)
 *=$C000
+
+
+;====== DXHEAD =========================================================
+; 8 bytes
+.byt $00
+.byt "dX"
+.byt "****"
+.byt $0d
+; 222 bytes
+; TITLE_COMMENT[
+.byt "BOAT"
+.byt $00, $00
+.dsb $c0e6-*, $23
+;]
+; 18 bytes
+;DCLIB_COMMIT[
+.byt "LLLLLLLL"
+;]
+;MAIN_COMMIT[
+.byt "MMMMMMMM"
+;]
+;VERSION[
+.byt "VV"
+;]
+; 8 bytes
+;TIME[
+.byt "TT"
+;]
+;DATE[
+.byt "DD"
+;]
+;FILEZISE[
+.byt $00,$80,$00,$00
+;]
+;=======================================================================
+
 #include "boat_tiles.s"
-; First map 0xe000
+; First map 0xe100
 #include "boat_maps.s"
 
 begin:
@@ -24,7 +60,7 @@ LDA #$00
 STA $12
 
 ; $14, $15 tilemap to draw
-LDA #$E0
+LDA #$E1
 STA $15
 LDA #$00
 STA $14
@@ -39,7 +75,7 @@ LDA #$40
 STA $11
 LDA #$00
 STA $10
-LDA #$e1
+LDA #$e2
 STA $15
 LDA #$00
 STA $14
@@ -56,7 +92,7 @@ LDA #$60
 STA $11
 LDA #$00
 STA $10
-LDA #$e2
+LDA #$e3
 STA $15
 LDA #$00
 STA $14
@@ -192,7 +228,7 @@ LSR
 CLC
 LSR
 CLC
-ADC #$C0
+ADC #$C1
 STA $13
 RTS
 ; --------------------------------------------------------
