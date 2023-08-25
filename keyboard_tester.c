@@ -38,7 +38,7 @@ void drawKeyboard() {
     unsigned char i, r, c, x, y;
     i=0;
     x=6;
-    y=10;
+    y=30;
     
     for(r=0; r<4; r++) {
         for(c=0; c<10; c++) {
