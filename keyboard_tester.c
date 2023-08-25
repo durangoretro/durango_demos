@@ -1,5 +1,5 @@
 #include <system.h>
-#include <geometrics.h>
+#include <qgraph.h>
 #include <psv.h>
 
 void drawKeyboard(void);
@@ -11,10 +11,12 @@ unsigned char hw_keyboard[5];
 unsigned char maped_keyboard[40];
 unsigned char display_keyboard[40];
 
+rectangle rect;
+
 int main(void){
     unsigned char i;
     
-    drawFullScreen(CIAN);
+    fillScreen(CIAN);
     
     for(i=0; i<40; i++) {
         display_keyboard[i]=0;
@@ -33,18 +35,22 @@ int main(void){
 }
 
 void drawKeyboard() {
-    unsigned char i, r, c, x, y, color;
+    unsigned char i, r, c, x, y;
     i=0;
-    x=15;
+    x=14;
     y=10;
     
     for(r=0; r<4; r++) {
         for(c=0; c<10; c++) {
-            color=getColor(display_keyboard[i++]);
-            drawFillRect(x, y, 5, 5, color);
+            rect.color=getColor(display_keyboard[i++]);
+            rect.x=x;
+			rect.y=y;
+			rect.height=6;
+			rect.width=6;
+			drawRect(&rect);
             x+=10;
         }
-        x=15;
+        x=14;
         y+=10;
     }
     
