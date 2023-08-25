@@ -37,7 +37,7 @@ int main(void){
 void drawKeyboard() {
     unsigned char i, r, c, x, y;
     i=0;
-    x=14;
+    x=6;
     y=10;
     
     for(r=0; r<4; r++) {
@@ -45,13 +45,13 @@ void drawKeyboard() {
             rect.color=getColor(display_keyboard[i++]);
             rect.x=x;
 			rect.y=y;
-			rect.height=6;
-			rect.width=6;
+			rect.height=8;
+			rect.width=8;
 			drawRect(&rect);
-            x+=10;
+            x+=12;
         }
-        x=14;
-        y+=10;
+        x=6;
+        y+=12;
     }
     
 }
