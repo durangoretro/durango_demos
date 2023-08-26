@@ -1315,7 +1315,8 @@ pong_img:
 .byt $00,$04,$F4,$12,$00,$D1,$BF,$40,$FB,$00,$BF,$40,$FB,$00,$BF,$40,$FB,$0F,$40,$BF,$FF,$B4,$F0,$0B,$B0,$0F,$04,$F0,$4F,$04,$F0,$0B,
 .byt $FF,$B0,$4F,$04,$F0,$4F,$BF,$F4,$4F,$BF,$F4,$0F,$44,$F0,$0B,$B0,$BF,$FF,$B0,$BF,$F0,$7F,$00,$7F,$00,$7F,$00,$7F,$00,$0C,$00,$00,
 
-
+.dsb $ffe1-*, $ff
+JMP ($FFFC)
 .dsb $fffa-*, $ff
 ; === END OF SECOND 8K BLOCK ===
 
