@@ -1016,7 +1016,9 @@ RTS
 
 
 ; Fill unused ROM
-.dsb $fffa-*, $00
+.dsb $ffe1-*, $ff
+JMP ($FFFC)
+.dsb $fffa-*, $ff
 
 ; Set initial PC
 * = $fffa

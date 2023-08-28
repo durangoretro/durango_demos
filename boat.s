@@ -428,11 +428,10 @@ STA $10
 RTS
 ;--------------------------------------------------------
 
+; Fill unused ROM
 .dsb $ffe1-*, $ff
 JMP ($FFFC)
-
-; Fill unused ROM
-.dsb $fffa-*, $00
+.dsb $fffa-*, $ff
 
 ; Set initial PC
 * = $fffa
