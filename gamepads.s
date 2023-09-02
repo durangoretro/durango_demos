@@ -19,7 +19,10 @@ BUTTON_RIGHT = $01
 RED = $22
 DARK_GREEN = $44
 
+; Fill 16k with FF
+.dsb $C000-$8000, $ff
 
+; Rom start
 *=ROM_START
 
 ;====== DXHEAD =========================================================
@@ -185,7 +188,7 @@ tilemap:
 .byt $65,$66,$66,$66,$66,$67,$68,$68,$68,$69,$66,$6A,$6B,$6A,$6C,$6D,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,
 
 
-begin:
+reset:
 ; $e300
 STA CONTROLLER_1
 STA CONTROLLER_2
@@ -200,6 +203,9 @@ LDA CONTROLLER_1
 LDX CONTROLLER_2
 STA CONTROLLER1_INIT
 STX CONTROLLER2_INIT
+; Disable autodetect controller mode
+STZ CONTROLLER1_INIT
+STZ CONTROLLER2_INIT
 
 ; Set video mode
 ; [HiRes Invert S1 S0    RGB LED NC NC]
@@ -1013,15 +1019,16 @@ STA $10
 RTS
 ;--------------------------------------------------------
 
-
-
+; ============= Vectors ================================================
+nmi:
+RTI
+irq:
+RTI
 ; Fill unused ROM
 .dsb $ffe1-*, $ff
 JMP ($FFFC)
 .dsb $fffa-*, $ff
-
-; Set initial PC
-* = $fffa
-    .word begin
-    .word begin
-    .word begin
+.word nmi
+.word reset
+.word irq
+; ======================================================================
