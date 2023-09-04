@@ -7,6 +7,8 @@ CONTROLLER_1 = $df9c
 CONTROLLER_2 = $df9d
 CONTROLLER1_INIT = $20
 CONTROLLER2_INIT = $21
+GAMEPAD_VALUE1 = $23
+GAMEPAD_VALUE2 = $24
 BUTTON_A = $80
 BUTTON_START = $40
 BUTTON_B = $20
@@ -15,6 +17,7 @@ BUTTON_UP = $08
 BUTTON_LEFT = $04
 BUTTON_DOWN = $02
 BUTTON_RIGHT = $01
+INT_ENABLE = $DFA0
 ;----------------------------
 RED = $22
 DARK_GREEN = $44
@@ -188,24 +191,14 @@ tilemap:
 .byt $65,$66,$66,$66,$66,$67,$68,$68,$68,$69,$66,$6A,$6B,$6A,$6C,$6D,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,
 
 
-reset:
 ; $e300
-STA CONTROLLER_1
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-LDA CONTROLLER_1
-LDX CONTROLLER_2
-STA CONTROLLER1_INIT
-STX CONTROLLER2_INIT
-; Disable autodetect controller mode
-STZ CONTROLLER1_INIT
-STZ CONTROLLER2_INIT
+reset:
+
+; Initialize 6502    
+SEI ; Disable interrupts
+CLD ; Clear decimal mode
+LDX #$FF ; Initialize stack pointer to $01FF
+TXS
 
 ; Set video mode
 ; [HiRes Invert S1 S0    RGB LED NC NC]
@@ -229,6 +222,11 @@ STA $14
 ; Draw map 1
 JSR draw_map
 
+; Enable Durango interrupts
+LDA #$01
+STA INT_ENABLE
+CLI
+
 
 ; $10 $11 Set video pointer
 LDA #$60
@@ -250,20 +248,13 @@ JMP loop
 ; === FUNCTIONS ====
 
 read_gamepads:
-; 1. write into $DF9C
-LDA #$ff
-STA CONTROLLER_1
-; 2. write into $DF9D 8 times
-LDY #$08
-LDA #$ff
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
-STA CONTROLLER_2
+LDX GAMEPAD_VALUE1
+JSR proccess_controller
+LDX GAMEPAD_VALUE2
+JSR proccess_controller
+RTS
+
+
 ; ---- keys ----
 ; A      -> #$80
 ; START  -> #$40
@@ -274,23 +265,6 @@ STA CONTROLLER_2
 ; DOWN   -> #$02
 ; RIGHT  -> #$01
 ; --------------
-
-; 3. read first controller in $DF9C
-CLC
-; First controller
-LDY #$00
-LDA CONTROLLER_1
-EOR CONTROLLER1_INIT
-TAX
-JSR proccess_controller
-; Second controller
-LDX CONTROLLER_2
-LDA CONTROLLER_2
-EOR CONTROLLER2_INIT
-TAX
-JSR proccess_controller
-RTS
-; 4. read second controller in $DF9D
 
 ; Process controller
 proccess_controller:
@@ -1020,10 +994,42 @@ RTS
 ;--------------------------------------------------------
 
 ; ============= Vectors ================================================
+irq:
+    ; Save registres and filter BRK
+    PHA
+    PHX
+    PHY
+    TSX
+    LDA $104,X
+    AND #$10
+    BNE _stop
+    ; --- Read controllers ---
+	; 1. write into $DF9C
+    STA CONTROLLER_1
+	; 2. write into $DF9D 8 times
+    LDX #8
+    loop2:
+    STA CONTROLLER_2
+    DEX
+    BNE loop2
+    LDA CONTROLLER_1
+    STA GAMEPAD_VALUE1
+    LDA CONTROLLER_2
+    STA GAMEPAD_VALUE2
+        
+    ; Restore registers and return
+    PLY
+    PLX
+    PLA
+    RTI 
+
 nmi:
 RTI
-irq:
-RTI
+
+; Stop
+_stop:
+BRA _stop
+
 ; Fill unused ROM
 .dsb $ffe1-*, $ff
 JMP ($FFFC)
