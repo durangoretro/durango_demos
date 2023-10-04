@@ -23,7 +23,7 @@ RED = $22
 DARK_GREEN = $44
 
 ; Fill 16k with FF
-.dsb $C000-$8000, $ff
+;.dsb $C000-$8000, $ff
 
 ; Rom start
 *=ROM_START
