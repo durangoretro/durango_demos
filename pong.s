@@ -97,7 +97,6 @@ level = $10
 
 ; == 16K ROM. FIRST 8K BLOCK ==
 *=$c000
-JMP _main
 
 ; ------------------ HEADER ---------------------------------------
 ; 8 bytes
@@ -1198,7 +1197,7 @@ _init:
     STA $DFA0
     ; Enable interrupts
     CLI
-    JMP $c000
+    JMP _main
 .)
 _stop:
 .(
