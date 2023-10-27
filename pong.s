@@ -264,10 +264,50 @@ _main:
     LDA #>controls
     STA DATA_POINTER+1
     JSR _printStr
-	JSR _wait_start
     
+    LDY #20
+    STY Y_COORD
+    LDA #<controls1
+    STA DATA_POINTER
+    LDA #>controls1
+    STA DATA_POINTER+1
+    JSR _printStr
+	    
+    LDY #30
+    STY Y_COORD
+    LDA #<controls2
+    STA DATA_POINTER
+    LDA #>controls2
+    STA DATA_POINTER+1
+    JSR _printStr
+	    
+    LDY #40
+    STY Y_COORD
+    LDA #<controls3
+    STA DATA_POINTER
+    LDA #>controls3
+    STA DATA_POINTER+1
+    JSR _printStr
+	    
+    LDY #50
+    STY Y_COORD
+    LDA #<controls4
+    STA DATA_POINTER
+    LDA #>controls4
+    STA DATA_POINTER+1
+    JSR _printStr
+	    
+    LDY #60
+    STY Y_COORD
+    LDA #<controls5
+    STA DATA_POINTER
+    LDA #>controls5
+    STA DATA_POINTER+1
+    JSR _printStr
+	    
     ; Init
-	JSR _init_game
+	JSR _wait_start
+    JSR _init_game
 	
 gameloop:
 	; Wait vsync
@@ -1685,7 +1725,22 @@ default_font:
 ; ======================================================================
 
 controls:
-.asc "CONTROLS"
+.asc "    CONTROLS    "
+.byt $00
+controls1:
+.asc "1     LEFT PLAYER UP"
+.byt $00
+controls2:
+.asc "Q   LEFT PLAYER DOWN"
+.byt $00
+controls3:
+.asc "0    RIGHT PLAYER UP"
+.byt $00
+controls4:
+.asc "P  RIGHT PLAYER DOWN"
+.byt $00
+controls5:
+.asc "INTRO --- NEXT BALL"
 .byt $00
 
 ; --- Aux methods ---
