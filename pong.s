@@ -1728,19 +1728,19 @@ controls:
 .asc "    CONTROLS    "
 .byt $00
 controls1:
-.asc "1     LEFT PLAYER UP"
+.asc "1  LEFT PLAYER UP"
 .byt $00
 controls2:
-.asc "Q   LEFT PLAYER DOWN"
+.asc "Q  LEFT PLAYER DOWN"
 .byt $00
 controls3:
-.asc "0    RIGHT PLAYER UP"
+.asc "0  RIGHT PLAYER UP"
 .byt $00
 controls4:
 .asc "P  RIGHT PLAYER DOWN"
 .byt $00
 controls5:
-.asc "INTRO --- NEXT BALL"
+.asc "INTRO   NEXT BALL"
 .byt $00
 
 ; --- Aux methods ---
