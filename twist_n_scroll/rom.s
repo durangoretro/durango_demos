@@ -1,6 +1,6 @@
 ; Twist-and-Scroll demo for Durango-X
 ; (c) 2024 Carlos J. Santisteban
-; Last modified 20240506-1202
+; Last modified 20240506-1335
 
 ; ****************************
 ; *** standard definitions ***
@@ -8,17 +8,23 @@
 	fw_nmi	= $0202
 	test	= 0
 	posi	= $FB			; %11111011
-	systmp	= $FC			; %11111100
-	sysptr	= $FD			; %11111101
+	sysptr	= $FC			; %11111100
+	systmp	= $FE			; %11111101
 	himem	= $FF			; %11111111
 	IO8mode	= $DF80
 	IO8lf	= $DF88			; EEEEEEEK
 	IOAen	= $DFA0
 	IOBeep	= $DFB0
+	screen3	= $6000
+	ptr		= sysptr
+	src		= systmp
 ; ****************************
 
 * = $8000					; this is gonna be big...
+
+; ***********************
 ; *** standard header ***
+; ***********************
 rom_start:
 ; header ID
 	.byt	0				; [0]=NUL, first magic number
@@ -38,20 +44,17 @@ rom_start:
 ; NEW main commit (user field 1)
 	.asc	"$$$$$$$$"
 ; NEW coded version number
-	.word	$1001			; 1.0a1		%vvvvrrrrsshhbbbb, where revision = %hhrrrr, ss = %00 (alpha), %01 (beta), %10 (RC), %11 (final)
+	.word	$1002			; 1.0a2		%vvvvrrrrsshhbbbb, where revision = %hhrrrr, ss = %00 (alpha), %01 (beta), %10 (RC), %11 (final)
 
 ; date & time in MS-DOS format at byte 248 ($F8)
-	.word	$6000			; time, 12.00		0110 0-000 000-0 0000
+	.word	$6800			; time, 13.00		0110 1-000 000-0 0000
 	.word	$58A6			; date, 2024/5/6	0101 100-0 101-0 0110
 ; filesize in top 32 bits (@ $FC) now including header ** must be EVEN number of pages because of 512-byte sectors
 	.word	$10000-rom_start			; filesize (rom_end is actually $10000)
 	.word	0							; 64K space does not use upper 16 bits, [255]=NUL may be third magic number
 
-; *** fake hardware test ***
-#endif
-
 ; ******************
-; *** test suite ***
+; *** test suite *** FAKE
 ; ******************
 reset:
 	SEI						; usual 6502 stuff
@@ -68,27 +71,26 @@ reset:
 	STY fw_nmi
 	STA fw_nmi+1
 ; ** zeropage test **
-; make high pitched chirp during test (actually done for timing reasons)
+; make high pitched chirp during test (not actually done, just run for timing reasons)
 	LDX #<test				; 6510-savvy...
 zp_1:
 		TXA
 		STA 0, X			; try storing address itself (2+4)
 		CMP 0, X			; properly stored? (4+2)
-			BNE zp_bad
+		NOP					;	BNE zp_bad
 		LDA #0				; A=0 during whole ZP test (2)
 		STA 0, X			; clear byte (4)
 		CMP 0, X			; must be clear right now! sets carry too (4+2)
-			BNE zp_bad
-;		SEC					; prepare for shifting bit (2)
+		NOP					;	BNE zp_bad
 		LDY #10				; number of shifts +1 (2, 26t up here)
 zp_2:
 			DEY				; avoid infinite loop (2+2)
-				BEQ zp_bad
+			NOP				;	BEQ zp_bad
 			ROL 0, X		; rotate (6)
 			BNE zp_2		; only zero at the end (3...)
-			BCC zp_bad		; C must be set at the end (...or 5 last time) (total inner loop = 119t)
+			NOP				;BCC zp_bad		; C must be set at the end (...or 5 last time) (total inner loop = 119t)
 		CPY #1				; expected value after 9 shifts (2+2)
-			BNE zp_bad
+		NOP					;	BNE zp_bad
 		INX					; next address (2+4)
 		STX IOBeep			; make beep at 158t ~4.86 kHz, over 11 kHz in TURBO!
 		BNE zp_1			; complete page (3, post 13t)
@@ -138,24 +140,20 @@ ram_ok:
 
 ; ** ROM test ** NOPE
 
-; show banner if ROM checked OK (**************************worth using RLE?)
-	LDX #0					; reset index
-ro_4:
-		LDA banner, X		; put data...
-		STA $6000, X		; ...on screen
-		LDA banner+256, X
-		STA $6100, X
-		LDA banner+512, X	; it's 1K EEEEEEEK
-		STA $6200, X
-		LDA banner+768, X
-		STA $6300, X
-		INX
-		BNE ro_4			; 1K-byte banner as 4x256!
+; show banner if ROM checked OK (now using RLE)
+	LDY #<banner
+	LDX #>banner
+	STY src
+	STX src+1				; set origin pointer
+	LDY #<screen3			; actually 0
+	LDX #>screen3			; $60
+	STY ptr
+	STX ptr+1				; set destination pointer
+	JSR rle_loop			; display picture
 
 ; ** why not add a video mode flags tester? **
 	LDX #0
 	STX posi				; will store unresponding bits
-;	LDY IO8mode				; save previous mode
 mt_loop:
 		STX IO8mode			; try setting this mode...
 		TXA
@@ -176,12 +174,8 @@ mt_disp:
 			ORA #8			; add blue to non-essential
 mt_ess:
 		STA $66E8, X		; display dots to the right
-;		BIT #2				; recheck non-responding... CMOS!!!
-		TAY					; need to save A
-		AND #2
-
+		BIT #2				; recheck non-responding... CMOS!!!
 		BEQ mt_bitok
-			TYA				; retrieve A, NMOS only
 			STA $6768, X	; mark them down again for clarity
 mt_bitok:
 		DEX
@@ -220,7 +214,6 @@ nt_b:
 		BPL nt_b			; no offset!
 ; proceed with timeout
 	LDX #0					; reset timeout counters (might use INX as well)
-;	LDY #0					; makes little effect up to 0.4%
 	STX test				; reset interrupt counter
 	TXA						; or whatever is zero
 nt_1:
@@ -241,9 +234,9 @@ nt_2:
 		BNE nt_1			; no need for BRA
 ; disable NMI again for safer IRQ test
 	LDY #<exit
-;	LDA #>exit				; maybe the same
+	LDA #>exit				; maybe the same
 	STY fw_nmi
-;	STA fw_nmi+1
+	STA fw_nmi+1
 ; display dots indicating how many times was called (button bounce)
 nt_3:
 	LDX test				; using amount as index
@@ -274,7 +267,7 @@ it_b:
 	LDY #32					; EXPECTED value
 	STY test
 ; assume HW interrupt is on
-	LDX #154				; about 129 ms, time for 32 interrupts v1 (28 for v2, 14 for TURBO, 31 for EIA)
+	LDX #154				; about 129 ms, time for 32 interrupts v1
 ; this provides timeout
 it_1:
 			INY
@@ -282,11 +275,9 @@ it_1:
 		DEX
 		BNE it_1
 ; back to true video
-	LDX #$38				; can no longer be zero
+	LDX #$38
 	STX IO8mode
 ; display dots indicating how many times IRQ happened
-	LDX test				; using amount as index
-		BEQ it_slow			; did not respond at all! eeeeeek
 	LDA #$01				; nice mid green value in all modes
 	STA $6FDF				; place index dot @32 eeeeeek
 	LDA #$0F				; nice white value in all modes
@@ -382,6 +373,10 @@ ok_l:
 	LDA #$3C				; turn on extra LED
 	STA IO8mode
 
+; ***************************
+; *** now the fun begins! ***
+; ***************************
+
 ; ********************************************
 ; *** miscelaneous stuff, may be elsewhere ***
 ; ********************************************
@@ -409,7 +404,59 @@ delay:
 dl_1:
 	RTS						; for timeout counters
 
+; *** RLE decompressor ***
+; entry point, set src & ptr pointers
+rle_loop:
+		LDY #0				; always needed as part of the loop
+		LDA (src), Y		; get command
+		INC src				; advance read pointer
+		BNE rle_0
+			INC src+1
+rle_0:
+		TAX					; command is just a counter
+			BMI rle_u		; negative count means uncompressed string
+; * compressed string decoding ahead *
+		BEQ rle_exit		; 0 repetitions means end of 'file'
+; multiply next byte according to count
+		LDA (src), Y		; read immediate value to be repeated
+rc_loop:
+			STA (ptr), Y	; store one copy
+			INY				; next copy, will never wrap as <= 127
+			DEX				; one less to go
+			BNE rc_loop
+; burst generated, must advance to next command!
+		LDA #1
+		BNE rle_adv			; just advance source by 1 byte
+; * uncompressed string decoding ahead *
+rle_u:
+			LDA (src), Y	; read immediate value to be sent, just once
+			STA (ptr), Y	; store it just once
+			INY				; next byte in chunk, will never wrap as <= 127
+			INX				; one less to go
+			BNE rle_u
+		TYA					; how many were read?
+rle_adv:
+		CLC
+		ADC src				; advance source pointer accordingly (will do the same with destination)
+		STA src
+		BCC rle_next		; check possible carry
+			INC src+1
+; * common code for destination advence, either from compressed or un compressed
+rle_next:
+		TYA					; once again, these were the transferred/repeated bytes
+		CLC
+		ADC ptr				; advance desetination pointer accordingly
+		STA ptr
+		BCC rle_loop		; check possible carry
+			INC ptr+1
+		BNE rle_loop		; no need for BRA
+; *** end of code ***
+rle_exit:
+	RTS
+
+; ********************
 ; *** *** data *** ***
+; ********************
 
 ; *** mini banners *** could be elsewhere
 sync_b:
@@ -457,9 +504,10 @@ cpu_16:
 	.byt	$A0, $A0, $0A, $0A, $0A, $0A, $0A, $0A
 	.byt	$AA, $A0, $AA, $0A, $AA, $0A, $0A, $AA
 
-; *** banner data *** 1 Kbyte raw file! maybe RLE compressed?
+; *** picture data *** RLE compressed
 banner:
-	.bin	0, 1024, "../../other/data/durango-x.sv"
+	.bin	0, 0, "durango-x.rle"
+
 pic_end:
 
 ; ****************************************
