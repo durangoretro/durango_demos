@@ -28,7 +28,7 @@ copy:
 		STA dest-1, X		; copy into RAM
 		DEX
 		BNE copy
-	JMP $800				; launch payload!
+	JMP dest				; launch payload!
 bootend:
 
 ; ***************
